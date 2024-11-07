@@ -100,21 +100,22 @@ void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Bl
 
 CO_SDO_abortCode_t	read_SDO	(
 								  CO_SDOclient_t* SDO_C,
-								  uint8_t nodeId,
-								  uint16_t index,
-								  uint8_t subIndex,
-								  uint8_t* buf,
-								  size_t bufSize,
-								  size_t* readSize
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
 								  );
+
 
 CO_SDO_abortCode_t	write_SDO 	(
 								CO_SDOclient_t* SDO_C,
-								uint8_t nodeId,
-								uint16_t index,
-								uint8_t subIndex,
-								uint8_t* data,
-								size_t dataSize
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
 								);
 
 /* USER CODE END PFP */
@@ -168,14 +169,20 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications. It can be FDCan or CAN
-   * and CANOpenSTM32 Driver will take of care of handling that
+
+  /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications.
+   * It can be FDCan or CAN and CANOpenSTM32 Driver will take of care of handling that
+   *
    * HWInitFunction : Pass in the function that initialize the CAN peripheral, usually MX_CAN_Init
+   *
    * timerHandle : Pass in the timer that is going to be used for generating 1ms interrupt for tmrThread function,
-   * please note that CANOpenSTM32 Library will override HAL_TIM_PeriodElapsedCallback function, if you also need this function
-   * in your codes, please take required steps
-   * desiredNodeID : This is the Node ID that you ask the CANOpen stack to assign to your device, although it might not always
-   * be the final NodeID, after calling canopen_app_init() you should check ActiveNodeID of CANopenNodeSTM32 structure for assigned Node ID.
+   * please note that CANOpenSTM32 Library will override HAL_TIM_PeriodElapsedCallback function,
+   * if you also need this function in your codes, please take required steps
+   *
+   * desiredNodeID : This is the Node ID that you ask the CANOpen stack to assign to your device,
+   * although it might not always be the final NodeID,
+   * after calling canopen_app_init() you should check ActiveNodeID of CANopenNodeSTM32 structure for assigned Node ID.
+   *
    * baudrate: This is the baudrate you've set in your CubeMX Configuration
    *
    */
@@ -184,7 +191,9 @@ int main(void)
   //   UART_interface_Test();
   //  CAN_interface_Test();
 
-    GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
+  GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
+  GPIO_Blink_Test(GPIOA, GPIO_PIN_6, 25, 33);
+  //GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);
 
   HAL_TIM_Base_Start_IT(&htim4);
 
@@ -208,25 +217,18 @@ int main(void)
 				0x0E,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				15,											//Number_of_Byte_to_read
-				(size_t*)&Length_of_Ext_Var );
+				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
 
-	  HAL_Delay(100);
+	  	TerminalInterface.gState = HAL_UART_STATE_READY;
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8); HAL_Delay(50);
 
-	  	  TerminalInterface.gState = HAL_UART_STATE_READY;
-		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-
-
-
-		  	  write_SDO(
-		  			    canOpenNodeSTM32.canOpenStack->SDOclient,
-						0x3c,										//remote desiredNodeID
-						0x6038,										//Index_of_OD_variable_at_remote_NodeID LowerF_Array
-						0x0E,											//Sub_Index_of_OD_variable
-		  				Array_8u,									//
-		  				4);
-
-		  	  HAL_Delay(100);
-
+	  write_SDO(
+				canOpenNodeSTM32.canOpenStack->SDOclient,
+				0x3c,										//remote desiredNodeID
+				0x6038,										//Index_of_OD_variable_at_remote_NodeID LowerF_Array
+				0x0E,											//Sub_Index_of_OD_variable
+				Array_8u,									//
+				4);  		HAL_Delay(50);
 
   	  read_SDO (
   			    canOpenNodeSTM32.canOpenStack->SDOclient,
@@ -235,15 +237,11 @@ int main(void)
   				0x0E,											//Sub_Index_of_OD_variable
   				Rx_Array,									//Saved_Received_Data
   				4,											//Number_of_Byte_to_read
-  				(size_t*)&Length_of_Ext_Var );
-
-	  HAL_Delay(100);
+  				(size_t*)&Length_of_Ext_Var );  HAL_Delay(50);
 
 	  TerminalInterface.gState = HAL_UART_STATE_READY;
 	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-
 	  HAL_Delay(100);
-
 
 		  OD_PERSIST_COMM.x6000_upper_F4XX_VAR32_6000_TX=0;
 		  Local_Count=0;
@@ -563,7 +561,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : PE3 PE4 */
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : B1_Pin */
@@ -607,16 +605,15 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 
-CO_SDO_abortCode_t
-read_SDO (
-		  CO_SDOclient_t* SDO_C,
-		  uint8_t nodeId,
-		  uint16_t index,
-		  uint8_t subIndex,
-		  uint8_t* buf,
-		  size_t bufSize,
-		  size_t* readSize
-		  )
+CO_SDO_abortCode_t	read_SDO	(
+								  CO_SDOclient_t* SDO_C,
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
+								  )
 {
     CO_SDO_return_t SDO_ret;
 
@@ -661,15 +658,14 @@ read_SDO (
     return CO_SDO_AB_NONE;
 }
 
-CO_SDO_abortCode_t
-write_SDO (
-			CO_SDOclient_t* SDO_C,
-			uint8_t nodeId,
-			uint16_t index,
-			uint8_t subIndex,
-			uint8_t* data,
-			size_t dataSize
-			)
+CO_SDO_abortCode_t	write_SDO 	(
+								CO_SDOclient_t* SDO_C,
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
+								)
 {
     CO_SDO_return_t SDO_ret;
     bool_t bufferPartial = false;
@@ -770,6 +766,8 @@ void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Bl
 		  	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );//LED1_Pin___//LED1_GPIO_Port//green
 	  HAL_Delay(Period_of_blink_ms);
 	  }
+	  HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+	  //HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 }
 
 ////////////////////////////////////////////////

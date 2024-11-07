@@ -99,21 +99,22 @@ void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Bl
 
 CO_SDO_abortCode_t	read_SDO	(
 								  CO_SDOclient_t* SDO_C,
-								  uint8_t nodeId,
-								  uint16_t index,
-								  uint8_t subIndex,
-								  uint8_t* buf,
-								  size_t bufSize,
-								  size_t* readSize
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
 								  );
+
 
 CO_SDO_abortCode_t	write_SDO 	(
 								CO_SDOclient_t* SDO_C,
-								uint8_t nodeId,
-								uint16_t index,
-								uint8_t subIndex,
-								uint8_t* data,
-								size_t dataSize
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
 								);
 /* USER CODE END PFP */
 
@@ -183,7 +184,8 @@ int main(void)
   //   UART_interface_Test();
   //  CAN_interface_Test();
 
-    GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
+  //   GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33);
+      GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);
 
   HAL_TIM_Base_Start_IT(&htim4);
 
@@ -207,77 +209,64 @@ int main(void)
 				0x0E,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				8,											//Number_of_Byte_to_read
-				(size_t*)&Length_of_Ext_Var );
+				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
 
-	  HAL_Delay(100);
-
-	  	  TerminalInterface.gState = HAL_UART_STATE_READY;
+	  	TerminalInterface.gState = HAL_UART_STATE_READY;
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
 
 
-
-		  	  write_SDO(
-		  			    canOpenNodeSTM32.canOpenStack->SDOclient,
-						0x3d,										//remote desiredNodeID Upper_F407XX
-						0x6004,										//Index_of_OD_variable_at_remote_NodeID
-						0x0E,											//Sub_Index_of_OD_variable
-		  				Array_8u,									//
-		  				4);
-
-		  	  HAL_Delay(100);
+	  write_SDO(
+				canOpenNodeSTM32.canOpenStack->SDOclient,
+				0x3d,										//remote desiredNodeID Upper_F407XX
+				0x6004,										//Index_of_OD_variable_at_remote_NodeID
+				0x0E,										//Sub_Index_of_OD_variable
+				Array_8u,									//Source_of_data
+				4); HAL_Delay(100);
 
 
   	  read_SDO (
   			    canOpenNodeSTM32.canOpenStack->SDOclient,
 				0x3d,										//remote desiredNodeID Upper_F407XX
 				0x6004,										//Index_of_OD_variable_at_remote_NodeID
-  				0x0E,											//Sub_Index_of_OD_variable
+  				0x0E,										//Sub_Index_of_OD_variable
   				Rx_Array,									//Saved_Received_Data
   				4,											//Number_of_Byte_to_read
-  				(size_t*)&Length_of_Ext_Var );
-
-	  HAL_Delay(100);
+  				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
 
 	  TerminalInterface.gState = HAL_UART_STATE_READY;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-
-	  HAL_Delay(100);
-
+	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8); HAL_Delay(100);
 
 		  OD_PERSIST_COMM.x6000_disco_Blue_VAR32_6000_TX=0;
 		  Local_Count=0;
 		  while (1)
 		  {
-				 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
-				  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
-				 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-				  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
+		  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
+		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
+		  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
+		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 
-			  canopen_app_process();
+		  canopen_app_process();
 
-			  			if(tmp32u_0 != OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R)
-			  			{
-			  			tmp32u_0 = OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R;
+			if(tmp32u_0 != OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R)
+			{
+			tmp32u_0 = OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R;
 
-			  			TerminalInterface.gState = HAL_UART_STATE_READY;
-			  			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_0), 4);
-			  			}
+			TerminalInterface.gState = HAL_UART_STATE_READY;
+			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_0), 4);
+			}
 
-			  			if(tmp32u_1 != OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R)
-			  			{
-			  			tmp32u_1 = OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R;
-			  			TerminalInterface.gState = HAL_UART_STATE_READY;
-			  			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);
-			  			}
-
+			if(tmp32u_1 != OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R)
+			{
+			tmp32u_1 = OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R;
+			TerminalInterface.gState = HAL_UART_STATE_READY;
+			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);
+			}
 
 //			  		  if(HAL_GetTick() - Ticks>999)
 //			  		  {
-//			  			  Ticks = HAL_GetTick();
+//			  			Ticks = HAL_GetTick();
 //			  			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
 //			  		  }
-
-
 
     /* USER CODE END WHILE */
 
@@ -564,7 +553,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : PE3 PE4 */
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : B1_Pin */
@@ -607,16 +596,15 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-CO_SDO_abortCode_t
-read_SDO (
-		  CO_SDOclient_t* SDO_C,
-		  uint8_t nodeId,
-		  uint16_t index,
-		  uint8_t subIndex,
-		  uint8_t* buf,
-		  size_t bufSize,
-		  size_t* readSize
-		  )
+CO_SDO_abortCode_t	read_SDO	(
+								  CO_SDOclient_t* SDO_C,
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
+								  )
 {
     CO_SDO_return_t SDO_ret;
 
@@ -661,15 +649,14 @@ read_SDO (
     return CO_SDO_AB_NONE;
 }
 
-CO_SDO_abortCode_t
-write_SDO (
-			CO_SDOclient_t* SDO_C,
-			uint8_t nodeId,
-			uint16_t index,
-			uint8_t subIndex,
-			uint8_t* data,
-			size_t dataSize
-			)
+CO_SDO_abortCode_t	write_SDO 	(
+								CO_SDOclient_t* SDO_C,
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
+								)
 {
     CO_SDO_return_t SDO_ret;
     bool_t bufferPartial = false;
@@ -760,12 +747,13 @@ void UART_interface_Test(void)
 
 void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms)
 {
-	  for(uint8_t cnt=0;cnt<Count_of_Blink;cnt++)
-	  {
-		  	HAL_GPIO_TogglePin(GPIOx, GPIO_Pin );//LED2_Pin___//LED2_GPIO_Port//yellow
-		  	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );//LED1_Pin___//LED1_GPIO_Port//green
-	  HAL_Delay(Period_of_blink_ms);
-	  }
+	for(uint8_t cnt=0;cnt<Count_of_Blink;cnt++)
+	{
+	HAL_GPIO_TogglePin(GPIOx, GPIO_Pin );
+	HAL_Delay(Period_of_blink_ms);
+	}
+	  //HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 }
 
 

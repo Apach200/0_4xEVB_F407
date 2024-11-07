@@ -96,24 +96,27 @@ void CAN_interface_Test(void);
 void UART_interface_Test(void);
 void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms);
 
+
 CO_SDO_abortCode_t	read_SDO	(
 								  CO_SDOclient_t* SDO_C,
-								  uint8_t nodeId,
-								  uint16_t index,
-								  uint8_t subIndex,
-								  uint8_t* buf,
-								  size_t bufSize,
-								  size_t* readSize
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
 								  );
+
 
 CO_SDO_abortCode_t	write_SDO 	(
 								CO_SDOclient_t* SDO_C,
-								uint8_t nodeId,
-								uint16_t index,
-								uint8_t subIndex,
-								uint8_t* data,
-								size_t dataSize
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
 								);
+
 
 /* USER CODE END PFP */
 
@@ -181,7 +184,9 @@ int main(void)
   //   UART_interface_Test();
   //  CAN_interface_Test();
 
-    GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
+  GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
+  GPIO_Blink_Test(GPIOA, GPIO_PIN_6, 25, 33);
+     //GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);
 
    HAL_TIM_Base_Start_IT(&htim4);
 
@@ -220,7 +225,7 @@ int main(void)
 			  	0x3A,										//remote desiredNodeID   ALiex_Disco
 				0x6003,										//Index_of_OD_variable_at_remote_NodeID  ALiex_Disco_VAR32_6003
 				0,											//Sub_Index_of_OD_variable
-				Array_8u,									//
+				Array_8u,									//Source_of_Data
 				4);
 
 	  HAL_Delay(100);
@@ -567,7 +572,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : PE3 PE4 */
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : B1_Pin */
@@ -611,16 +616,15 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 
-CO_SDO_abortCode_t
-read_SDO (
-		  CO_SDOclient_t* SDO_C,
-		  uint8_t nodeId,
-		  uint16_t index,
-		  uint8_t subIndex,
-		  uint8_t* buf,
-		  size_t bufSize,
-		  size_t* readSize
-		  )
+CO_SDO_abortCode_t	read_SDO	(
+								  CO_SDOclient_t* SDO_C,
+								  uint8_t nodeId, 	//Remote_NodeID
+								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								  uint8_t* buf, 	//Saved_Data_Array
+								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
+								  )
 {
     CO_SDO_return_t SDO_ret;
 
@@ -632,8 +636,6 @@ read_SDO (
 
     if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return CO_SDO_AB_GENERAL; }
 
-
-
     // initiate upload
     SDO_ret = CO_SDOclientUploadInitiate ( SDO_C,
     										index,
@@ -642,8 +644,6 @@ read_SDO (
 											false);
 
     if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return CO_SDO_AB_GENERAL; }
-
-
 
     // upload data
     do 	{
@@ -665,15 +665,14 @@ read_SDO (
     return CO_SDO_AB_NONE;
 }
 
-CO_SDO_abortCode_t
-write_SDO (
-			CO_SDOclient_t* SDO_C,
-			uint8_t nodeId,
-			uint16_t index,
-			uint8_t subIndex,
-			uint8_t* data,
-			size_t dataSize
-			)
+CO_SDO_abortCode_t	write_SDO 	(
+								CO_SDOclient_t* SDO_C,
+								uint8_t nodeId, 	//Remote_NodeID
+								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
+								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
+								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
+								)
 {
     CO_SDO_return_t SDO_ret;
     bool_t bufferPartial = false;
@@ -764,12 +763,14 @@ void UART_interface_Test(void)
 
 void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms)
 {
-	  for(uint8_t cnt=0;cnt<Count_of_Blink;cnt++)
-	  {
-		  	HAL_GPIO_TogglePin(GPIOx, GPIO_Pin );//LED2_Pin___//LED2_GPIO_Port//yellow
-		  	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );//LED1_Pin___//LED1_GPIO_Port//green
-	  HAL_Delay(Period_of_blink_ms);
-	  }
+  for(uint8_t cnt=0;cnt<Count_of_Blink;cnt++)
+  {
+  HAL_GPIO_TogglePin(GPIOx, GPIO_Pin );
+  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );
+  HAL_Delay(Period_of_blink_ms);
+  }
+  HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 }
 
 
