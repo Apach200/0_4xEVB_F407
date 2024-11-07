@@ -1,4 +1,4 @@
-# Disco407_Blue
+# CO_Disco407_Blue
 Синяя плата  STM32F4-Discovery. CANOpen с собственным OD.
 
 Реализовано CAN-устройство на STM32F407 (EVB STM32F4DISCOVERY ).
@@ -33,12 +33,12 @@ USB_OTG_FS	Device_Only	USB_OTG_FS_DP	PA12
 
 Сеть состоит из устройств из проектов:
  
-Disco407_Blue,
+CO_Disco407_Blue,
 
-Aliex_Disco407green,
+CO_Aliex_Disco407green,
 
-EvolutionBoard from Aliexpress BLACK color STM32F4XX LOWER PCB at mezzanine.
+CO_EvolutionBoard from Aliexpress BLACK color STM32F4XX LOWER PCB at mezzanine.
 
-EvolutionBoard from Aliexpress BLACK color STM32F4XX UPPER PCB at mezzanine.
+CO_EvolutionBoard from Aliexpress BLACK color STM32F4XX UPPER PCB at mezzanine.
 
 

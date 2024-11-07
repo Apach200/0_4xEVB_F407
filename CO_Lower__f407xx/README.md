@@ -1,4 +1,4 @@
-# Lower_F407XX
+# CO_Lower_F407XX
 EvolutionBoard STM32F4XX  from Aliexpress BLACK color.
 LOWER PCB at mezzanine 
 CANOpen at STM32F407
@@ -35,13 +35,13 @@ USB_OTG_FS	Device_Only	USB_OTG_FS_DP	PA12
 
 Сеть состоит из устройств из проектов:
  
-Disco407_Blue,
+CO_Disco407_Blue,
 
-Aliex_Disco407green,
+CO_Aliex_Disco407green,
 
-EvolutionBoard from Aliexpress BLACK color STM32F4XX LOWER PCB at mezzanine.
+CO_EvolutionBoard from Aliexpress BLACK color STM32F4XX LOWER PCB at mezzanine.
 
-EvolutionBoard from Aliexpress BLACK color STM32F4XX UPPER PCB at mezzanine.
+CO_EvolutionBoard from Aliexpress BLACK color STM32F4XX UPPER PCB at mezzanine.
 
 
 
