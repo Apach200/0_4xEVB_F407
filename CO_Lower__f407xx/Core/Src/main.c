@@ -194,9 +194,8 @@ int main(void)
 
      GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
 //    GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
-     HAL_UART_Transmit(&huart2, (uint8_t*)"1234567890", 10, 15);
 
-    UART_interface_Test(); //while(1){;}
+//    UART_interface_Test(); //while(1){;}
 //  //  CAN_interface_Test();
     Board_Name_to_Terminal();
 
