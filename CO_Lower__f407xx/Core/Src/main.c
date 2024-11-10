@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TerminalInterface	huart1
+#define TerminalInterface	huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -67,6 +67,8 @@ uint8_t Tx_Array[16]={0x5a,0x6b,0x7c,0x86,0x5f,0x43,0x8e,0x58,0x69,0x70,0x81,0x9
 uint8_t Rx_Array[16]={0};
 uint32_t Array_32u[16]={0};
 uint8_t Array_8u[16]={0x54,0x34,0x21,0xea,0xf3,0x7a,0xd4,0x46};
+char Message_to_Terminal[128]={};
+uint8_t Length_of_Message;
 uint8_t Length_of_Ext_Var=0;
 uint8_t Local_Count=0;
 
@@ -751,13 +753,25 @@ void CAN_interface_Test(void)
 }
 
 ///////////////////////////////////////////////////
+
 void UART_interface_Test(void)
 {
-	  HAL_Delay(500);
-	  Local_Count = sizeof String_L;
-	  String_L[Local_Count-1] = 0x0d;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(String_L), Local_Count);
-	  while (1){}
+	// Test_Terminal__ASCII
+	  Length_of_Message = sprintf( Message_to_Terminal,
+			  	  	  	  	  	  	  "Rx_Array[0]=0x%x, Rx_Array[1]= 0x%x, Rx_Array[2]= 0x%x, Rx_Array[3]= 0x%x \n\r",
+									   Rx_Array[0],Rx_Array[1],Rx_Array[2],Rx_Array[3]
+								 );
+	  TerminalInterface.gState = HAL_UART_STATE_READY;
+	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+//    Test_Terminal__HEX
+//
+//	  HAL_Delay(500);
+//	  Local_Count = sizeof String_L;
+//	  String_L[Local_Count-1] = 0x0d;
+//	  TerminalInterface.gState = HAL_DMA_STATE_READY;
+//	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(String_L), Local_Count);
+
 }
 //////////////////////////////////////////////
 

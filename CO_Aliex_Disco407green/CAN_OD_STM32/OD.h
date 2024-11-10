@@ -16,12 +16,12 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     01.11.2024 19:58:56
+        Modified:     10.11.2024 16:03:36
         Modified By:  
 
     Device Info:
         Vendor Name:  Chromos_A
-        Vendor ID:    0xAFFEAFFd
+        Vendor ID:    0xAFFEFFd
         Product Name: ALiex_Disco
         Product ID:   0x3A
 

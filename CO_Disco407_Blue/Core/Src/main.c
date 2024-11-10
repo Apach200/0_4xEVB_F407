@@ -41,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TerminalInterface	huart1
+#define TerminalInterface	huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -67,6 +67,8 @@ uint8_t Tx_Array[16]={0x51,0x62,0x73,0x84,0x55,0x46,0x87,0x18,0x29,0x10,0x11,0x1
 uint8_t Rx_Array[16]={0};
 uint32_t Array_32u[16]={0};
 uint8_t Array_8u[16]={0x54,0x34,0x21,0xea,0xf3,0x7a,0xd4,0x46};
+char Message_to_Terminal[128]={};
+uint8_t Length_of_Message;
 uint8_t Length_of_Ext_Var=0;
 uint8_t Local_Count=0;
 
@@ -181,21 +183,23 @@ int main(void)
    */
 
 
-  //   UART_interface_Test();
+  //  UART_interface_Test(); while(1){;}
   //  CAN_interface_Test();
 
-  //   GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33);
-      GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);
+  //   GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
+    GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
 
-  HAL_TIM_Base_Start_IT(&htim4);
 
-   CANopenNodeSTM32 canOpenNodeSTM32;
-   canOpenNodeSTM32.CANHandle = &hcan1;
-   canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
-   canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = 0x3b;			//Disco_f407_Blue
-   canOpenNodeSTM32.baudrate = 125*4;
-   canopen_app_init(&canOpenNodeSTM32);
+
+	HAL_TIM_Base_Start_IT(&htim4);
+
+	CANopenNodeSTM32 canOpenNodeSTM32;
+	canOpenNodeSTM32.CANHandle = &hcan1;
+	canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
+	canOpenNodeSTM32.timerHandle = &htim4;
+	canOpenNodeSTM32.desiredNodeID = 0x3b;			//Disco_f407_Blue
+	canOpenNodeSTM32.baudrate = 125*4;
+	canopen_app_init(&canOpenNodeSTM32);
 
   /* USER CODE END 2 */
 
@@ -737,11 +741,22 @@ void CAN_interface_Test(void)
 ///////////////////////////////////////////////////
 void UART_interface_Test(void)
 {
-	  HAL_Delay(500);
-	  Local_Count = sizeof String_L;
-	  String_L[Local_Count-1] = 0x0d;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(String_L), Local_Count);
-	  while (1){}
+	// Test_Terminal__ASCII
+	  Length_of_Message = sprintf( Message_to_Terminal,
+			  	  	  	  	  	  	  "Rx_Array[0]=0x%x, Rx_Array[1]= 0x%x, Rx_Array[2]= 0x%x, Rx_Array[3]= 0x%x \n\r",
+									   Rx_Array[0],Rx_Array[1],Rx_Array[2],Rx_Array[3]
+								 );
+	  TerminalInterface.gState = HAL_UART_STATE_READY;
+	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+//    Test_Terminal__HEX
+//
+//	  HAL_Delay(500);
+//	  Local_Count = sizeof String_L;
+//	  String_L[Local_Count-1] = 0x0d;
+//	  TerminalInterface.gState = HAL_DMA_STATE_READY;
+//	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(String_L), Local_Count);
+
 }
 //////////////////////////////////////////////
 
