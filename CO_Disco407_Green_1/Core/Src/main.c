@@ -14,11 +14,9 @@
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   *
-  *			  *			Discovery_F407green__EvolutionBoard
-
+  *		Discovery_F407green__EvolutionBoard
   *
   *			NodeID = 0x3E
-  *
   *
   ******************************************************************************
   */
@@ -43,13 +41,14 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define CO_Aliex_Disco407green	1
-//#define CO_Disco407_Blue	1
-//#define CO_Lower__f407xx	1
-//#define CO_Upper_F407XX	1
+#define CO_Aliex_Disco407green	0x3A
+#define CO_Disco407_Blue		0x3b
+#define CO_Lower__f407xx		0x3c
+#define CO_Upper_F407XX			0x3d
+#define CO_Disco407_Green_1		0x3e
 
-#define Make_Read_SDO	1
-#define TerminalInterface	huart2
+#define Make_Read_SDO			1
+#define TerminalInterface		huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -218,7 +217,7 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = 0x3A;
+   canOpenNodeSTM32.desiredNodeID = CO_Disco407_Green_1;//		0x3e
    canOpenNodeSTM32.baudrate = 125*4;
    canopen_app_init(&canOpenNodeSTM32);
 
@@ -821,9 +820,9 @@ void Board_Name_to_Terminal(void)
 	const char Message_0[]={"   ******************************************\n\r"};
 //	const char Message_1[]={"*  Upper Blackboard  STM32F4XX___Ali     *\n\r"};
 //	const char Message_2[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
-	const char Message_3[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
-//	const char Message_4[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
-//	const char Message_5[]={"*       *\n\r"};
+	//const char Message_3[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
+	//	const char Message_4[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
+		const char Message_5[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
 	char Array_for_Messages[128]={};
 	uint16_t Msg_Length;
 //	uint32_t Chip_ID_96bit[4]={};
@@ -836,12 +835,10 @@ void Board_Name_to_Terminal(void)
 	Msg_Length = sizeof(Message_0);
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_0, Msg_Length);
-////	HAL_UART_Transmit( &TerminalInterface, (uint8_t*)Message_0, Msg_Length,1);
 
-	Msg_Length = sizeof(Message_3);
+	Msg_Length = sizeof(Message_5);
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
-	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_3, Msg_Length);
-////	HAL_UART_Transmit( &TerminalInterface, (uint8_t*)Message_3, Msg_Length,1);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_5, Msg_Length);
 
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 	Msg_Length = sprintf( Array_for_Messages,
@@ -849,7 +846,6 @@ void Board_Name_to_Terminal(void)
 						  (uint16_t)(HAL_RCC_GetSysClockFreq()/1000000)
 						);
 	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length);
-////	HAL_UART_Transmit( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length,1);
 
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 	Msg_Length = sprintf( Array_for_Messages,

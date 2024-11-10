@@ -42,13 +42,14 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define CO_Aliex_Disco407green	1
-//#define CO_Disco407_Blue	1
-//#define CO_Lower__f407xx	1
-//#define CO_Upper_F407XX	1
+#define CO_Aliex_Disco407green	0x3A
+#define CO_Disco407_Blue		0x3b
+#define CO_Lower__f407xx		0x3c
+#define CO_Upper_F407XX			0x3d
+#define CO_Disco407_Green_1		0x3e
 
-#define Make_Read_SDO	1
-#define TerminalInterface	huart2
+#define Make_Read_SDO			1
+#define TerminalInterface		huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -217,7 +218,7 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = 0x3A;
+   canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
    canOpenNodeSTM32.baudrate = 125*4;
    canopen_app_init(&canOpenNodeSTM32);
 

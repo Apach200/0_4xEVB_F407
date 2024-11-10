@@ -41,7 +41,15 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TerminalInterface	huart2
+
+#define CO_Aliex_Disco407green	0x3A
+#define CO_Disco407_Blue		0x3b
+#define CO_Lower__f407xx		0x3c
+#define CO_Upper_F407XX			0x3d
+#define CO_Disco407_Green_1		0x3e
+
+#define Make_Read_SDO			1
+#define TerminalInterface		huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -97,6 +105,7 @@ static void MX_TIM4_Init(void);
 void CAN_interface_Test(void);
 void UART_interface_Test(void);
 void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms);
+void Board_Name_to_Terminal(void);
 
 
 CO_SDO_abortCode_t	read_SDO	(
@@ -183,12 +192,13 @@ int main(void)
    *
    */
 
-  //   UART_interface_Test();
-  //  CAN_interface_Test();
+     GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
+//    GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
+     HAL_UART_Transmit(&huart2, (uint8_t*)"1234567890", 10, 15);
 
-  GPIO_Blink_Test(GPIOA, GPIO_PIN_7, 25, 33);
-  GPIO_Blink_Test(GPIOA, GPIO_PIN_6, 25, 33);
-     //GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);
+    UART_interface_Test(); //while(1){;}
+//  //  CAN_interface_Test();
+    Board_Name_to_Terminal();
 
    HAL_TIM_Base_Start_IT(&htim4);
 
@@ -196,7 +206,7 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = 0x3c;			//Lower__f407xx
+   canOpenNodeSTM32.desiredNodeID = CO_Lower__f407xx;  //0x3c;
    canOpenNodeSTM32.baudrate = 125*4;
    canopen_app_init(&canOpenNodeSTM32);
 
@@ -762,7 +772,8 @@ void UART_interface_Test(void)
 									   Rx_Array[0],Rx_Array[1],Rx_Array[2],Rx_Array[3]
 								 );
 	  TerminalInterface.gState = HAL_UART_STATE_READY;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+	  //HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+	  HAL_UART_Transmit( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message,50);
 
 //    Test_Terminal__HEX
 //
@@ -787,6 +798,75 @@ void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Bl
   //HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 }
 
+//////////////////////////////////////////////////
+void Board_Name_to_Terminal(void)
+{
+	const char Message_0[]={"   ******************************************\n\r"};
+//	const char Message_1[]={"*  Upper Blackboard  STM32F4XX___Ali     *\n\r"};
+	const char Message_1[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
+//  const char Message_1[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
+//	const char Message_1[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
+//    const char Message_1[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
+	char Array_for_Messages[128]={};
+	uint16_t Msg_Length;
+//	uint32_t Chip_ID_96bit[4]={};
+//	uint16_t  *pChip_ID_96bit =(uint16_t*)Chip_ID_96bit ;
+
+//	Chip_ID_96bit[0] = HAL_GetUIDw0();
+//	Chip_ID_96bit[1] = HAL_GetUIDw1();
+//	Chip_ID_96bit[2] = HAL_GetUIDw2();
+
+	Msg_Length = sizeof(Message_0);
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_0, Msg_Length);
+
+	Msg_Length = sizeof(Message_1);
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_1, Msg_Length);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Msg_Length = sprintf( Array_for_Messages,
+			  	  	  	  "*  SystemClock = %d MHz                 *\n\r",
+						  (uint16_t)(HAL_RCC_GetSysClockFreq()/1000000)
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Msg_Length = sprintf( Array_for_Messages,
+			  	  	  	  "   *  Unical_ID %X%X%X%X%X%X        *\n\r",
+						  (uint16_t)(HAL_GetUIDw2()>>16),(uint16_t)(HAL_GetUIDw2() & 0x0000FFFF),
+						  (uint16_t)(HAL_GetUIDw1()>>16),(uint16_t)(HAL_GetUIDw1() & 0x0000FFFF),
+						  (uint16_t)(HAL_GetUIDw0()>>16),(uint16_t)(HAL_GetUIDw0() & 0x0000FFFF)
+
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Msg_Length = sprintf( Array_for_Messages,
+			  	  	  	  "   *  Device identifier %X%X                *\n\r",
+						  (uint16_t)(HAL_GetDEVID()>>16), (uint16_t)(HAL_GetDEVID() & 0x0000FFFF)
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Msg_Length = sprintf( Array_for_Messages,
+			  	  	  	  "   *  Device revision identifier %X%X      *\n\r",
+						  (uint16_t)( HAL_GetREVID()>>16 ),
+						  (uint16_t)( HAL_GetREVID() & 0x0000FFFF )
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Array_for_Messages, Msg_Length);
+
+	Msg_Length = sizeof(Message_0);
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_0, Msg_Length);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Array_for_Messages[0]=0x0a;		Array_for_Messages[1]=0x0d;
+	Array_for_Messages[2]=0x0a;		Array_for_Messages[3]=0x0d;
+	Array_for_Messages[4]=0x0a;		Array_for_Messages[5]=0x0d;
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(Array_for_Messages), 6);
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+}
 
 
 /* USER CODE END 4 */
