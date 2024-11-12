@@ -96,10 +96,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_TIM14_Init(void);
-static void MX_CAN1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
 
 void CAN_interface_Test(void);
@@ -172,11 +172,11 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_TIM14_Init();
-  MX_CAN1_Init();
   MX_USART1_UART_Init();
   MX_USB_DEVICE_Init();
   MX_USART2_UART_Init();
   MX_TIM4_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
   /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications. It can be FDCan or CAN
    * and CANOpenSTM32 Driver will take of care of handling that
@@ -195,7 +195,7 @@ int main(void)
 
   //   GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
     GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
-    UART_interface_Test(); while(1){;}
+//    UART_interface_Test(); //while(1){;}
 //  //  CAN_interface_Test();
     Board_Name_to_Terminal();
 
@@ -211,6 +211,33 @@ int main(void)
 	canOpenNodeSTM32.baudrate = 125*4;
 	canopen_app_init(&canOpenNodeSTM32);
 
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Length_of_Message = sprintf( Message_to_Terminal,
+	  	  	  "   *  CANopenNodeSTM32 canOpenNodeSTM32;        *\n\r"
+	  	  	  "   *  .CANHandle = &hcan1;                      *\n\r"
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Length_of_Message = sprintf( Message_to_Terminal,
+	  	  	  "   *  .HWInitFunction = MX_CAN1_Init            *\n\r"
+	  	  	  "   *  .timerHandle = &htim4                     *\n\r"
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Length_of_Message = sprintf( Message_to_Terminal,
+	  	  	  "   *  .baudrate = 500kbps                       *\n\r"
+	  	  	  "   *  .desiredNodeID = CO_Disco407_Blue;//0x3b; *\n\r"
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Length_of_Message = sprintf( Message_to_Terminal,
+	  	  	  "   *  canopen_app_init(&canOpenNodeSTM32);      *\n\r\n\r\n\r"
+						);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -224,10 +251,52 @@ int main(void)
 				Rx_Array,									//Saved_Received_Data
 				8,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
+#if 1
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+		  	  	                     " execute read_SDO(...); for the first time\n\r "
+                  "by canOpenNodeSTM32.canOpenStack->SDOclient\n\r");
 
-	  	TerminalInterface.gState = HAL_UART_STATE_READY;
-		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
 
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+                "from RemoteNode=0x3d OD_Index=0x6004 SubIndex=0x0E\n\r"
+                "and Save to \n\r"
+                "Rx_Array={0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X} \n\r",
+				Rx_Array[0],Rx_Array[1],Rx_Array[2],Rx_Array[3],
+				Rx_Array[4],Rx_Array[5],Rx_Array[6],Rx_Array[7]);
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message); HAL_Delay(10);
+#endif
+
+
+
+
+
+#if 2
+		Length_of_Message = sprintf( Message_to_Terminal, "\n\r write_SDO(.....);\n\r"
+														  " write_SDO  by "
+                  	  	  	  	  	  	  	  	  	  	  "canOpenNodeSTM32.canOpenStack->SDOclient\n\r");
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
+
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+                "Get Data from \n\r"
+                "Array_8u={0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X} \n\r",
+				Array_8u[0],Array_8u[1],Array_8u[2],Array_8u[3],
+				Array_8u[4],Array_8u[5],Array_8u[6],Array_8u[7]);
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message); HAL_Delay(10);
+
+
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+                "and write to\n\r"
+                "OD_Index=0x6004 SubIndex=0x0E  @ Remote Node_0x3d\n\r");
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
+#endif//2
 
 	  write_SDO(
 				canOpenNodeSTM32.canOpenStack->SDOclient,
@@ -247,13 +316,36 @@ int main(void)
   				4,											//Number_of_Byte_to_read
   				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
 
-	  TerminalInterface.gState = HAL_UART_STATE_READY;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8); HAL_Delay(100);
+#if 3
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+		  	  	                     "\n\rexecute read_SDO(...); for the SECOND time\n\r");
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+                " Read NEW DATA from Node_0x3d OD_Index=0x6004 SubIndex=0x0E\n\r"
+                "and Save to\n\r");
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = sprintf( Message_to_Terminal,
+                "Rx_Array={0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X,0x%X} \n\r\n\r",
+				Array_8u[0],Array_8u[1],Array_8u[2],Array_8u[3],
+				Array_8u[4],Array_8u[5],Array_8u[6],Array_8u[7]);
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message); HAL_Delay(10);
+
+#endif//3
+	  HAL_Delay(50);
+
+
 
 		  OD_PERSIST_COMM.x6000_disco_Blue_VAR32_6000_TX=0;
 		  Local_Count=0;
+
+
 		  while (1)
-		  {
+
 		  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
 		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 		  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
@@ -265,15 +357,25 @@ int main(void)
 			{
 			tmp32u_0 = OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R;
 
-			TerminalInterface.gState = HAL_UART_STATE_READY;
-			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_0), 4);
-			}
+#if 4
+		Length_of_Message = sprintf( Message_to_Terminal,
+		  	  	                     "copy  OD_PERSIST_COMM.x6001_disco_Blue_VAR32_6001_R "
+                  	  	  	  	  	  " to tmp32u_0 = 0x%X%X\n\r",(uint16_t)(tmp32u_0>>16),(uint16_t)tmp32u_0);
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
+
+#endif	//4
 
 			if(tmp32u_1 != OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R)
 			{
-			tmp32u_1 = OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R;
-			TerminalInterface.gState = HAL_UART_STATE_READY;
-			HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);
+				Length_of_Message = sprintf( Message_to_Terminal,
+		                "check for updates tmp32u_1 = OD_PERSIST_COMM.x6002_disco_Blue_VAR32_6002_R"
+		                "tmp32u_1 = 0x%X%X\n\r",(uint16_t)(tmp32u_1>>16),(uint16_t)tmp32u_1);
+				while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
+
 			}
 
 //			  		  if(HAL_GetTick() - Ticks>999)
@@ -350,11 +452,11 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 6;
+  hcan1.Init.Prescaler = 16;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_1TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
