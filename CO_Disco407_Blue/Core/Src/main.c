@@ -32,6 +32,8 @@
 #include "301/CO_SDOclient.h"
 #include "CANopen.h"
 #include "OD.h"
+
+#include "format_out.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,6 +71,9 @@ DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart2_tx;
 DMA_HandleTypeDef hdma_usart2_rx;
 
+DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
+DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
+DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
 /* USER CODE BEGIN PV */
 uint8_t Tx_Array[16]={0x51,0x62,0x73,0x84,0x55,0x46,0x87,0x18,0x29,0x10,0x11,0x12,0x13,0x14,0x15,0x33};
 uint8_t Rx_Array[16]={0};
@@ -79,7 +84,7 @@ uint8_t Length_of_Message;
 uint8_t Length_of_Ext_Var=0;
 uint8_t Local_Count=0;
 
-
+CO_SDO_abortCode_t  Code_return_SDO;
 CAN_TxHeaderTypeDef Tx_Header;
 uint32_t            TxMailbox;
 uint32_t            tmp32u_1   = 0x1e1f1a1b;
@@ -243,15 +248,20 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-	  read_SDO (
+	Code_return_SDO = read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
 			  	0x3d,										//remote desiredNodeID Upper_F407XX
-				0x6004,										//Index_of_OD_variable_at_remote_NodeID
-				0x0E,											//Sub_Index_of_OD_variable
+				0x6004,										//Index_of_OD_variable_at_remote_NodeID_6004_u64
+				0x00,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				8,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
+
 #if 1
+	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Length_of_Message = SDO_abortCode_to_String(Code_return_SDO,  Message_to_Terminal);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
+
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 		Length_of_Message = sprintf( Message_to_Terminal,
 		  	  	                     " execute read_SDO(...); for the first time\n\r "
@@ -298,28 +308,38 @@ int main(void)
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
 #endif//2
 
-	  write_SDO(
+Code_return_SDO = write_SDO(
 				canOpenNodeSTM32.canOpenStack->SDOclient,
 				0x3d,										//remote desiredNodeID Upper_F407XX
-				0x6004,										//Index_of_OD_variable_at_remote_NodeID
-				0x0E,										//Sub_Index_of_OD_variable
+				0x6004,										//Index_of_OD_variable_at_remote_NodeID_6004_u64
+				0x00,										//Sub_Index_of_OD_variable
 				Array_8u,									//Source_of_data
-				4); HAL_Delay(100);
+				4);
 
+#if 1
+while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+Length_of_Message = SDO_abortCode_to_String(Code_return_SDO,  Message_to_Terminal);
+HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
+#endif
+HAL_Delay(10);
 
-  	  read_SDO (
+Code_return_SDO = read_SDO (
   			    canOpenNodeSTM32.canOpenStack->SDOclient,
 				0x3d,										//remote desiredNodeID Upper_F407XX
-				0x6004,										//Index_of_OD_variable_at_remote_NodeID
-  				0x0E,										//Sub_Index_of_OD_variable
+				0x6004,										//Index_of_OD_variable_at_remote_NodeID_6004_u64
+  				0x00,										//Sub_Index_of_OD_variable
   				Rx_Array,									//Saved_Received_Data
   				4,											//Number_of_Byte_to_read
-  				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
+  				(size_t*)&Length_of_Ext_Var );
 
 #if 3
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+		Length_of_Message = SDO_abortCode_to_String(Code_return_SDO,  Message_to_Terminal);
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);HAL_Delay(10);
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 		Length_of_Message = sprintf( Message_to_Terminal,
-		  	  	                     "\n\rexecute read_SDO(...); for the SECOND time\n\r");
+		  	  	                     "\n\r EXECUTE read_SDO(...); for the SECOND time\n\r");
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message);
 
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
@@ -617,6 +637,10 @@ static void MX_USART2_UART_Init(void)
 
 /**
   * Enable DMA controller clock
+  * Configure DMA for memory to memory transfers
+  *   hdma_memtomem_dma2_stream0
+  *   hdma_memtomem_dma2_stream1
+  *   hdma_memtomem_dma2_stream3
   */
 static void MX_DMA_Init(void)
 {
@@ -624,6 +648,63 @@ static void MX_DMA_Init(void)
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* Configure DMA request hdma_memtomem_dma2_stream0 on DMA2_Stream0 */
+  hdma_memtomem_dma2_stream0.Instance = DMA2_Stream0;
+  hdma_memtomem_dma2_stream0.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream0.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream0.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream0.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream0.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma_memtomem_dma2_stream0.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma_memtomem_dma2_stream0.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream0.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_memtomem_dma2_stream0.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream0.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream0.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream0.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream0) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+  /* Configure DMA request hdma_memtomem_dma2_stream1 on DMA2_Stream1 */
+  hdma_memtomem_dma2_stream1.Instance = DMA2_Stream1;
+  hdma_memtomem_dma2_stream1.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream1.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream1.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+  hdma_memtomem_dma2_stream1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+  hdma_memtomem_dma2_stream1.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream1.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_memtomem_dma2_stream1.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream1.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream1.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream1.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream1) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+  /* Configure DMA request hdma_memtomem_dma2_stream3 on DMA2_Stream3 */
+  hdma_memtomem_dma2_stream3.Instance = DMA2_Stream3;
+  hdma_memtomem_dma2_stream3.Init.Channel = DMA_CHANNEL_0;
+  hdma_memtomem_dma2_stream3.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem_dma2_stream3.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem_dma2_stream3.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem_dma2_stream3.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream3.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_memtomem_dma2_stream3.Init.Mode = DMA_NORMAL;
+  hdma_memtomem_dma2_stream3.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_memtomem_dma2_stream3.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_memtomem_dma2_stream3.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_memtomem_dma2_stream3.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_memtomem_dma2_stream3.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  if (HAL_DMA_Init(&hdma_memtomem_dma2_stream3) != HAL_OK)
+  {
+    Error_Handler( );
+  }
 
   /* DMA interrupt init */
   /* DMA1_Stream5_IRQn interrupt configuration */

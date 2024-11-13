@@ -201,7 +201,7 @@ int main(void)
   //  CAN_interface_Test();
 
      GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
-  //  GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
+  // GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
 
 
     Board_Name_to_Terminal();
@@ -223,36 +223,36 @@ int main(void)
 
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-			  	0x3c,										//remote desiredNodeID  Lower__f407xx
-				0x6038,										//Index_of_OD_variable_at_remote_NodeID LowerF_Array
-				0x0E,											//Sub_Index_of_OD_variable
+				CO_Lower__f407xx,							//Remote_NodeID=0x3c
+				0x6038,										//Index_of_OD_variable_6038_u16_at_remote_Node
+				0x0E,										//Sub_Index_of_OD_variable_0e
 				Rx_Array,									//Saved_Received_Data
 				15,											//Number_of_Byte_to_read
-				(size_t*)&Length_of_Ext_Var ); HAL_Delay(100);
+				(size_t*)&Length_of_Ext_Var ); HAL_Delay(50);
 
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8); HAL_Delay(50);
 
 	  write_SDO(
-				canOpenNodeSTM32.canOpenStack->SDOclient,
-				0x3c,										//remote desiredNodeID
-				0x6038,										//Index_of_OD_variable_at_remote_NodeID LowerF_Array
-				0x0E,											//Sub_Index_of_OD_variable
+			    canOpenNodeSTM32.canOpenStack->SDOclient,
+				CO_Lower__f407xx,							//Remote_NodeID=0x3c
+				0x6038,										//Index_of_OD_variable_6038_u16_at_remote_Node
+				0x0E,										//Sub_Index_of_OD_variable_0e
 				Array_8u,									//
 				4);  		HAL_Delay(50);
 
   	  read_SDO (
-  			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				0x3c,										//remote desiredNodeID
-				0x6038,										//Index_of_OD_variable_at_remote_NodeID LowerF_Array
-  				0x0E,											//Sub_Index_of_OD_variable
+			    canOpenNodeSTM32.canOpenStack->SDOclient,
+				CO_Lower__f407xx,							//Remote_NodeID=0x3c
+				0x6038,										//Index_of_OD_variable_6038_u16_at_remote_Node
+				0x0E,										//Sub_Index_of_OD_variable_0e
   				Rx_Array,									//Saved_Received_Data
   				4,											//Number_of_Byte_to_read
   				(size_t*)&Length_of_Ext_Var );  HAL_Delay(50);
 
   	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-	  HAL_Delay(100);
+	  HAL_Delay(50);
 
 		  OD_PERSIST_COMM.x6000_upper_F4XX_VAR32_6000_TX=0;
 		  Local_Count=0;

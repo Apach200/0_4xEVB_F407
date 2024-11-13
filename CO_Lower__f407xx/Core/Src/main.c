@@ -16,7 +16,7 @@
   *
   *			LOWER__PCBmodul__STM32_F4VE_V2.0-2
   *
-  *			NodeID = 072
+  *			NodeID = 0x3C
   *
   *
   ******************************************************************************
@@ -219,42 +219,42 @@ int main(void)
 
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-			  	0x3A,										//remote desiredNodeID   ALiex_Disco
-				0x6003,										//Index_of_OD_variable_at_remote_NodeID  ALiex_Disco_VAR32_6003
+				CO_Aliex_Disco407green,						 //remote_NodeID_0x3A
+				0x6003,										//Index_of_OD_variable_ALiex_Disco_VAR32_6003=0xabcd1234
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 
-	  HAL_Delay(100);
+	  HAL_Delay(50);
 
 	  	TerminalInterface.gState = HAL_UART_STATE_READY;
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
 
 	  write_SDO(
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-			  	0x3A,										//remote desiredNodeID   ALiex_Disco
-				0x6003,										//Index_of_OD_variable_at_remote_NodeID  ALiex_Disco_VAR32_6003
+				CO_Aliex_Disco407green,						//remote_NodeID_0x3A
+				0x6003,										//Index_of_OD_variable ALiex_Disco_VAR32_6003 _at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
 				Array_8u,									//Source_of_Data
 				4);
 
-	  HAL_Delay(100);
+	  HAL_Delay(50);
 
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-			  	0x3A,										//remote desiredNodeID   ALiex_Disco
-				0x6003,										//Index_of_OD_variable_at_remote_NodeID  ALiex_Disco_VAR32_6003
+				CO_Aliex_Disco407green,						//remote_NodeID_0x3A
+				0x6003,										//Index_of_OD_variable ALiex_Disco_VAR32_6003 _at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 
-	  HAL_Delay(100);
+	  HAL_Delay(50);
 
 	  TerminalInterface.gState = HAL_UART_STATE_READY;
 	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-      HAL_Delay(100);
+      HAL_Delay(50);
 
 		Local_Count=0;
 		  OD_PERSIST_COMM.x6000_lowerF_VAR32_6000=0;

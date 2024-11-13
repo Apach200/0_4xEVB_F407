@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : Format_out.h
-  * @brief          : Header for Format_out.c file.
+  * @brief          : Header for format_out.c file.
   *                   This file contains the common defines of the application.
   ******************************************************************************
   * @attention
@@ -21,6 +21,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "301/CO_SDOserver.h"
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -35,7 +36,7 @@ extern "C" {
 
 
 /* Exported functions prototypes ---------------------------------------------*/
-uint32_t* pMessage SDO_abortCode_to_String(CO_SDO_abortCode_t Code);
+uint16_t  SDO_abortCode_to_String(CO_SDO_abortCode_t Code, char* pString);
 
 /* Private defines -----------------------------------------------------------*/
 //#define PC14_OSC32_IN_Pin GPIO_PIN_14

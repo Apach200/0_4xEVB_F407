@@ -14,7 +14,7 @@
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   *
-  *		Discovery_F407green__EvolutionBoard
+  *		Discovery_F407green__EvolutionBoard_Original
   *
   *			NodeID = 0x3E
   *
@@ -232,8 +232,8 @@ int main(void)
 
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				0x3b,										//remote desiredNodeID Disco407_Blue
-				0x600E,										//Index_of_OD_variable_at_remote_NodeID Disco_Blue_VAR64_600e_TX
+				CO_Disco407_Blue,							//Remote_NodeID=0x3b
+				0x600E,										//Index_of_OD_variable_Disco_Blue_VAR64_600e_TX at_remote_Node
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				4,											//Number_of_Byte_to_read
@@ -242,23 +242,22 @@ int main(void)
 
 	  write_SDO(
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				0x3b,										//remote desiredNodeID Disco407_Blue
-				0x600E,										//Index_of_OD_variable_at_remote_NodeID Disco_Blue_VAR64_600e_TX
-				0,											//Sub_Index_of_OD_variable
-				Array_8u,									//
+				CO_Disco407_Blue,							//Remote_NodeID=0x3b
+				0x600E,										//Index_of_OD_variable_Disco_Blue_VAR64_600e_TX at_remote_Node
+				0,											//Sub_Index_of_OD_variablee
+				Array_8u,									//Data_Source
 				4);	  HAL_Delay(100);
 
 
 
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				0x3b,										//remote desiredNodeID Disco407_Blue
-				0x600E,										//Index_of_OD_variable_at_remote_NodeID Disco_Blue_VAR64_600e_TX
+				CO_Disco407_Blue,							//Remote_NodeID=0x3b
+				0x600E,										//Index_of_OD_variable_Disco_Blue_VAR64_600e_TX at_remote_Node
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
 				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );  HAL_Delay(100);
-
 
 
 	  TerminalInterface.gState = HAL_UART_STATE_READY;

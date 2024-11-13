@@ -12,6 +12,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "format_out.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -24,14 +25,17 @@
 
 
 /* Private variables ---------------------------------------------------------*/
+extern	DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
+extern	DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
+extern	DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
+
+/* Private functions -----------------------------------------------*/
+uint16_t  SDO_abortCode_to_String(CO_SDO_abortCode_t Code, char* pString);
 
 
-/* Private function prototypes -----------------------------------------------*/
-//uint32_t* pMessage SDO_abortCode_to_String(CO_SDO_abortCode_t Code);
-
-
-uint32_t* pMessage SDO_abortCode_to_String(CO_SDO_abortCode_t Code)
+uint16_t  SDO_abortCode_to_String(CO_SDO_abortCode_t Code, char* pString)
 {
+
 	/// SDO abort codes
 const char Message_SDO_AB_NONE[]="CO_SDO_AB_NONE = 0x00000000UL  /* No abort */";	
 const char Message_SDO_AB_TOGGLE_BIT[]="CO_SDO_AB_TOGGLE_BIT = 0x05030000UL /* Toggle bit not altered */";	
@@ -68,45 +72,181 @@ const char Message_SDO_AB_NO_DATA[]="CO_SDO_AB_NO_DATA = 0x08000024UL /* No data
 
 //The abort codes not listed above are reserved.
 const char Message_Default[]="UNKNOUN CODE";
-	
+uint8_t Length_Message;
 
 	
 switch((uint32_t )Code)
 {
-case CO_SDO_AB_NONE:				return  Message_SDO_AB_NONE;				break;
-case CO_SDO_AB_TOGGLE_BIT:			return  Message_SDO_AB_TOGGLE_BIT;			break;
-case CO_SDO_AB_TIMEOUT:				return  Message_SDO_AB_TIMEOUT;				break;
-case CO_SDO_AB_CMD:					return  Message_SDO_AB_CMD;					break;
-case CO_SDO_AB_BLOCK_SIZE:			return  Message_SDO_AB_BLOCK_SIZE;			break;
-case CO_SDO_AB_SEQ_NUM:				return  Message_SDO_AB_SEQ_NUM;				break;
-case CO_SDO_AB_CRC:					return  Message_SDO_AB_CRC;					break;
-case CO_SDO_AB_OUT_OF_MEM:			return  Message_SDO_AB_OUT_OF_MEM;			break;
-case CO_SDO_AB_UNSUPPORTED_ACCESS:	return  Message_SDO_AB_UNSUPPORTED_ACCESS;	break;
-case CO_SDO_AB_WRITEONLY:			return  Message_SDO_AB_WRITEONLY;			break;
-case CO_SDO_AB_READONLY:			return  Message_SDO_AB_READONLY;			break;
-case CO_SDO_AB_NOT_EXIST:			return  Message_SDO_AB_NOT_EXIST;			break;
-case CO_SDO_AB_NO_MAP:				return  Message_SDO_AB_NO_MAP;				break;
-case CO_SDO_AB_MAP_LEN:				return  Message_SDO_AB_MAP_LEN;				break;
-case CO_SDO_AB_PRAM_INCOMPAT:		return  Message_SDO_AB_PRAM_INCOMPAT;		break;
-case CO_SDO_AB_DEVICE_INCOMPAT:		return  Message_SDO_AB_DEVICE_INCOMPAT;		break;
-case CO_SDO_AB_HW:					return  Message_SDO_AB_HW;					break;
-case CO_SDO_AB_TYPE_MISMATCH:		return  Message_SDO_AB_TYPE_MISMATCH;		break;
-case CO_SDO_AB_DATA_LONG:			return  Message_SDO_AB_DATA_LONG;			break;
-case CO_SDO_AB_DATA_SHORT:			return  Message_SDO_AB_DATA_SHORT;			break;
-case CO_SDO_AB_SUB_UNKNOWN:			return  Message_SDO_AB_SUB_UNKNOWN;			break;
-case CO_SDO_AB_INVALID_VALUE:		return  Message_SDO_AB_INVALID_VALUE;		break;
-case CO_SDO_AB_VALUE_HIGH:			return  Message_SDO_AB_VALUE_HIGH;			break;
-case CO_SDO_AB_VALUE_LOW:			return  Message_SDO_AB_VALUE_LOW;			break;
-case CO_SDO_AB_MAX_LESS_MIN:		return  Message_SDO_AB_MAX_LESS_MIN;		break;
-case CO_SDO_AB_NO_RESOURCE:			return  Message_SDO_AB_NO_RESOURCE;			break;
-case CO_SDO_AB_GENERAL:				return  Message_SDO_AB_GENERAL;				break;
-case CO_SDO_AB_DATA_TRANSF:			return  Message_SDO_AB_DATA_TRANSF;			break;
-case CO_SDO_AB_DATA_LOC_CTRL:		return  Message_SDO_AB_DATA_LOC_CTRL;		break;
-case CO_SDO_AB_DATA_DEV_STATE:		return  Message_SDO_AB_DATA_DEV_STATE;		break;
-case CO_SDO_AB_DATA_OD:				return  Message_SDO_AB_DATA_OD;				break; 
-case CO_SDO_AB_NO_DATA:				return  Message_SDO_AB_NO_DATA;				break;
-default:							return  Message_Default;					break;  			
+case CO_SDO_AB_NONE:
+	Length_Message = sizeof( Message_SDO_AB_NONE);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_NONE, (uint32_t)pString, Length_Message);
+	break;
+
+
+case CO_SDO_AB_TOGGLE_BIT:
+	Length_Message = sizeof( Message_SDO_AB_TOGGLE_BIT);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_TOGGLE_BIT, (uint32_t)pString, Length_Message);
+	break;
+
+
+case CO_SDO_AB_TIMEOUT:
+	Length_Message = sizeof( Message_SDO_AB_TIMEOUT);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_TIMEOUT, (uint32_t)pString, Length_Message);
+		break;
+
+case CO_SDO_AB_CMD:
+	Length_Message = sizeof( Message_SDO_AB_CMD);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_CMD, (uint32_t)pString, Length_Message);
+	break;
+
+case CO_SDO_AB_BLOCK_SIZE:
+	Length_Message = sizeof( Message_SDO_AB_BLOCK_SIZE);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_BLOCK_SIZE, (uint32_t)pString, Length_Message);
+	break;
+
+case CO_SDO_AB_SEQ_NUM:
+	Length_Message = sizeof( Message_SDO_AB_SEQ_NUM);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_SEQ_NUM, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_CRC:
+	Length_Message = sizeof( Message_SDO_AB_CRC);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_CRC, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_OUT_OF_MEM:
+	Length_Message = sizeof( Message_SDO_AB_OUT_OF_MEM);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_OUT_OF_MEM, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_UNSUPPORTED_ACCESS:
+	Length_Message = sizeof( Message_SDO_AB_UNSUPPORTED_ACCESS);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_UNSUPPORTED_ACCESS, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_WRITEONLY:
+	Length_Message = sizeof( Message_SDO_AB_WRITEONLY);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_WRITEONLY, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_READONLY:
+	Length_Message = sizeof( Message_SDO_AB_READONLY);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_READONLY, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_NOT_EXIST:
+	Length_Message = sizeof( Message_SDO_AB_NOT_EXIST);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_NOT_EXIST, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_NO_MAP:
+	Length_Message = sizeof( Message_SDO_AB_NO_MAP);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_NO_MAP, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_MAP_LEN:
+	Length_Message = sizeof( Message_SDO_AB_MAP_LEN);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_MAP_LEN, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_PRAM_INCOMPAT:
+	Length_Message = sizeof( Message_SDO_AB_PRAM_INCOMPAT);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_PRAM_INCOMPAT, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DEVICE_INCOMPAT:
+	Length_Message = sizeof( Message_SDO_AB_DEVICE_INCOMPAT);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DEVICE_INCOMPAT, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_HW:
+	Length_Message = sizeof( Message_SDO_AB_HW);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_HW, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_TYPE_MISMATCH:
+	Length_Message = sizeof( Message_SDO_AB_TYPE_MISMATCH);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_TYPE_MISMATCH, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DATA_LONG:
+	Length_Message = sizeof( Message_SDO_AB_DATA_LONG);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_LONG, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DATA_SHORT:
+	Length_Message = sizeof( Message_SDO_AB_DATA_SHORT);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_SHORT, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_SUB_UNKNOWN:
+	Length_Message = sizeof( Message_SDO_AB_SUB_UNKNOWN);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_SUB_UNKNOWN, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_INVALID_VALUE:
+	Length_Message = sizeof( Message_SDO_AB_INVALID_VALUE);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_INVALID_VALUE, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_VALUE_HIGH:
+	Length_Message = sizeof( Message_SDO_AB_VALUE_HIGH);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_VALUE_HIGH, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_VALUE_LOW:
+	Length_Message = sizeof( Message_SDO_AB_VALUE_LOW);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_VALUE_LOW, (uint32_t)pString, Length_Message);
+	//pString =  Message_SDO_AB_VALUE_LOW;
+break;
+case CO_SDO_AB_MAX_LESS_MIN:
+	Length_Message = sizeof( Message_SDO_AB_MAX_LESS_MIN);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_MAX_LESS_MIN, (uint32_t)pString, Length_Message);
+	//pString =  Message_SDO_AB_MAX_LESS_MIN;
+break;
+
+case CO_SDO_AB_NO_RESOURCE:
+	Length_Message = sizeof( Message_SDO_AB_NO_RESOURCE);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_NO_RESOURCE, (uint32_t)pString, Length_Message);
+	//pString =  Message_SDO_AB_NO_RESOURCE;
+break;
+
+case CO_SDO_AB_GENERAL:
+	Length_Message = sizeof( Message_SDO_AB_GENERAL);
+	HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_GENERAL, (uint32_t)pString, Length_Message);
+	//pString =  Message_SDO_AB_GENERAL;
+break;
+
+case CO_SDO_AB_DATA_TRANSF:			//pString =  Message_SDO_AB_DATA_TRANSF;
+Length_Message = sizeof( Message_SDO_AB_DATA_TRANSF);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_TRANSF, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DATA_LOC_CTRL:		//pString =  Message_SDO_AB_DATA_LOC_CTRL;
+Length_Message = sizeof( Message_SDO_AB_DATA_LOC_CTRL);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_LOC_CTRL, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DATA_DEV_STATE:		//pString =  Message_SDO_AB_DATA_DEV_STATE;
+Length_Message = sizeof( Message_SDO_AB_DATA_DEV_STATE);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_DEV_STATE, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_DATA_OD:				//pString =  Message_SDO_AB_DATA_OD;
+Length_Message = sizeof( Message_SDO_AB_DATA_OD);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_DATA_OD, (uint32_t)pString, Length_Message);
+break;
+
+case CO_SDO_AB_NO_DATA:				//pString =  Message_SDO_AB_NO_DATA;
+Length_Message = sizeof( Message_SDO_AB_NO_DATA);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_SDO_AB_NO_DATA, (uint32_t)pString, Length_Message);
+break;
+
+default:							//pString =  Message_Default;
+Length_Message = sizeof( Message_Default);
+HAL_DMA_Start(&hdma_memtomem_dma2_stream0, (uint32_t)Message_Default, (uint32_t)pString, Length_Message);
+break;
 }
-	
+return Length_Message;
 }//end_of_SDO_abortCode_to_String(CO_SDO_abortCode_t Code)
 

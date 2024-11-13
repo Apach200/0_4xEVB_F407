@@ -55,6 +55,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Disco407_Blue/CAN_OD_STM32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Disco407_Blue/CANopenNode}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Disco407_Blue/CanOpenSTM32}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Disco407_Blue/User_functions}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1220582642" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -84,6 +85,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="CAN_OD_STM32"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="CanOpenSTM32"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="CANopenNode"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="User_functions"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
