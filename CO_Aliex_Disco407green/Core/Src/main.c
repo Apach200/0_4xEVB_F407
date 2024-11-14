@@ -224,7 +224,24 @@ int main(void)
    canOpenNodeSTM32.timerHandle = &htim4;
    canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
    canOpenNodeSTM32.baudrate = 125*4;
-   canopen_app_init(&canOpenNodeSTM32);
+   uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
+
+   if (Ret_value==0){
+   const uint8_t Msg_0[]="canopen_app_init OK\n\r";
+   	  Length_of_Message = sizeof(Msg_0);
+   	  while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   	  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_0, Length_of_Message);
+   	 }else if(Ret_value==1) {
+   		const uint8_t Msg_1[]="Error: Can't allocate memory\n\r";
+   		 Length_of_Message = sizeof(Msg_1);
+   		 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   		  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_1, Length_of_Message);
+   		 }else if(Ret_value==2) {
+   			const uint8_t Msg_2[]="Error: Storage %d\n\r";
+   			 Length_of_Message = sizeof(Msg_2);
+   			 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   			  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_2, Length_of_Message);
+   			 }else{;}
 
 
   /* USER CODE END 2 */
@@ -276,7 +293,7 @@ HAL_Delay(10);
 
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 		Length_of_Message = sprintf( Message_to_Terminal,
-                "Get Data from \n\r"
+                "Get Data from Local\n\r"
                 "Array_8u={0x%X,0x%X,0x%X,0x%X} \n\r",
 				Array_8u[0],Array_8u[1],Array_8u[2],Array_8u[3]);
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_to_Terminal, Length_of_Message); HAL_Delay(10);

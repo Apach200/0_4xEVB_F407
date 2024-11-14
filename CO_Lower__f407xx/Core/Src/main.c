@@ -80,7 +80,7 @@ uint8_t Length_of_Message;
 uint8_t Length_of_Ext_Var=0;
 uint8_t Local_Count=0;
 
-
+CO_SDO_abortCode_t  Code_return_SDO;
 CAN_TxHeaderTypeDef Tx_Header;
 uint32_t            TxMailbox;
 uint32_t            tmp32u_1   = 0x1e1f1a1b;
@@ -207,7 +207,24 @@ int main(void)
    canOpenNodeSTM32.timerHandle = &htim4;
    canOpenNodeSTM32.desiredNodeID = CO_Lower__f407xx;  //0x3c;
    canOpenNodeSTM32.baudrate = 125*4;
-   canopen_app_init(&canOpenNodeSTM32);
+   uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
+
+   if (Ret_value==0){
+   const uint8_t Msg_0[]="canopen_app_init OK\n\r";
+   	  Length_of_Message = sizeof(Msg_0);
+   	  while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   	  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_0, Length_of_Message);
+   	 }else if(Ret_value==1) {
+   		const uint8_t Msg_1[]="Error: Can't allocate memory\n\r";
+   		 Length_of_Message = sizeof(Msg_1);
+   		 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   		  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_1, Length_of_Message);
+   		 }else if(Ret_value==2) {
+   			const uint8_t Msg_2[]="Error: Storage %d\n\r";
+   			 Length_of_Message = sizeof(Msg_2);
+   			 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+   			  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_2, Length_of_Message);
+   			 }else{;}
 
 
   /* USER CODE END 2 */
@@ -222,7 +239,7 @@ int main(void)
 				CO_Aliex_Disco407green,						 //remote_NodeID_0x3A
 				0x6003,										//Index_of_OD_variable_ALiex_Disco_VAR32_6003=0xabcd1234
 				0,											//Sub_Index_of_OD_variable
-				Rx_Array,									//Saved_Received_Data
+				Rx_Array,									//Save_Received_Data_to Local_Array
 				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 
@@ -246,7 +263,7 @@ int main(void)
 				CO_Aliex_Disco407green,						//remote_NodeID_0x3A
 				0x6003,										//Index_of_OD_variable ALiex_Disco_VAR32_6003 _at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
-				Rx_Array,									//Saved_Received_Data
+				Rx_Array,									//new_Save_Received_Data_to Local_Array
 				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 

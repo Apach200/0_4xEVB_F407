@@ -45,5 +45,10 @@
 			<type>2</type>
 			<location>D:/0_4xEVB_F407/CanOpenSTM32</location>
 		</link>
+		<link>
+			<name>User_functions</name>
+			<type>2</type>
+			<location>D:/0_4xEVB_F407/User_functions</location>
+		</link>
 	</linkedResources>
 </projectDescription>

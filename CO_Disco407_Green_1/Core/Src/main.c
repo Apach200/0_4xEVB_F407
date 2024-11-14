@@ -31,6 +31,7 @@
 #include "301/CO_SDOclient.h"
 #include "CANopen.h"
 #include "OD.h"
+#include "format_out.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,7 +83,7 @@ uint8_t Local_Count=0;
 
 
 
-
+CO_SDO_abortCode_t  Code_return_SDO;
 CAN_TxHeaderTypeDef Tx_Header;
 uint32_t            TxMailbox;
 uint32_t            tmp32u_1   = 0x1e1f1a1b;
@@ -107,6 +108,8 @@ void CAN_interface_Test(void);
 void UART_interface_Test(void);
 void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms);
 void Board_Name_to_Terminal(void);
+void CO_Init_Return_State(uint16_t Returned_Code);
+void SDO_abortCode_ASCII_to_Terminal(void);
 
 CO_SDO_abortCode_t	read_SDO	(
 								  CO_SDOclient_t* SDO_C,
@@ -219,7 +222,8 @@ int main(void)
    canOpenNodeSTM32.timerHandle = &htim4;
    canOpenNodeSTM32.desiredNodeID = CO_Disco407_Green_1;//		0x3e
    canOpenNodeSTM32.baudrate = 125*4;
-   canopen_app_init(&canOpenNodeSTM32);
+   uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
+   CO_Init_Return_State(Ret_value);
 
 
   /* USER CODE END 2 */
@@ -818,10 +822,10 @@ void Board_Name_to_Terminal(void)
 {
 	const char Message_0[]={"   ******************************************\n\r"};
 //	const char Message_1[]={"*  Upper Blackboard  STM32F4XX___Ali     *\n\r"};
-//	const char Message_2[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
-	//const char Message_3[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
-	//	const char Message_4[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
-		const char Message_5[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
+//	const char Message_1[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
+	//const char Message_1[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
+	//	const char Message_1[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
+		const char Message_1[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
 	char Array_for_Messages[128]={};
 	uint16_t Msg_Length;
 //	uint32_t Chip_ID_96bit[4]={};
@@ -831,13 +835,13 @@ void Board_Name_to_Terminal(void)
 //	Chip_ID_96bit[1] = HAL_GetUIDw1();
 //	Chip_ID_96bit[2] = HAL_GetUIDw2();
 
-	Msg_Length = sizeof(Message_0);
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	Msg_Length = sizeof(Message_0);
 	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_0, Msg_Length);
 
-	Msg_Length = sizeof(Message_5);
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
-	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_5, Msg_Length);
+	Msg_Length = sizeof(Message_1);
+	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_1, Msg_Length);
 
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 	Msg_Length = sprintf( Array_for_Messages,
@@ -882,6 +886,57 @@ void Board_Name_to_Terminal(void)
 	HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(Array_for_Messages), 6);
 	while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 }
+
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+void CO_Init_Return_State(uint16_t Returned_Code)
+{
+	uint16_t Lngth_of_Message;
+	char Msg_2_Terminal[400];
+	   if (Returned_Code==0){
+	   const uint8_t Msg_0[]="canopen_app_init OK\n\r";
+	   Lngth_of_Message = sizeof(Msg_0);
+	   	  while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	   	  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_0, Lngth_of_Message);
+	   	 }else if(Returned_Code==1) {
+	   		const uint8_t Msg_1[]="Error: Can't allocate memory\n\r";
+	   		Lngth_of_Message = sizeof(Msg_1);
+	   		 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	   		  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_1, Lngth_of_Message);
+	   		 }else if(Returned_Code==2) {
+	   			const uint8_t Msg_2[]="Error: Storage %d\n\r";
+	   			Lngth_of_Message = sizeof(Msg_2);
+	   			 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	   			  HAL_UART_Transmit_DMA( &TerminalInterface, Msg_2, Lngth_of_Message);
+	   			 }else{;}
+
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+	   Lngth_of_Message = sprintf( Msg_2_Terminal,
+		  	  	  "   *  CANopenNodeSTM32 canOpenNodeSTM32;        *\n\r"
+		  	  	  "   *  .CANHandle = &hcan1;                      *\n\r"
+		  	  	  "   *  .HWInitFunction = MX_CAN1_Init            *\n\r"
+		  	  	  "   *  .timerHandle = &htim4                     *\n\r"
+		  	  	  "   *  .baudrate = 500kbps                       *\n\r"
+		  	  	  "   *  .desiredNodeID = CO_Disco407_Blue;//0x3b; *\n\r"
+		  	  	  "   *  canopen_app_init(&canOpenNodeSTM32);      *\n\r\n\r\n\r"
+			   );
+		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Msg_2_Terminal, Lngth_of_Message);
+		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+}
+
+///////////////////////////////////////////////////
+
+void SDO_abortCode_ASCII_to_Terminal(void)
+{
+	char Message_2_Terminal[128];
+	uint8_t Message_Length;
+while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+Message_Length = SDO_abortCode_to_String(Code_return_SDO,  Message_2_Terminal);
+HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Message_2_Terminal, Message_Length);
+}
+//////////////////////////////////////////
+
+
 
 /* USER CODE END 4 */
 
