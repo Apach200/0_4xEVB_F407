@@ -23,6 +23,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <format_out.h>
 #include "main.h"
 #include "usb_device.h"
 
@@ -32,7 +33,6 @@
 #include "301/CO_SDOclient.h"
 #include "CANopen.h"
 #include "OD.h"
-#include "format_out.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
