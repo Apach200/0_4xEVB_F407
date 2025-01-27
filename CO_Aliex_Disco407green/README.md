@@ -34,9 +34,9 @@ USB_OTG_FS	Device_Only	USB_OTG_FS_DP	PA12
 
 Сеть состоит из устройств из проектов:
  
-CO_Disco407_Blue,
+CO_Disco407_Blue, LSS_master Disco_STLink...2211
 
-CO_Aliex_Disco407green,
+CO_Aliex_Disco407green, Disco_STLink...4323
 
 CO_EvolutionBoard from Aliexpress BLACK color STM32F4XX LOWER PCB at mezzanine.
 
