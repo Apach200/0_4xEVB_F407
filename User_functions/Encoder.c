@@ -1,6 +1,6 @@
 #include "Encoder.h"
 #include "main.h"
-//#define Tim_Encoder Tim_1_Encoder
+#define Tim_Encoder Tim_1_Encoder
 
 extern
 TIM_HandleTypeDef Tim_Encoder;
