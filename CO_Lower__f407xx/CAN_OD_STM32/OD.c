@@ -33,10 +33,10 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1017_producerHeartbeatTime = 0x0000,
     .x1018_identity = {
         .highestSub_indexSupported = 0x04,
-        .vendor_ID = 0x00000000,
-        .productCode = 0x00000000,
-        .revisionNumber = 0x00000000,
-        .serialNumber = 0x00000000
+        .vendor_ID = 0x0AFFEFFD,
+        .productCode = 0x3C3C3C3C,
+        .revisionNumber = 0x00040001,
+        .serialNumber = 0x5678DFEA
     },
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1280_SDOClientParameter = {

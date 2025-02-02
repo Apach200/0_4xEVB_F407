@@ -16,14 +16,14 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     05.11.2024 13:08:19
+        Modified:     02.02.2025 21:29:20
         Modified By:  
 
     Device Info:
         Vendor Name:  Chromos_A
         Vendor ID:    0xAFFEFFd
         Product Name: Lower__f407xx
-        Product ID:   0x3c
+        Product ID:   0x3c3c3c3c
 
         Description:  
 *******************************************************************************/
