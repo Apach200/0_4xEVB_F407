@@ -56,6 +56,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Upper_F407XX/CANopenNode}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Upper_F407XX/CanOpenSTM32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Upper_F407XX/User_functions}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CO_Upper_F407XX/CANopenNode/301}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1816629975" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

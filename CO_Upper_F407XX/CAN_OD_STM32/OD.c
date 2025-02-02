@@ -33,10 +33,10 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1017_producerHeartbeatTime = 0x0000,
     .x1018_identity = {
         .highestSub_indexSupported = 0x04,
-        .vendor_ID = 0x00000000,
-        .productCode = 0x00000000,
-        .revisionNumber = 0x00000000,
-        .serialNumber = 0x00000000
+        .vendor_ID = 0xAFFEAFFD,
+        .productCode = 0x3D3D3D3D,
+        .revisionNumber = 0x0007000F,
+        .serialNumber = 0xFADE4A21
     },
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1280_SDOClientParameter = {
@@ -118,10 +118,10 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x6000_upper_F4XX_VAR32_6000_TX = 857870592,
-    .x6001_upper_F4XX_VAR32_6001_R = 0xF1E1D1C1,
-    .x6002_upper_F4XX_VAR32_6002_R = 0x23222120,
-    .x6003_upper_F4XX_VAR64_6003_TX = 0x3736353433323130,
-    .x6004_upper_F4XX_VAR64_6004_TX = 0x4746454443424140,
+    .x6001_upper_F4XX_VAR32_6001R = 0x01010101,
+    .x6002_upper_F4XX_VAR32_6002R = 0x02020202,
+    .x6003_upper_F4XX_VAR64_6003_TX = 0x0303030303030300,
+    .x6004_upper_F4XX_VAR64_6004_TX = 0x0404040404040400,
     .x6047_upper_F4XX_T = 0x47474747
 };
 
@@ -170,8 +170,8 @@ typedef struct {
     OD_obj_record_t o_1A00_TPDOMappingParameter[9];
     OD_obj_record_t o_1A01_TPDOMappingParameter[9];
     OD_obj_var_t o_6000_upper_F4XX_VAR32_6000_TX;
-    OD_obj_var_t o_6001_upper_F4XX_VAR32_6001_R;
-    OD_obj_var_t o_6002_upper_F4XX_VAR32_6002_R;
+    OD_obj_var_t o_6001_upper_F4XX_VAR32_6001R;
+    OD_obj_var_t o_6002_upper_F4XX_VAR32_6002R;
     OD_obj_var_t o_6003_upper_F4XX_VAR64_6003_TX;
     OD_obj_var_t o_6004_upper_F4XX_VAR64_6004_TX;
     OD_obj_var_t o_6047_upper_F4XX_T;
@@ -695,13 +695,13 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .attribute = ODA_SDO_RW | ODA_TPDO | ODA_MB,
         .dataLength = 4
     },
-    .o_6001_upper_F4XX_VAR32_6001_R = {
-        .dataOrig = &OD_PERSIST_COMM.x6001_upper_F4XX_VAR32_6001_R,
+    .o_6001_upper_F4XX_VAR32_6001R = {
+        .dataOrig = &OD_PERSIST_COMM.x6001_upper_F4XX_VAR32_6001R,
         .attribute = ODA_SDO_RW | ODA_RPDO | ODA_MB,
         .dataLength = 4
     },
-    .o_6002_upper_F4XX_VAR32_6002_R = {
-        .dataOrig = &OD_PERSIST_COMM.x6002_upper_F4XX_VAR32_6002_R,
+    .o_6002_upper_F4XX_VAR32_6002R = {
+        .dataOrig = &OD_PERSIST_COMM.x6002_upper_F4XX_VAR32_6002R,
         .attribute = ODA_SDO_RW | ODA_RPDO | ODA_MB,
         .dataLength = 4
     },
@@ -753,8 +753,8 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1A00, 0x09, ODT_REC, &ODObjs.o_1A00_TPDOMappingParameter, NULL},
     {0x1A01, 0x09, ODT_REC, &ODObjs.o_1A01_TPDOMappingParameter, NULL},
     {0x6000, 0x01, ODT_VAR, &ODObjs.o_6000_upper_F4XX_VAR32_6000_TX, NULL},
-    {0x6001, 0x01, ODT_VAR, &ODObjs.o_6001_upper_F4XX_VAR32_6001_R, NULL},
-    {0x6002, 0x01, ODT_VAR, &ODObjs.o_6002_upper_F4XX_VAR32_6002_R, NULL},
+    {0x6001, 0x01, ODT_VAR, &ODObjs.o_6001_upper_F4XX_VAR32_6001R, NULL},
+    {0x6002, 0x01, ODT_VAR, &ODObjs.o_6002_upper_F4XX_VAR32_6002R, NULL},
     {0x6003, 0x01, ODT_VAR, &ODObjs.o_6003_upper_F4XX_VAR64_6003_TX, NULL},
     {0x6004, 0x01, ODT_VAR, &ODObjs.o_6004_upper_F4XX_VAR64_6004_TX, NULL},
     {0x6047, 0x01, ODT_VAR, &ODObjs.o_6047_upper_F4XX_T, NULL},

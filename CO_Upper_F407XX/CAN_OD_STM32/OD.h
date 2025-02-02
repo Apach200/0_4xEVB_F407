@@ -16,14 +16,14 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     01.11.2024 23:25:24
+        Modified:     02.02.2025 21:32:34
         Modified By:  
 
     Device Info:
         Vendor Name:  Chromos_A
         Vendor ID:    0xAFFEAFFd
         Product Name: Upper_F407XX
-        Product ID:   0x3d
+        Product ID:   0x3d3d3d3d
 
         Description:  
 *******************************************************************************/
@@ -158,8 +158,8 @@ typedef struct {
         uint32_t applicationObject8;
     } x1A01_TPDOMappingParameter;
     int32_t x6000_upper_F4XX_VAR32_6000_TX;
-    uint32_t x6001_upper_F4XX_VAR32_6001_R;
-    uint32_t x6002_upper_F4XX_VAR32_6002_R;
+    uint32_t x6001_upper_F4XX_VAR32_6001R;
+    uint32_t x6002_upper_F4XX_VAR32_6002R;
     uint64_t x6003_upper_F4XX_VAR64_6003_TX;
     uint64_t x6004_upper_F4XX_VAR64_6004_TX;
     uint32_t x6047_upper_F4XX_T;
@@ -259,8 +259,8 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[23]
 #define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[24]
 #define OD_ENTRY_H6000_upper_F4XX_VAR32_6000_TX &OD->list[25]
-#define OD_ENTRY_H6001_upper_F4XX_VAR32_6001_R &OD->list[26]
-#define OD_ENTRY_H6002_upper_F4XX_VAR32_6002_R &OD->list[27]
+#define OD_ENTRY_H6001_upper_F4XX_VAR32_6001R &OD->list[26]
+#define OD_ENTRY_H6002_upper_F4XX_VAR32_6002R &OD->list[27]
 #define OD_ENTRY_H6003_upper_F4XX_VAR64_6003_TX &OD->list[28]
 #define OD_ENTRY_H6004_upper_F4XX_VAR64_6004_TX &OD->list[29]
 #define OD_ENTRY_H6047_upper_F4XX_T &OD->list[30]
