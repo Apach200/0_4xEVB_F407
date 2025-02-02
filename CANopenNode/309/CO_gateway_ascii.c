@@ -998,7 +998,7 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 err = true;
                 break;
             }
-            ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
+            //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
 
             if (ret == CO_ERROR_NO) {
                 responseWithOK(gtwa);
@@ -1019,7 +1019,7 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 err = true;
                 break;
             }
-            ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
+            //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
 
             if (ret == CO_ERROR_NO) {
                 responseWithOK(gtwa);
@@ -1040,7 +1040,7 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 err = true;
                 break;
             }
-            ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
+            //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
 
             if (ret == CO_ERROR_NO) {
                 responseWithOK(gtwa);
@@ -1081,7 +1081,7 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 break;
             }
 
-            ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
+            //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
 
             if (ret == CO_ERROR_NO) {
                 responseWithOK(gtwa);

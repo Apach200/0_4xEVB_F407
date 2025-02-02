@@ -31,6 +31,7 @@
 
 #include "CO_storageBlank.h"
 #include "OD.h"
+#include "format_out.h"
 
 CANopenNodeSTM32*
     canopenNodeSTM32; // It will be set by canopen_app_init and will be used across app to get access to CANOpen objects
@@ -40,8 +41,8 @@ CANopenNodeSTM32*
 
 /* default values for CO_CANopenInit() */
 #define NMT_CONTROL                                                                                                    \
-    CO_NMT_STARTUP_TO_OPERATIONAL                                                                                      \
-    | CO_NMT_ERR_ON_ERR_REG | CO_ERR_REG_GENERIC_ERR | CO_ERR_REG_COMMUNICATION
+     CO_NMT_STARTUP_TO_OPERATIONAL | CO_NMT_ERR_ON_ERR_REG | CO_ERR_REG_GENERIC_ERR | CO_ERR_REG_COMMUNICATION
+
 #define FIRST_HB_TIME        500
 #define SDO_SRV_TIMEOUT_TIME 1000
 #define SDO_CLI_TIMEOUT_TIME 500
@@ -90,7 +91,9 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
         log_printf("Error: Can't allocate memory\n");
         return 1;
     } else {
-        log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
+        //log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
+        Message_2_UART_u32((char*)"Allocated %u bytes for CANopen objects ",heapMemoryUsed);
+
     }
 
     canopenNodeSTM32->canOpenStack = CO;
@@ -111,67 +114,91 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 }
 
 int
-canopen_app_resetCommunication() {
-    /* CANopen communication reset - initialize CANopen objects *******************/
-    log_printf("CANopenNode - Reset communication...\n");
+canopen_app_resetCommunication()
+{
+/* CANopen communication reset - initialize CANopen objects *******************/
+//log_printf("CANopenNode - Reset communication...\n");
+Message_2_UART((char*)"CANopenNode - Reset communication...\n");
+/* Wait rt_thread. */
+CO->CANmodule->CANnormal = false;
 
-    /* Wait rt_thread. */
-    CO->CANmodule->CANnormal = false;
+/* Enter CAN configuration. */
+CO_CANsetConfigurationMode((void*)canopenNodeSTM32);
+CO_CANmodule_disable(CO->CANmodule);
 
-    /* Enter CAN configuration. */
-    CO_CANsetConfigurationMode((void*)canopenNodeSTM32);
-    CO_CANmodule_disable(CO->CANmodule);
+/* initialize CANopen */
+err = CO_CANinit(CO, canopenNodeSTM32, 0); // Bitrate for STM32 microcontroller is being set in MXCube Settings
+if (err != CO_ERROR_NO) {
+	//log_printf("Error: CAN initialization failed: %d\n", err);
+	Message_2_UART_u16((char*)"Error: CAN initialization failed:",err);
+	return 1;
+}
 
-    /* initialize CANopen */
-    err = CO_CANinit(CO, canopenNodeSTM32, 0); // Bitrate for STM32 microcontroller is being set in MXCube Settings
-    if (err != CO_ERROR_NO) {
-        log_printf("Error: CAN initialization failed: %d\n", err);
-        return 1;
-    }
+CO_LSS_address_t lssAddress = {.identity = {.vendorID       = OD_PERSIST_COMM.x1018_identity.vendor_ID,
+											.productCode    = OD_PERSIST_COMM.x1018_identity.productCode,
+											.revisionNumber = OD_PERSIST_COMM.x1018_identity.revisionNumber,
+											.serialNumber   = OD_PERSIST_COMM.x1018_identity.serialNumber}
+							  };
 
-    CO_LSS_address_t lssAddress = {.identity = {.vendorID       = OD_PERSIST_COMM.x1018_identity.vendor_ID,
-                                                .productCode    = OD_PERSIST_COMM.x1018_identity.productCode,
-                                                .revisionNumber = OD_PERSIST_COMM.x1018_identity.revisionNumber,
-                                                .serialNumber   = OD_PERSIST_COMM.x1018_identity.serialNumber}
-    							 };
-    err = CO_LSSinit(CO, &lssAddress, &canopenNodeSTM32->desiredNodeID, &canopenNodeSTM32->baudrate);
-    if (err != CO_ERROR_NO) {
-        log_printf("Error: LSS slave initialization failed: %d\n", err);
-        return 2;
-    }
+err = CO_LSSinit(
+				CO,
+				&lssAddress,
+				&canopenNodeSTM32->desiredNodeID,
+				&canopenNodeSTM32->baudrate
+				);
 
-    canopenNodeSTM32->activeNodeID = canopenNodeSTM32->desiredNodeID;
-    uint32_t errInfo = 0;
+if (err != CO_ERROR_NO)
+{
+	//log_printf("Error: LSS slave initialization failed: %d\n", err);
+	Message_2_UART_u16((char*)"Error: LSS slave initialization failed:",err);
+	return 2;
+}
 
-    err = CO_CANopenInit(CO,                   /* CANopen object */
-                         NULL,                 /* alternate NMT */
-                         NULL,                 /* alternate em */
-                         OD,                   /* Object dictionary */
-                         OD_STATUS_BITS,       /* Optional OD_statusBits */
-                         NMT_CONTROL,          /* CO_NMT_control_t */
-                         FIRST_HB_TIME,        /* firstHBTime_ms */
-                         SDO_SRV_TIMEOUT_TIME, /* SDOserverTimeoutTime_ms */
-                         SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms */
-                         SDO_CLI_BLOCK,        /* SDOclientBlockTransfer */
-                         canopenNodeSTM32->activeNodeID, &errInfo);
-    if (err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS) {
-        if (err == CO_ERROR_OD_PARAMETERS) {
-            log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-        } else {
-            log_printf("Error: CANopen initialization failed: %d\n", err);
-        }
-        return 3;
-    }
+canopenNodeSTM32->activeNodeID = canopenNodeSTM32->desiredNodeID;
+uint32_t errInfo = 0;
 
-    err = CO_CANopenInitPDO(CO, CO->em, OD, canopenNodeSTM32->activeNodeID, &errInfo);
-    if (err != CO_ERROR_NO) {
-        if (err == CO_ERROR_OD_PARAMETERS) {
-            log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-        } else {
-            log_printf("Error: PDO initialization failed: %d\n", err);
-        }
-        return 4;
-    }
+err = CO_CANopenInit(CO,                   /* CANopen object */
+					 NULL,                 /* alternate NMT */
+					 NULL,                 /* alternate em */
+					 OD,                   /* Object dictionary */
+					 OD_STATUS_BITS,       /* Optional OD_statusBits */
+					 NMT_CONTROL,          /* CO_NMT_control_t */
+					 FIRST_HB_TIME,        /* firstHBTime_ms */
+					 SDO_SRV_TIMEOUT_TIME, /* SDOserverTimeoutTime_ms */
+					 SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms */
+					 SDO_CLI_BLOCK,        /* SDOclientBlockTransfer */
+					 canopenNodeSTM32->activeNodeID,
+					 &errInfo);
+
+if (   err != CO_ERROR_NO
+	&& err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS
+	)
+	{
+		if (err == CO_ERROR_OD_PARAMETERS)
+			{
+				//log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
+			Message_2_UART_u16((char*)"Error: Object Dictionary entry ",errInfo);
+			} else {
+					log_printf("Error: CANopen initialization failed: %d\n", err);
+					Message_2_UART_u32((char*)"Error: CANopen initialization failed: ",err);
+					}
+	return 3;
+	}
+
+err = CO_CANopenInitPDO(CO, CO->em, OD, canopenNodeSTM32->activeNodeID, &errInfo);
+if (err != CO_ERROR_NO)
+	{
+	if (err == CO_ERROR_OD_PARAMETERS)
+		{
+		///////////////log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
+		Message_2_UART_u32((char*)"Error: Object Dictionary entry ",errInfo);
+
+		} else {
+				///////////////log_printf("Error: PDO initialization failed: %d\n", err);
+				Message_2_UART_u32((char*)"Error: PDO initialization failed:",err);
+				}
+	return 4;
+	}
 
     /* Configure Timer interrupt function for execution every 1 millisecond */
     HAL_TIM_Base_Start_IT(canopenNodeSTM32->timerHandle); //1ms interrupt
@@ -187,13 +214,15 @@ canopen_app_resetCommunication() {
         }
 #endif
     } else {
-        log_printf("CANopenNode - Node-id not initialized\n");
-    }
+        	//log_printf("CANopenNode - Node-id not initialized\n");
+        	Message_2_UART((char*)"CANopenNode - Node-id not initialized ");
+    		}
 
     /* start CAN */
     CO_CANsetNormalMode(CO->CANmodule);
 
-    log_printf("CANopenNode - Running...\n");
+    //log_printf("CANopenNode - Running...\n");
+	Message_2_UART((char*)"CANopenNode - Running...");
     fflush(stdout);
     time_old = time_current = HAL_GetTick();
     return 0;

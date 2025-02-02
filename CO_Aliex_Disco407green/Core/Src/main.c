@@ -216,25 +216,25 @@ int main(void)
 
   //	HAL_RTC_SetTime(&hrtc, &sTime,        RTC_FORMAT_BIN);
   //	HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
+  HAL_RTC_GetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
+  HAL_RTC_GetTime(&hrtc, &sTime,        RTC_FORMAT_BIN);
 
-  	HAL_RTC_GetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN);
-  	HAL_RTC_GetTime(&hrtc, &sTime,        RTC_FORMAT_BIN);
-
-   Encoder_Config();  // configure the encoders timer
-   Encoder_Init();    // start the encoders timer
-   LCD_ini();
+  Encoder_Config();  // configure the encoders timer
+  Encoder_Init();    // start the encoders timer
+  LCD_ini();
   // Logo_to_1602LCD();
   Datum_to_1602LCD();
   //GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); 						// for_STM32F4XX_Ali_pcb
-    GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
+   GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
   //UART_interface_Test(); //while(1){;}
   //CAN_interface_Test();
 
-  	HAL_TIM_Base_Start_IT(&htim8);
-    HAL_UART_Receive_DMA(&huart2, Array_from_Terminal, sizeof Array_from_Terminal );
-    //HAL_Delay(1500);
-    Board_Name_to_Terminal();
-  	HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim8);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_UART_Receive_DMA(&huart2, Array_from_Terminal, sizeof Array_from_Terminal );
+  //HAL_Delay(1500);
+  Board_Name_to_Terminal();
+
 
     /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications.
      *             It can be FDCan or CAN and CANOpenSTM32 Driver will take of care of handling that
@@ -252,12 +252,11 @@ int main(void)
      * baudrate: This is the baudrate you've set in your CubeMX Configuration
      *
      */
-//   CANopenNodeSTM32 canOpenNodeSTM32;
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   //canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
-   canOpenNodeSTM32.desiredNodeID = 0xff;//unconfigured
+   canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
+   //canOpenNodeSTM32.desiredNodeID = 0xff;//unconfigured
    canOpenNodeSTM32.baudrate = 125*4;
    uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
    	CO_Init_Return_State(Ret_value );
@@ -272,7 +271,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-   canopen_app_process();
+//   canopen_app_process();
 
 #if Make_Read_SDO
 #endif//Make_Read_SDO
@@ -295,19 +294,19 @@ int main(void)
 //				tmp32u_1 = OD_PERSIST_COMM.x6001_nucleo_VAR32_6001;
 //				TerminalInterface.gState = HAL_UART_STATE_READY;
 //				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);}
-//
-//			  if(HAL_GetTick() - Ticks>749)
-//			  {
-//				Ticks = HAL_GetTick();
-//				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
-//				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
-//				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-//				TerminalInterface.gState = HAL_UART_STATE_READY;
-//				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
-//				Local_Count++;Local_Count = Local_Count%4;
-//				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
-//				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
-//			  }
+
+			  if(HAL_GetTick() - Ticks>749)
+			  {
+				Ticks = HAL_GetTick();
+				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
+				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
+				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
+				TerminalInterface.gState = HAL_UART_STATE_READY;
+				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
+				Local_Count++;Local_Count = Local_Count%4;
+				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
+				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
+			  }
 
 
 
@@ -423,7 +422,7 @@ void Board_Name_to_Terminal(void)
 //	const char Message_1[]={"*  Upper Blackboard  STM32F4XX___Ali     *\n\r"};
 //	const char Message_2[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
 //	const char Message_3[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
-	const char Message_3[]={"*  STM32F4DISCO Greenboard_STLINK_4323   *\n\r"};
+	const char Message_3[]={"*  STM32F4DISCO Greenboard_STLINK_4323   *"};
 //	const char Message_4[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
 //	const char Message_5[]={"*       *\n\r"};
 	char Array_for_Messages[128]={};
@@ -499,7 +498,8 @@ void Board_Name_to_Terminal(void)
 		  switch(encoderStatus) {
 		    case Incremented:
 		    	currCounter++;
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+				//HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET  );
 				sprintf(String_LCD,"%04d",currCounter);
 				LCD_SetPos(11, 0);
 				HAL_Delay(10);
@@ -507,12 +507,14 @@ void Board_Name_to_Terminal(void)
 
 				L_str=	snprintf(buff, sizeof(buff), "\n\r %04d ", currCounter);
 				while(TerminalInterface.gState != HAL_UART_STATE_READY ){;}
-				HAL_UART_Transmit(&TerminalInterface, (uint8_t*)buff, L_str,16);
-				HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET  );
+				HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)buff, L_str);
+				//HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET  );
+				HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET  );
 		      break;
 		    case Decremented:
 		    	currCounter--;
-				HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+				//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET  );
 				sprintf(String_LCD,"%04d",currCounter);
 				LCD_SetPos(11,0);HAL_Delay(10);
 
@@ -520,8 +522,9 @@ void Board_Name_to_Terminal(void)
 
 				L_str=	snprintf(buff, sizeof(buff), "\n\r %04d ", currCounter);
 				while(TerminalInterface.gState != HAL_UART_STATE_READY ){;}
-				HAL_UART_Transmit(&TerminalInterface, (uint8_t*)buff, L_str,16);
-				HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET  );
+				HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)buff, L_str);
+				//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET  );
+				HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET  );
 		      break;
 
 		    case Neutral:

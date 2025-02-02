@@ -23,17 +23,13 @@
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) != 0
 
 CO_ReturnError_t
-CO_LEDs_init(CO_LEDs_t* LEDs) {
+CO_LEDs_init(CO_LEDs_t* LEDs)
+{
     CO_ReturnError_t ret = CO_ERROR_NO;
-
     /* verify arguments */
-    if (LEDs == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
-
+    if (LEDs == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT;}
     /* clear the object */
     (void)memset(LEDs, 0, sizeof(CO_LEDs_t));
-
     return ret;
 }
 

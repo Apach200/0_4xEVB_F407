@@ -47,7 +47,9 @@ void Get_Date(void);
 void Get_Time_output(uint8_t *Uhren,uint8_t *Minutn,uint8_t *Sekundn);
 uint32_t RTC_update_and_Terminal(uint32_t Period_update_ms);
 uint16_t Process_Rx_Array_UART_DMA(uint8_t *Array,uint16_t Size_of_Array);
-void Message_2_UART(char *pMessage, uint16_t Argument);/// Argument - optional parameter
+void Message_2_UART(char *pMessage);
+void Message_2_UART_u16(char *pMessage, uint16_t Argument);
+void Message_2_UART_u32(char *pMessage, uint32_t Argument);
 
 float process_adc_buffer(uint16_t *buffer);
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc);

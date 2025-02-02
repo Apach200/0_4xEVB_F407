@@ -643,8 +643,11 @@ extern "C" {
  *   LED diodes on terminal.
  */
 #ifdef CO_DOXYGEN
-#define CO_CONFIG_GTW (0)
+//#define CO_CONFIG_GTW (0)
 #endif
+#define CO_CONFIG_GTW (CO_CONFIG_GTW_ASCII|CO_CONFIG_GTW_ASCII_SDO|CO_CONFIG_GTW_ASCII_NMT \
+		              |CO_CONFIG_GTW_ASCII_LOG|CO_CONFIG_GTW_ASCII_PRINT_HELP)
+
 #define CO_CONFIG_GTW_MULTI_NET        0x01
 #define CO_CONFIG_GTW_ASCII            0x02
 #define CO_CONFIG_GTW_ASCII_SDO        0x04
@@ -663,8 +666,9 @@ extern "C" {
  * times within own loop (up to 127). This can speed-up SDO block transfer.
  */
 #ifdef CO_DOXYGEN
-#define CO_CONFIG_GTW_BLOCK_DL_LOOP 1
+//#define CO_CONFIG_GTW_BLOCK_DL_LOOP 1
 #endif
+#define CO_CONFIG_GTW_BLOCK_DL_LOOP 1
 
 /**
  * Size of command buffer in ASCII gateway object.
@@ -673,15 +677,18 @@ extern "C" {
  * increased to 1000 or more. Buffer may be refilled between the block transfer.
  */
 #ifdef CO_DOXYGEN
-#define CO_CONFIG_GTWA_COMM_BUF_SIZE 200
+//#define CO_CONFIG_GTWA_COMM_BUF_SIZE 200
 #endif
+#define CO_CONFIG_GTWA_COMM_BUF_SIZE 200
 
 /**
  * Size of message log buffer in ASCII gateway object.
  */
 #ifdef CO_DOXYGEN
-#define CO_CONFIG_GTWA_LOG_BUF_SIZE 2000
+//#define CO_CONFIG_GTWA_LOG_BUF_SIZE 2000
 #endif
+#define CO_CONFIG_GTWA_LOG_BUF_SIZE 2000
+
 /** @} */ /* CO_STACK_CONFIG_GATEWAY */
 
 /**

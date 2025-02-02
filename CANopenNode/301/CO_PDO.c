@@ -431,37 +431,39 @@ OD_read_PDO_commParam(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t
  * previous message will be lost and overwritten by the new message.
  */
 static void
-CO_PDO_receive(void* object, void* msg) {
-    CO_RPDO_t* RPDO = object;
-    CO_PDO_common_t* PDO = &RPDO->PDO_common;
-    uint8_t DLC = CO_CANrxMsg_readDLC(msg);
-    const uint8_t* data = CO_CANrxMsg_readData(msg);
-    uint8_t err = RPDO->receiveError;
+CO_PDO_receive(void* object, void* msg)
+{
+CO_RPDO_t* RPDO = object;
+CO_PDO_common_t* PDO = &RPDO->PDO_common;
+uint8_t DLC = CO_CANrxMsg_readDLC(msg);
+const uint8_t* data = CO_CANrxMsg_readData(msg);
+uint8_t err = RPDO->receiveError;
 
-    if (PDO->valid) {
-        if (DLC >= PDO->dataLength) {
-            /* indicate errors in PDO length */
-            if (DLC == PDO->dataLength) {
-                if (err == CO_RPDO_RX_ACK_ERROR) {
-                    err = CO_RPDO_RX_OK;
-                }
+if (PDO->valid)
+    {
+     if (DLC >= PDO->dataLength)
+     {
+      /* indicate errors in PDO length */
+            if (DLC == PDO->dataLength)
+            {
+             if (err == CO_RPDO_RX_ACK_ERROR) {err = CO_RPDO_RX_OK; }
+
             } else {
-                if (err == CO_RPDO_RX_ACK_NO_ERROR) {
-                    err = CO_RPDO_RX_LONG;
-                }
-            }
+                	if (err == CO_RPDO_RX_ACK_NO_ERROR) {err = CO_RPDO_RX_LONG;}
+                   }
 
             /* Determine, to which of the two rx buffers copy the message. */
-            uint8_t bufNo = 0;
+uint8_t bufNo = 0;
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-            if (RPDO->synchronous && (RPDO->SYNC != NULL) && RPDO->SYNC->CANrxToggle) {
-                bufNo = 1;
-            }
+if (
+	RPDO->synchronous
+	&& (RPDO->SYNC != NULL)
+	&& RPDO->SYNC->CANrxToggle
+	) { bufNo = 1;}
 #endif
-
-            /* copy data into appropriate buffer and set 'new message' flag */
-            (void)memcpy(RPDO->CANrxData[bufNo], data, CO_PDO_MAX_SIZE);
-            CO_FLAG_SET(RPDO->CANrxNew[bufNo]);
+/* copy data into appropriate buffer and set 'new message' flag */
+(void)memcpy(RPDO->CANrxData[bufNo], data, CO_PDO_MAX_SIZE);
+CO_FLAG_SET(RPDO->CANrxNew[bufNo]);
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0
             /* Optional signal to RTOS, which can resume task, which handles the RPDO. */
@@ -485,116 +487,142 @@ CO_PDO_receive(void* object, void* msg) {
  * For more information see file CO_ODinterface.h, OD_IO_t.
  */
 static ODR_t
-OD_write_14xx(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten) {
+OD_write_14xx(
+				OD_stream_t* stream,
+				const void* buf,
+				OD_size_t count,
+				OD_size_t* countWritten
+			)
+{
     /* "count" is also verified in *_init() function */
-    if ((stream == NULL) || (buf == NULL) || (countWritten == NULL) || (count > 4U)) {
-        return ODR_DEV_INCOMPAT;
-    }
+if (
+	(stream == NULL) || (buf == NULL)
+	|| (countWritten == NULL) || (count > 4U)
+	) {return ODR_DEV_INCOMPAT;}
 
-    CO_RPDO_t* RPDO = stream->object;
-    CO_PDO_common_t* PDO = &RPDO->PDO_common;
-    uint8_t bufCopy[4];
-    (void)memcpy((void*)bufCopy, (const void*)buf, count);
+CO_RPDO_t* RPDO = stream->object;
+CO_PDO_common_t* PDO = &RPDO->PDO_common;
+uint8_t bufCopy[4];
+(void)memcpy((void*)bufCopy, (const void*)buf, count);
 
-    switch (stream->subIndex) {
-        case 1: { /* COB-ID used by PDO */
-            uint32_t COB_ID = CO_getUint32(buf);
-            uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
-            bool_t valid = (COB_ID & 0x80000000U) == 0U;
+switch (stream->subIndex)
+{
+        case 1: {
+        		/* COB-ID used by PDO */
+            	uint32_t COB_ID = CO_getUint32(buf);
+            	uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
+            	bool_t valid = (COB_ID & 0x80000000U) == 0U;
 
-            /* bits 11...29 must be zero, PDO must be disabled on change, CAN_ID == 0 is
-             * not allowed, mapping must be configured before enabling the PDO */
-            if (((COB_ID & 0x3FFFF800U) != 0U) || (valid && PDO->valid && (CAN_ID != PDO->configuredCanId))
-                || (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID)) || (valid && (PDO->mappedObjectsCount == 0U))) {
-                return ODR_INVALID_VALUE;
-            }
+            	/* bits 11...29 must be zero, PDO must be disabled on change, CAN_ID == 0 is
+            	 * not allowed, mapping must be configured before enabling the PDO */
+            	if (
+            		((COB_ID & 0x3FFFF800U) != 0U)
+					|| (valid && PDO->valid && (CAN_ID != PDO->configuredCanId))
+					|| (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID))
+					|| (valid && (PDO->mappedObjectsCount == 0U))
+					) {return ODR_INVALID_VALUE;}
 
-            /* parameter changed? */
-            if ((valid != PDO->valid) || (CAN_ID != PDO->configuredCanId)) {
-                /* if default CAN-ID is written, store to OD without Node-ID */
-                if (CAN_ID == PDO->preDefinedCanId) {
-                    (void)CO_setUint32(bufCopy, COB_ID & 0xFFFFFF80U);
-                }
-                if (!valid) {
-                    CAN_ID = 0;
-                }
+            	/* parameter changed? */
+            	if (
+            		(valid != PDO->valid)
+					|| (CAN_ID != PDO->configuredCanId)
+					) {
+            			/* if default CAN-ID is written, store to OD without Node-ID */
+            			if (CAN_ID == PDO->preDefinedCanId)
+            					{(void)CO_setUint32(bufCopy, COB_ID & 0xFFFFFF80U);}
 
-                CO_ReturnError_t ret = CO_CANrxBufferInit(PDO->CANdev, PDO->CANdevIdx, CAN_ID, 0x7FF, false,
-                                                          (void*)RPDO, CO_PDO_receive);
+            			if (!valid) {CAN_ID = 0;}
 
-                if (valid && (ret == CO_ERROR_NO)) {
-                    PDO->valid = true;
-                    PDO->configuredCanId = CAN_ID;
-                } else {
-                    PDO->valid = false;
-                    CO_FLAG_CLEAR(RPDO->CANrxNew[0]);
+						CO_ReturnError_t ret = CO_CANrxBufferInit(
+																	PDO->CANdev,
+																	PDO->CANdevIdx,
+																	CAN_ID,
+																	0x7FF,
+																	false,
+																	(void*)RPDO,
+																	CO_PDO_receive
+																 );
+
+						if (valid && (ret == CO_ERROR_NO))
+						{
+						 PDO->valid = true;
+						 PDO->configuredCanId = CAN_ID;
+						} else 	{
+								PDO->valid = false;
+								CO_FLAG_CLEAR(RPDO->CANrxNew[0]);
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-                    CO_FLAG_CLEAR(RPDO->CANrxNew[1]);
+								CO_FLAG_CLEAR(RPDO->CANrxNew[1]);
 #endif
-                    if (ret != CO_ERROR_NO) {
-                        return ODR_DEV_INCOMPAT;
-                    }
-                }
-            }
-            break;
-        }
+								if (ret != CO_ERROR_NO) {return ODR_DEV_INCOMPAT;}
+								}
+            		}
+				break;
+				}
 
-        case 2: { /* transmission type */ uint8_t transmissionType = CO_getUint8(buf);
+        case 2: {
+        	     /* transmission type */
+        		uint8_t transmissionType = CO_getUint8(buf);
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-            if ((transmissionType > (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240)
-                && (transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)) {
-                return ODR_INVALID_VALUE;
-            }
+        		if (
+        			(transmissionType > (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240)
+					&& (transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
+					) {return ODR_INVALID_VALUE; }
 
-            bool_t synchronous = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
-            /* Remove old message from the second buffer. */
-            if (RPDO->synchronous != synchronous) {
-                CO_FLAG_CLEAR(RPDO->CANrxNew[1]);
-            }
-
-            RPDO->synchronous = synchronous;
+        		bool_t synchronous = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
+        		/* Remove old message from the second buffer. */
+        		if (RPDO->synchronous != synchronous) {CO_FLAG_CLEAR(RPDO->CANrxNew[1]);}
+        		RPDO->synchronous = synchronous;
 #else
-            if (transmissionType < CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {
-                return ODR_INVALID_VALUE;
-            }
+        		if (transmissionType < CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {return ODR_INVALID_VALUE;}
 #endif
-            break;
-        }
+        		break;
+        		}
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0
-        case 5: { /* event-timer */
-            uint32_t eventTime = CO_getUint16(buf);
-            RPDO->timeoutTime_us = eventTime * 1000U;
-            RPDO->timeoutTimer = 0;
-            break;
-        }
+        case 5: {
+        		/* event-timer */
+            	uint32_t eventTime = CO_getUint16(buf);
+            	RPDO->timeoutTime_us = eventTime * 1000U;
+            	RPDO->timeoutTimer = 0;
+            	break;
+        		}
 #endif
-        default:
-            /* MISRA C 2004 15.3 */
+        default:/* MISRA C 2004 15.3 */
             break;
-    }
+}
 
     /* write value to the original location in the Object Dictionary */
-    return OD_writeOriginal(stream, bufCopy, count, countWritten);
+return OD_writeOriginal(stream, bufCopy, count, countWritten);
 }
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC */
 
+
+
 CO_ReturnError_t
-CO_RPDO_init(CO_RPDO_t* RPDO, OD_t* OD, CO_EM_t* em,
+CO_RPDO_init(
+			CO_RPDO_t* RPDO,
+			OD_t* OD,
+			CO_EM_t* em,
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-             CO_SYNC_t* SYNC,
+            CO_SYNC_t* SYNC,
 #endif
-             uint16_t preDefinedCanId, OD_entry_t* OD_14xx_RPDOCommPar, OD_entry_t* OD_16xx_RPDOMapPar,
-             CO_CANmodule_t* CANdevRx, uint16_t CANdevRxIdx, uint32_t* errInfo) {
-    CO_PDO_common_t* PDO = &RPDO->PDO_common;
-    CO_ReturnError_t ret;
-    ODR_t odRet;
+            uint16_t preDefinedCanId,
+			OD_entry_t* OD_14xx_RPDOCommPar,
+			OD_entry_t* OD_16xx_RPDOMapPar,
+            CO_CANmodule_t* CANdevRx,
+			uint16_t CANdevRxIdx,
+			uint32_t* errInfo)
+{
+CO_PDO_common_t* PDO = &RPDO->PDO_common;
+CO_ReturnError_t ret;
+ODR_t odRet;
 
     /* verify arguments */
-    if ((RPDO == NULL) || (OD == NULL) || (em == NULL) || (OD_14xx_RPDOCommPar == NULL) || (OD_16xx_RPDOMapPar == NULL)
-        || (CANdevRx == NULL)) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+if (
+	(RPDO == NULL) || (OD == NULL) || (em == NULL)
+	|| (OD_14xx_RPDOCommPar == NULL) || (OD_16xx_RPDOMapPar == NULL)
+	|| (CANdevRx == NULL)
+	) {return CO_ERROR_ILLEGAL_ARGUMENT;}
 
     /* clear object */
     (void)memset(RPDO, 0, sizeof(CO_RPDO_t));
@@ -653,22 +681,23 @@ CO_RPDO_init(CO_RPDO_t* RPDO, OD_t* OD, CO_EM_t* em,
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
     uint8_t transmissionType = (uint8_t)(CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO);
     odRet = OD_get_u8(OD_14xx_RPDOCommPar, 2, &transmissionType, true);
-    if (odRet != ODR_OK) {
-        if (errInfo != NULL) {
-            *errInfo = (((uint32_t)OD_getIndex(OD_14xx_RPDOCommPar)) << 8) | 2U;
-        }
+    if (odRet != ODR_OK)
+    	{
+        if (errInfo != NULL)
+			{
+			 *errInfo = (((uint32_t)OD_getIndex(OD_14xx_RPDOCommPar)) << 8) | 2U;
+			}
         return CO_ERROR_OD_PARAMETERS;
-    }
-
-    RPDO->SYNC = SYNC;
-    RPDO->synchronous = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
+    	}
+RPDO->SYNC = SYNC;
+RPDO->synchronous = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
 #endif
 
-    /* Configure communication parameter - event-timer (optional) */
+/* Configure communication parameter - event-timer (optional) */
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0
-    uint16_t eventTime = 0;
-    (void)OD_get_u16(OD_14xx_RPDOCommPar, 5, &eventTime, true);
-    RPDO->timeoutTime_us = (uint32_t)eventTime * 1000U;
+uint16_t eventTime = 0;
+(void)OD_get_u16(OD_14xx_RPDOCommPar, 5, &eventTime, true);
+RPDO->timeoutTime_us = (uint32_t)eventTime * 1000U;
 #endif
 
     /* Configure OD extensions */
@@ -687,7 +716,6 @@ CO_RPDO_init(CO_RPDO_t* RPDO, OD_t* OD, CO_EM_t* em,
     (void)OD_extension_init(OD_14xx_RPDOCommPar, &PDO->OD_communicationParam_ext);
     (void)OD_extension_init(OD_16xx_RPDOMapPar, &PDO->OD_mappingParam_extension);
 #endif
-
     return CO_ERROR_NO;
 }
 
@@ -874,110 +902,124 @@ CO_RPDO_process(CO_RPDO_t* RPDO,
  * For more information see file CO_ODinterface.h, OD_IO_t.
  */
 static ODR_t
-OD_write_18xx(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten) {
+OD_write_18xx(
+				OD_stream_t* stream,
+				const void* buf,
+				OD_size_t count,
+				OD_size_t* countWritten
+			 )
+{
     /* "count" is also verified in *_init() function */
-    if ((stream == NULL) || (buf == NULL) || (countWritten == NULL) || (count > 4U)) {
-        return ODR_DEV_INCOMPAT;
-    }
+if 	(
+	  (stream == NULL) || (buf == NULL)
+	  || (countWritten == NULL) || (count > 4U)
+	) {return ODR_DEV_INCOMPAT;}
 
-    CO_TPDO_t* TPDO = stream->object;
-    CO_PDO_common_t* PDO = &TPDO->PDO_common;
-    uint8_t bufCopy[4];
-    (void)memcpy((void*)bufCopy, (const void*)buf, count);
+CO_TPDO_t* TPDO = stream->object;
+CO_PDO_common_t* PDO = &TPDO->PDO_common;
+uint8_t bufCopy[4];
+(void)memcpy((void*)bufCopy, (const void*)buf, count);
 
-    switch (stream->subIndex) {
+switch (stream->subIndex)
+{
         case 1: { /* COB-ID used by PDO */
-            uint32_t COB_ID = CO_getUint32(buf);
-            uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
-            bool_t valid = (COB_ID & 0x80000000U) == 0U;
+				uint32_t COB_ID = CO_getUint32(buf);
+				uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
+				bool_t valid = (COB_ID & 0x80000000U) == 0U;
 
-            /* bits 11...29 must be zero, PDO must be disabled on change, CAN_ID == 0 is
-             * not allowed, mapping must be configured before enabling the PDO */
-            if (((COB_ID & 0x3FFFF800U) != 0U) || (valid && (PDO->valid && (CAN_ID != PDO->configuredCanId)))
-                || (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID)) || (valid && (PDO->mappedObjectsCount == 0U))) {
-                return ODR_INVALID_VALUE;
-            }
+				/* bits 11...29 must be zero, PDO must be disabled on change, CAN_ID == 0 is
+				 * not allowed, mapping must be configured before enabling the PDO */
+				if (
+					((COB_ID & 0x3FFFF800U) != 0U)
+					|| (valid && (PDO->valid && (CAN_ID != PDO->configuredCanId)))
+					|| (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID))
+					|| (valid && (PDO->mappedObjectsCount == 0U))
+					) {return ODR_INVALID_VALUE; }
 
-            /* parameter changed? */
-            if ((valid != PDO->valid) || (CAN_ID != PDO->configuredCanId)) {
-                /* if default CAN-ID is written, store to OD without Node-ID */
-                if (CAN_ID == PDO->preDefinedCanId) {
-                    (void)CO_setUint32(bufCopy, COB_ID & 0xFFFFFF80U);
-                }
-                if (!valid) {
-                    CAN_ID = 0;
-                }
+				/* parameter changed? */
+				if (
+					(valid != PDO->valid)
+					|| (CAN_ID != PDO->configuredCanId)
+				   ) {
+					  /* if default CAN-ID is written, store to OD without Node-ID */
+					  if (CAN_ID == PDO->preDefinedCanId)
+						  {
+						  (void)CO_setUint32 ( bufCopy, COB_ID & 0xFFFFFF80U );
+						  }
+					  if (!valid) {CAN_ID = 0;}
 
-                CO_CANtx_t* CANtxBuff = CO_CANtxBufferInit(
-                    PDO->CANdev, PDO->CANdevIdx, CAN_ID, false, PDO->dataLength,
-                    TPDO->transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240);
+					  CO_CANtx_t* CANtxBuff = CO_CANtxBufferInit(
+																  PDO->CANdev,
+																  PDO->CANdevIdx,
+																  CAN_ID,
+																  false,
+																  PDO->dataLength,
+																  TPDO->transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240
+																  );
 
-                if (CANtxBuff == NULL) {
-                    return ODR_DEV_INCOMPAT;
-                }
+					if (CANtxBuff == NULL) {return ODR_DEV_INCOMPAT;}
 
-                TPDO->CANtxBuff = CANtxBuff;
-                PDO->valid = valid;
-                PDO->configuredCanId = CAN_ID;
-            }
-            break;
-        }
+					TPDO->CANtxBuff = CANtxBuff;
+					PDO->valid = valid;
+					PDO->configuredCanId = CAN_ID;
+					}/* parameter changed? */
+				break;
+        		}///case 1: /* COB-ID used by PDO */
 
-        case 2: { /* transmission type */ uint8_t transmissionType = CO_getUint8(buf);
+        case 2: { /* transmission type */
+        		uint8_t transmissionType = CO_getUint8(buf);
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-            if ((transmissionType > (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240)
-                && (transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)) {
-                return ODR_INVALID_VALUE;
-            }
-            TPDO->CANtxBuff->syncFlag = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
-            TPDO->syncCounter = 255;
+        		if (
+        			(transmissionType > (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240)
+                     && (transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
+					) {return ODR_INVALID_VALUE;}
+
+
+        		TPDO->CANtxBuff->syncFlag = transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240;
+        		TPDO->syncCounter = 255;
 #else
             if (transmissionType < CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {
                 return ODR_INVALID_VALUE;
             }
 #endif
-            TPDO->transmissionType = transmissionType;
-            TPDO->sendRequest = true;
+            	TPDO->transmissionType = transmissionType;
+            	TPDO->sendRequest = true;
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
-            TPDO->inhibitTimer = 0;
-            TPDO->eventTimer = 0;
+            	TPDO->inhibitTimer = 0;
+            	TPDO->eventTimer = 0;
 #endif
-            break;
-        }
+            	break;
+        		}//case 2: { /* transmission type */
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
         case 3: { /* inhibit time */
-            if (PDO->valid) {
-                return ODR_INVALID_VALUE;
-            }
-            uint32_t inhibitTime = CO_getUint16(buf);
-            TPDO->inhibitTime_us = inhibitTime * 100U;
-            TPDO->inhibitTimer = 0;
-            break;
-        }
+            	if (PDO->valid) {return ODR_INVALID_VALUE;}
+
+				uint32_t inhibitTime = CO_getUint16(buf);
+				TPDO->inhibitTime_us = inhibitTime * 100U;
+				TPDO->inhibitTimer = 0;
+				break;
+        		}
 
         case 5: { /* event-timer */
-            uint32_t eventTime = CO_getUint16(buf);
-            TPDO->eventTime_us = eventTime * 1000U;
-            TPDO->eventTimer = 0;
-            break;
-        }
+            	uint32_t eventTime = CO_getUint16(buf);
+            	TPDO->eventTime_us = eventTime * 1000U;
+            	TPDO->eventTimer = 0;
+            	break;
+        		}
 #endif
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
         case 6: { /* SYNC start value */
-            uint8_t syncStartValue = CO_getUint8(buf);
+            	uint8_t syncStartValue = CO_getUint8(buf);
 
-            if (PDO->valid || (syncStartValue > 240U)) {
-                return ODR_INVALID_VALUE;
-            }
-            TPDO->syncStartValue = syncStartValue;
-            break;
-        }
+            	if (PDO->valid || (syncStartValue > 240U)) { return ODR_INVALID_VALUE;}
+                TPDO->syncStartValue = syncStartValue;
+                break;
+        		}
 #endif
-        default:
-            /* MISRA C 2004 15.3 */
-            break;
+      default:/* MISRA C 2004 15.3 */
+            	break;
     }
 
     /* write value to the original location in the Object Dictionary */
@@ -986,92 +1028,112 @@ OD_write_18xx(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* 
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC */
 
 CO_ReturnError_t
-CO_TPDO_init(CO_TPDO_t* TPDO, OD_t* OD, CO_EM_t* em,
+CO_TPDO_init(
+				CO_TPDO_t* TPDO,
+				OD_t* OD,
+				CO_EM_t* em,
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-             CO_SYNC_t* SYNC,
+				CO_SYNC_t* SYNC,
 #endif
-             uint16_t preDefinedCanId, OD_entry_t* OD_18xx_TPDOCommPar, OD_entry_t* OD_1Axx_TPDOMapPar,
-             CO_CANmodule_t* CANdevTx, uint16_t CANdevTxIdx, uint32_t* errInfo) {
-    CO_PDO_common_t* PDO = &TPDO->PDO_common;
-    ODR_t odRet;
+				uint16_t preDefinedCanId,
+				OD_entry_t* OD_18xx_TPDOCommPar,
+				OD_entry_t* OD_1Axx_TPDOMapPar,
+				CO_CANmodule_t* CANdevTx,
+				uint16_t CANdevTxIdx,
+				uint32_t* errInfo
+				)
+{
+CO_PDO_common_t* PDO = &TPDO->PDO_common;
+ODR_t odRet;
 
-    /* verify arguments */
-    if ((TPDO == NULL) || (OD == NULL) || (em == NULL) || (OD_18xx_TPDOCommPar == NULL) || (OD_1Axx_TPDOMapPar == NULL)
-        || (CANdevTx == NULL)) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+if (	 /* verify arguments */
+	(TPDO == NULL) || (OD == NULL)||(em == NULL)
+	 ||(OD_18xx_TPDOCommPar == NULL) || (OD_1Axx_TPDOMapPar == NULL)
+	 || (CANdevTx == NULL)
+	){return CO_ERROR_ILLEGAL_ARGUMENT;}
 
-    /* clear object */
-    (void)memset(TPDO, 0, sizeof(CO_TPDO_t));
+(void)memset(TPDO, 0, sizeof(CO_TPDO_t)); /* clear object */
 
     /* Configure object variables */
-    PDO->em = em;
-    PDO->CANdev = CANdevTx;
+PDO->em = em;
+PDO->CANdev = CANdevTx;
 
-    /* Configure mapping parameters */
-    uint32_t erroneousMap = 0;
-    CO_ReturnError_t ret = PDO_initMapping(PDO, OD, OD_1Axx_TPDOMapPar, false, errInfo, &erroneousMap);
-    if (ret != CO_ERROR_NO) {
-        return ret;
-    }
+uint32_t erroneousMap = 0;/* Configure mapping parameters */
+CO_ReturnError_t ret = PDO_initMapping(
+										PDO,
+										OD,
+										OD_1Axx_TPDOMapPar,
+										false,
+										errInfo,
+										&erroneousMap
+										);
+
+if (ret != CO_ERROR_NO) {return ret;}
 
     /* Configure communication parameter - transmission type */
     uint8_t transmissionType = (uint8_t)(CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO);
     odRet = OD_get_u8(OD_18xx_TPDOCommPar, 2, &transmissionType, true);
-    if (odRet != ODR_OK) {
-        if (errInfo != NULL) {
-            *errInfo = (((uint32_t)OD_getIndex(OD_18xx_TPDOCommPar)) << 8) | 2U;
-        }
+    if (odRet != ODR_OK)
+    {
+        if (errInfo != NULL)
+        {*errInfo = (((uint32_t)OD_getIndex(OD_18xx_TPDOCommPar)) << 8) | 2U;}
+
         return CO_ERROR_OD_PARAMETERS;
     }
-    if ((transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
+
+    	if	( (transmissionType < (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
         && (transmissionType > (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240)
 #endif
-    ) {
-        transmissionType = (uint8_t)(CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO);
-    }
+    		){transmissionType = (uint8_t)(CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO);}
+
+
     TPDO->transmissionType = transmissionType;
     TPDO->sendRequest = true;
 
     /* Configure communication parameter - COB-ID */
     uint32_t COB_ID = 0;
     odRet = OD_get_u32(OD_18xx_TPDOCommPar, 1, &COB_ID, true);
-    if (odRet != ODR_OK) {
-        if (errInfo != NULL) {
-            *errInfo = (((uint32_t)OD_getIndex(OD_18xx_TPDOCommPar)) << 8) | 1U;
-        }
-        return CO_ERROR_OD_PARAMETERS;
+    if (odRet != ODR_OK)
+    {
+     if (errInfo != NULL) {*errInfo = (((uint32_t)OD_getIndex(OD_18xx_TPDOCommPar)) << 8) | 1U;}
+     return CO_ERROR_OD_PARAMETERS;
     }
 
     bool_t valid = (COB_ID & 0x80000000U) == 0U;
     uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
-    if (valid && ((PDO->mappedObjectsCount == 0U) || (CAN_ID == 0U))) {
-        valid = false;
-        if (erroneousMap == 0U) {
-            erroneousMap = 1;
-        }
+		if (valid && ((PDO->mappedObjectsCount == 0U) || (CAN_ID == 0U)))
+		{
+		valid = false;
+		if (erroneousMap == 0U) { erroneousMap = 1;}
+		}
+
+    if (erroneousMap != 0U)
+    {
+     CO_errorReport(
+    		 	 	 PDO->em,
+					 CO_EM_PDO_WRONG_MAPPING,
+					 CO_EMC_PROTOCOL_ERROR,
+                     (erroneousMap != 1U) ? erroneousMap : COB_ID
+                   );
     }
 
-    if (erroneousMap != 0U) {
-        CO_errorReport(PDO->em, CO_EM_PDO_WRONG_MAPPING, CO_EMC_PROTOCOL_ERROR,
-                       (erroneousMap != 1U) ? erroneousMap : COB_ID);
-    }
-    if (!valid) {
-        CAN_ID = 0;
-    }
+    if (!valid) {CAN_ID = 0;}
 
     /* If default CAN-ID is stored in OD (without Node-ID), add Node-ID */
-    if ((CAN_ID != 0U) && (CAN_ID == (preDefinedCanId & 0xFF80U))) {
-        CAN_ID = preDefinedCanId;
-    }
+    if ((CAN_ID != 0U) && (CAN_ID == (preDefinedCanId & 0xFF80U))) { CAN_ID = preDefinedCanId; }
 
-    TPDO->CANtxBuff = CO_CANtxBufferInit(CANdevTx, CANdevTxIdx, CAN_ID, false, PDO->dataLength,
-                                         TPDO->transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240);
 
-    if (TPDO->CANtxBuff == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+    TPDO->CANtxBuff = CO_CANtxBufferInit(
+    									CANdevTx,
+										CANdevTxIdx,
+										CAN_ID,
+										false,
+										PDO->dataLength,
+										TPDO->transmissionType <= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_240
+										);
+
+    if (TPDO->CANtxBuff == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT;}
 
     PDO->valid = valid;
 

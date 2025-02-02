@@ -40,72 +40,78 @@ static CO_CANmodule_t* CANModule_local = NULL; /* Local instance of global CAN m
 
 /******************************************************************************/
 void
-CO_CANsetConfigurationMode(void* CANptr) {
+CO_CANsetConfigurationMode(void* CANptr)
+{
     /* Put CAN module in configuration mode */
-    if (CANptr != NULL) {
-#ifdef CO_STM32_FDCAN_Driver
-        HAL_FDCAN_Stop(((CANopenNodeSTM32*)CANptr)->CANHandle);
-#else
-        HAL_CAN_Stop(((CANopenNodeSTM32*)CANptr)->CANHandle);
-#endif
-    }
+if (CANptr != NULL)
+	{HAL_CAN_Stop(((CANopenNodeSTM32*)CANptr)->CANHandle);}
 }
 
 /******************************************************************************/
 void
 CO_CANsetNormalMode(CO_CANmodule_t* CANmodule) {
     /* Put CAN module in normal mode */
-    if (CANmodule->CANptr != NULL) {
-#ifdef CO_STM32_FDCAN_Driver
-        if (HAL_FDCAN_Start(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle) == HAL_OK)
-#else
-        if (HAL_CAN_Start(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle) == HAL_OK)
-#endif
-        {
-            CANmodule->CANnormal = true;
-        }
+if (CANmodule->CANptr != NULL)
+	{
+     if (
+    	HAL_CAN_Start(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle) == HAL_OK
+		)
+     	 { CANmodule->CANnormal = true;}
+
     }
 }
 
 /******************************************************************************/
 CO_ReturnError_t
-CO_CANmodule_init(CO_CANmodule_t* CANmodule, void* CANptr, CO_CANrx_t rxArray[], uint16_t rxSize, CO_CANtx_t txArray[],
-                  uint16_t txSize, uint16_t CANbitRate) {
-
+CO_CANmodule_init	(
+					CO_CANmodule_t* CANmodule,
+					void* CANptr,
+					CO_CANrx_t rxArray[],
+					uint16_t rxSize,
+					CO_CANtx_t txArray[],
+					uint16_t txSize,
+					uint16_t CANbitRate
+					)
+{
     /* verify arguments */
-    if (CANmodule == NULL || rxArray == NULL || txArray == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+if (
+	CANmodule == NULL
+	|| rxArray == NULL
+	|| txArray == NULL
+	) {return CO_ERROR_ILLEGAL_ARGUMENT;}
 
-    /* Hold CANModule variable */
-    CANmodule->CANptr = CANptr;
+/* Hold CANModule variable */
+CANmodule->CANptr = CANptr;
 
-    /* Keep a local copy of CANModule */
-    CANModule_local = CANmodule;
+/* Keep a local copy of CANModule */
+CANModule_local = CANmodule;
 
-    /* Configure object variables */
-    CANmodule->rxArray = rxArray;
-    CANmodule->rxSize = rxSize;
-    CANmodule->txArray = txArray;
-    CANmodule->txSize = txSize;
-    CANmodule->CANerrorStatus = 0;
-    CANmodule->CANnormal = false;
-    CANmodule->useCANrxFilters = false; /* Do not use HW filters */
-    CANmodule->bufferInhibitFlag = false;
-    CANmodule->firstCANtxMessage = true;
-    CANmodule->CANtxCount = 0U;
-    CANmodule->errOld = 0U;
+/* Configure object variables */
+CANmodule->rxArray = rxArray;
+CANmodule->rxSize = rxSize;
+CANmodule->txArray = txArray;
+CANmodule->txSize = txSize;
+CANmodule->CANerrorStatus = 0;
+CANmodule->CANnormal = false;
+CANmodule->useCANrxFilters = false; /* Do not use HW filters */
+CANmodule->bufferInhibitFlag = false;
+CANmodule->firstCANtxMessage = true;
+CANmodule->CANtxCount = 0U;
+CANmodule->errOld = 0U;
 
     /* Reset all variables */
-    for (uint16_t i = 0U; i < rxSize; i++) {
-        rxArray[i].ident = 0U;
-        rxArray[i].mask = 0xFFFFU;
-        rxArray[i].object = NULL;
-        rxArray[i].CANrx_callback = NULL;
-    }
-    for (uint16_t i = 0U; i < txSize; i++) {
-        txArray[i].bufferFull = false;
-    }
+for (uint16_t i = 0U; i < rxSize; i++)
+	{
+	rxArray[i].ident = 0U;
+	rxArray[i].mask = 0xFFFFU;
+	rxArray[i].object = NULL;
+	rxArray[i].CANrx_callback = NULL;
+	}
+
+for (uint16_t i = 0U; i < txSize; i++)
+{
+ txArray[i].bufferFull = false;
+}
 
     /***************************************/
     /* STM32 related configuration */
@@ -334,33 +340,40 @@ prv_send_can_message(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer) {
 
 /******************************************************************************/
 CO_ReturnError_t
-CO_CANsend(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer) {
-    CO_ReturnError_t err = CO_ERROR_NO;
+CO_CANsend(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer)
+{
+CO_ReturnError_t err = CO_ERROR_NO;
 
-    /* Verify overflow */
-    if (buffer->bufferFull) {
-        if (!CANmodule->firstCANtxMessage) {
-            /* don't set error, if bootup message is still on buffers */
-            CANmodule->CANerrorStatus |= CO_CAN_ERRTX_OVERFLOW;
-        }
-        err = CO_ERROR_TX_OVERFLOW;
-    }
+/* Verify overflow */
+if (buffer->bufferFull)
+	{
+	if (!CANmodule->firstCANtxMessage)
+		{
+			/* don't set error, if bootup message is still on buffers */
+			CANmodule->CANerrorStatus |= CO_CAN_ERRTX_OVERFLOW;
+		}
+	err = CO_ERROR_TX_OVERFLOW;
+	}
 
-    /*
-     * Send message to CAN network
-     *
-     * Lock interrupts for atomic operation
-     */
-    CO_LOCK_CAN_SEND(CANmodule);
-    if (prv_send_can_message(CANmodule, buffer)) {
-        CANmodule->bufferInhibitFlag = buffer->syncFlag;
-    } else {
-        buffer->bufferFull = true;
-        CANmodule->CANtxCount++;
-    }
-    CO_UNLOCK_CAN_SEND(CANmodule);
+/*
+ * Send message to CAN network
+ *
+ * Lock interrupts for atomic operation
+ */
+CO_LOCK_CAN_SEND(CANmodule);
 
-    return err;
+if  (
+	 prv_send_can_message(CANmodule, buffer)
+	)
+	{
+	 CANmodule->bufferInhibitFlag = buffer->syncFlag;
+	} else {
+			buffer->bufferFull = true;
+			CANmodule->CANtxCount++;
+			}
+
+CO_UNLOCK_CAN_SEND(CANmodule);
+return err;
 }
 
 /******************************************************************************/
@@ -397,83 +410,45 @@ CO_CANclearPendingSyncPDOs(CO_CANmodule_t* CANmodule) {
 /******************************************************************************/
 /* Get error counters from the module. If necessary, function may use
     * different way to determine errors. */
-static uint16_t rxErrors = 0, txErrors = 0, overflow = 0;
+//static uint16_t rxErrors = 0, txErrors = 0, overflow = 0;
 
 void
-CO_CANmodule_process(CO_CANmodule_t* CANmodule) {
-    uint32_t err = 0;
+CO_CANmodule_process(CO_CANmodule_t* CANmodule)
+{
+uint32_t err = 0;
+// CANOpen just care about Bus_off, Warning, Passive and Overflow
+err = (
+		(CAN_HandleTypeDef*)((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle)->Instance->ESR
+				& (CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF
+	  );
 
-    // CANOpen just care about Bus_off, Warning, Passive and Overflow
-    // I didn't find overflow error register in STM32, if you find it please let me know
+//    uint32_t esrVal = ((CAN_HandleTypeDef*)((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle)->Instance->ESR; Debug purpose
+if (CANmodule->errOld != err)
+	{
+	uint16_t status = CANmodule->CANerrorStatus;
+	CANmodule->errOld = err;
+	if (err & CAN_ESR_BOFF)
+		{
+		status |= CO_CAN_ERRTX_BUS_OFF;
+		// In this driver, we assume that auto bus recovery is activated ! so this error will eventually handled automatically.
+		} else {
+				/* recalculate CANerrorStatus, first clear some flags */
+				status &= 0xFFFF
+							^  ( CO_CAN_ERRTX_BUS_OFF | CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE \
+									| CO_CAN_ERRTX_WARNING| CO_CAN_ERRTX_PASSIVE
+						       );
 
-#ifdef CO_STM32_FDCAN_Driver
+				if (err & CAN_ESR_EWGF) { status |= CO_CAN_ERRRX_WARNING | CO_CAN_ERRTX_WARNING;}
 
-    err = ((FDCAN_HandleTypeDef*)((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle)->Instance->PSR
-          & (FDCAN_PSR_BO | FDCAN_PSR_EW | FDCAN_PSR_EP);
+				if (err & CAN_ESR_EPVF) { status |= CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_PASSIVE;}
+				}///else
 
-    if (CANmodule->errOld != err) {
+	CANmodule->CANerrorStatus = status;
+	}///if (CANmodule->errOld != err)
 
-        uint16_t status = CANmodule->CANerrorStatus;
+}//CO_CANmodule_process()
 
-        CANmodule->errOld = err;
 
-        if (err & FDCAN_PSR_BO) {
-            status |= CO_CAN_ERRTX_BUS_OFF;
-            // In this driver we expect that the controller is automatically handling the protocol exceptions.
-
-        } else {
-            /* recalculate CANerrorStatus, first clear some flags */
-            status &= 0xFFFF
-                      ^ (CO_CAN_ERRTX_BUS_OFF | CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_WARNING
-                         | CO_CAN_ERRTX_PASSIVE);
-
-            if (err & FDCAN_PSR_EW) {
-                status |= CO_CAN_ERRRX_WARNING | CO_CAN_ERRTX_WARNING;
-            }
-
-            if (err & FDCAN_PSR_EP) {
-                status |= CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_PASSIVE;
-            }
-        }
-
-        CANmodule->CANerrorStatus = status;
-    }
-#else
-
-    err = ((CAN_HandleTypeDef*)((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle)->Instance->ESR
-          & (CAN_ESR_BOFF | CAN_ESR_EPVF | CAN_ESR_EWGF);
-
-    //    uint32_t esrVal = ((CAN_HandleTypeDef*)((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle)->Instance->ESR; Debug purpose
-    if (CANmodule->errOld != err) {
-
-        uint16_t status = CANmodule->CANerrorStatus;
-
-        CANmodule->errOld = err;
-
-        if (err & CAN_ESR_BOFF) {
-            status |= CO_CAN_ERRTX_BUS_OFF;
-            // In this driver, we assume that auto bus recovery is activated ! so this error will eventually handled automatically.
-
-        } else {
-            /* recalculate CANerrorStatus, first clear some flags */
-            status &= 0xFFFF
-                      ^ (CO_CAN_ERRTX_BUS_OFF | CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_WARNING
-                         | CO_CAN_ERRTX_PASSIVE);
-
-            if (err & CAN_ESR_EWGF) {
-                status |= CO_CAN_ERRRX_WARNING | CO_CAN_ERRTX_WARNING;
-            }
-
-            if (err & CAN_ESR_EPVF) {
-                status |= CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_PASSIVE;
-            }
-        }
-
-        CANmodule->CANerrorStatus = status;
-    }
-
-#endif
-}
 
 /**
  * \brief           Read message from RX FIFO

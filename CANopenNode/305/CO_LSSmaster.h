@@ -24,6 +24,7 @@
 
 #include "305/CO_LSS.h"
 
+
 #if (((CO_CONFIG_LSS)&CO_CONFIG_LSS_MASTER) != 0) || defined CO_DOXYGEN
 
 #ifdef __cplusplus

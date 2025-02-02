@@ -256,7 +256,8 @@ typedef struct {
 /**
  * Emergency object.
  */
-typedef struct {
+typedef struct
+{
     uint8_t errorStatusBits[CO_CONFIG_EM_ERR_STATUS_BITS_COUNT / 8U]; /**< Bitfield for the internal indication of
                                                                          the error condition. */
     uint8_t* errorRegister;     /**< Pointer to error register in object dictionary at 0x1001,00. */
@@ -265,10 +266,12 @@ typedef struct {
 
 #if (((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) != 0) || defined CO_DOXYGEN
     CO_EM_fifo_t*
-        fifo; /**< Internal circular FIFO buffer for storing pre-processed emergency messages. Messages are added by
-                 @ref CO_error() function. All messages are later post-processed by @ref CO_EM_process() function. In
-                 case of overflow, error is indicated but emergency message is not sent. Fifo is also used for error
-                 history, OD object 0x1003, "Pre-defined error field". Buffer is defined by @ref CO_EM_init(). */
+        fifo; /**< Internal circular FIFO buffer for storing pre-processed emergency messages.
+         	 	 	Messages are added by @ref CO_error() function.
+                 All messages are later post-processed by @ref CO_EM_process() function.
+                 In case of overflow, error is indicated but emergency message is not sent.
+                 Fifo is also used for error history,OD object 0x1003, "Pre-defined error field".
+                  Buffer is defined by @ref CO_EM_init(). */
     uint8_t fifoSize;  /**< Size of the above buffer, specified by @ref CO_EM_init(). */
     uint8_t fifoWrPtr; /**< Pointer for the fifo buffer, where next emergency message will be written by @ref CO_error()
                           function. */
