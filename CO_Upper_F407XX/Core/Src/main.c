@@ -185,6 +185,7 @@ int main(void)
 
 
     Board_Name_to_Terminal();
+    OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
 
   HAL_TIM_Base_Start_IT(&htim4);
 
@@ -208,18 +209,10 @@ int main(void)
 		  Local_Count=0;
 		  while (1)
 		  {
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, canOpenNodeSTM32.outStatusLEDRed  );
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, canOpenNodeSTM32.outStatusLEDRed  );
 
 			  canopen_app_process();
-
-			  		  if(HAL_GetTick() - Ticks>999)
-			  		  {
-			  			  //Ticks = HAL_GetTick();
-			  			//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-			  		  }
-
-
 
     /* USER CODE END WHILE */
 

@@ -454,14 +454,21 @@ void CO_error(CO_EM_t* em, bool_t setError, const uint8_t errorBit, uint16_t err
  * @return true if Error is present.
  */
 static inline bool_t
-CO_isError(CO_EM_t* em, const uint8_t errorBit) {
-    uint8_t index = errorBit >> 3;
-    uint8_t bitmask = 1 << (errorBit & 0x7);
+CO_isError(
+			CO_EM_t* em,
+			const uint8_t errorBit
+			)
+{
+uint8_t index = errorBit >> 3;
+uint8_t bitmask = 1 << (errorBit & 0x7);
 
-    return (em == NULL || index >= (CO_CONFIG_EM_ERR_STATUS_BITS_COUNT / 8U)
-            || (em->errorStatusBits[index] & bitmask) != 0)
-               ? true
-               : false;
+return(
+		 ( em == NULL || index >= (CO_CONFIG_EM_ERR_STATUS_BITS_COUNT / 8U)
+		 || ( em->errorStatusBits[index] & bitmask) != 0
+
+		 )? true: false
+
+	 );///return
 }
 
 /**

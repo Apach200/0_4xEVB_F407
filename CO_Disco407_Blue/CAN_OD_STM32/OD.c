@@ -33,10 +33,10 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1017_producerHeartbeatTime = 0x0000,
     .x1018_identity = {
         .highestSub_indexSupported = 0x04,
-        .vendor_ID = 0x00000000,
-        .productCode = 0x00000000,
-        .revisionNumber = 0x00000000,
-        .serialNumber = 0x00000000
+        .vendor_ID = 0xAFFEAFFD,
+        .productCode = 0x3BBB3321,
+        .revisionNumber = 0x00210085,
+        .serialNumber = 0x74857321
     },
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1280_SDOClientParameter = {
@@ -84,7 +84,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .COB_IDUsedByTPDO = 0x00000180,
         .transmissionType = 0xFE,
         .inhibitTime = 0x0000,
-        .eventTimer = 0x04B0,
+        .eventTimer = 0x00C8,
         .SYNCStartValue = 0x00
     },
     .x1A00_TPDOMappingParameter = {

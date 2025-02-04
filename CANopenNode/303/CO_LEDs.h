@@ -53,11 +53,11 @@ extern "C" {
  *
  * CANopen red led - error led:
  * - off: no error
- * - flickering: LSS node id is not configured, CANopen is not initialized
- * - blinking: invalid configuration, general error
- * - single flash: CAN warning limit reached
- * - double flash: heartbeat consumer - error in remote monitored node
- * - triple flash: sync message reception timeout
+ * - flickering:      LSS node id is not configured, CANopen is not initialized
+ * - blinking:        invalid configuration, general error
+ * - single flash:    CAN warning limit reached
+ * - double flash:    heartbeat consumer - error in remote monitored node
+ * - triple flash:    sync message reception timeout
  * - quadruple flash: PDO has not been received before the event timer elapsed
  * - on: CAN bus off
  *

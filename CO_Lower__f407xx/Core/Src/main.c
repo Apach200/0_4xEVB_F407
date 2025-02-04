@@ -55,15 +55,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-//#define CO_Aliex_Disco407green	0x3A
-//#define CO_Disco407_Blue		0x3b
-//#define CO_Lower__f407xx		0x3c
-//#define CO_Upper_F407XX			0x3d
-//#define CO_Disco407_Green_1		0x3e
-//#define Node_Unconfigured		0xFF
-//
-//#define Make_Read_SDO			1
-//#define TerminalInterface		huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -184,6 +175,7 @@ int main(void)
 //    UART_interface_Test(); //while(1){;}
 //  //  CAN_interface_Test();
     Board_Name_to_Terminal();
+    OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
 
    HAL_TIM_Base_Start_IT(&htim4);
 
@@ -206,39 +198,6 @@ int main(void)
 
    canopen_app_process();
 
-	  read_SDO (
-			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				CO_Aliex_Disco407green,						 //remote_NodeID_0x3A
-				0x6003,										//Index_of_OD_variable_ALiex_Disco_VAR32_6003=0xabcd1234
-				0,											//Sub_Index_of_OD_variable
-				Rx_Array,									//Save_Received_Data_to Local_Array
-				4,											//Number_of_Byte_to_read
-				(size_t*)&Length_of_Ext_Var );	  HAL_Delay(50);
-
-
-
-	  	TerminalInterface.gState = HAL_UART_STATE_READY;
-		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);
-
-	  write_SDO(
-			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				CO_Aliex_Disco407green,						//remote_NodeID_0x3A
-				0x6003,										//Index_of_OD_variable ALiex_Disco_VAR32_6003 _at_remote_NodeID
-				0,											//Sub_Index_of_OD_variable
-				Array_8u,									//Source_of_Data
-				4);	  HAL_Delay(50);
-
-	  read_SDO (
-			    canOpenNodeSTM32.canOpenStack->SDOclient,
-				CO_Aliex_Disco407green,						//remote_NodeID_0x3A
-				0x6003,										//Index_of_OD_variable ALiex_Disco_VAR32_6003 _at_remote_NodeID
-				0,											//Sub_Index_of_OD_variable
-				Rx_Array,									//new_Save_Received_Data_to Local_Array
-				4,											//Number_of_Byte_to_read
-				(size_t*)&Length_of_Ext_Var );	  HAL_Delay(50);
-
-	  TerminalInterface.gState = HAL_UART_STATE_READY;
-	  HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Rx_Array, 8);      HAL_Delay(50);
 
 
 		Local_Count=0;
@@ -246,33 +205,12 @@ int main(void)
 
 		  while (1)
 		  {
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 //		         HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );//LED1_Pin___//LED1_GPIO_Port//green
 
 			canopen_app_process();
 
-//			if(tmp32u_1 != OD_PERSIST_COMM.x6001_nucleo_VAR32_6001)
-//				{
-//				tmp32u_1 = OD_PERSIST_COMM.x6001_nucleo_VAR32_6001;
-//				TerminalInterface.gState = HAL_UART_STATE_READY;
-//				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);
-//				}
-
-
-			  if(HAL_GetTick() - Ticks>749)
-			  {
-				Ticks = HAL_GetTick();
-				OD_PERSIST_COMM.x6000_lowerF_VAR32_6000++;
-				tmp32u_0 = OD_PERSIST_COMM.x6000_lowerF_VAR32_6000;
-				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-				TerminalInterface.gState = HAL_UART_STATE_READY;
-				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
-				Local_Count++;
-				Local_Count = Local_Count%4;
-				if(Local_Count==0){OD_PERSIST_COMM.x6038_lowerF_Array[0]++;}
-				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
-			  }
 
     /* USER CODE END WHILE */
 
@@ -328,119 +266,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-//
-//CO_SDO_abortCode_t	read_SDO	(
-//								  CO_SDOclient_t* SDO_C,
-//								  uint8_t nodeId, 	//Remote_NodeID
-//								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
-//								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
-//								  uint8_t* buf, 	//Saved_Data_Array
-//								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
-//								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
-//								  )
-//{
-//    CO_SDO_return_t SDO_ret;
-//
-//    // setup client (this can be skipped, if remote device don't change)
-//    SDO_ret = CO_SDOclient_setup (
-//    								SDO_C, CO_CAN_ID_SDO_CLI + nodeId,
-//									CO_CAN_ID_SDO_SRV + nodeId,
-//									nodeId);
-//
-//    if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return CO_SDO_AB_GENERAL; }
-//
-//    // initiate upload
-//    SDO_ret = CO_SDOclientUploadInitiate ( SDO_C,
-//    										index,
-//											subIndex,
-//											1000,
-//											false);
-//
-//    if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return CO_SDO_AB_GENERAL; }
-//
-//    // upload data
-//    do 	{
-//        uint32_t timeDifference_us = 10000;
-//        CO_SDO_abortCode_t abortCode = CO_SDO_AB_NONE;
-//
-//        SDO_ret = CO_SDOclientUpload(SDO_C, timeDifference_us, false, &abortCode, NULL, NULL, NULL);
-//
-//        if (SDO_ret < 0) {  return abortCode;  }
-//
-//        HAL_Delay(timeDifference_us/1000);// sleep_us(timeDifference_us);
-//
-//    	} while (SDO_ret > 0);
-//
-//
-//    // copy data to the user buffer (for long data function must be called several times inside the loop)
-//    *readSize = CO_SDOclientUploadBufRead(SDO_C, buf, bufSize);
-//
-//    return CO_SDO_AB_NONE;
-//}
-
-
-//
-//CO_SDO_abortCode_t	write_SDO 	(
-//								CO_SDOclient_t* SDO_C,
-//								uint8_t nodeId, 	//Remote_NodeID
-//								uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
-//								uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
-//								uint8_t* data,	//Data_Array_to_write_into_entire_at_Remote_NodeID
-//								size_t dataSize	//Number_of_Bytes_write_into_entire_at_Remote_NodeID
-//								)
-//{
-//    CO_SDO_return_t SDO_ret;
-//    bool_t bufferPartial = false;
-//
-//    // setup client (this can be skipped, if remote device is the same)
-//    SDO_ret = CO_SDOclient_setup (	SDO_C,
-//    								CO_CAN_ID_SDO_CLI + nodeId,
-//									CO_CAN_ID_SDO_SRV + nodeId,
-//									nodeId);
-//
-//    if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return -1; }
-//
-//
-//
-//    // initiate download
-//    SDO_ret = CO_SDOclientDownloadInitiate(SDO_C, index, subIndex, dataSize, 1000, false);
-//
-//    if (SDO_ret != CO_SDO_RT_ok_communicationEnd) /**< Success, end of communication. SDO client: uploaded data must be read. */
-//    	{ return -1; }
-//
-//
-//
-//    // fill data
-//    size_t nWritten = CO_SDOclientDownloadBufWrite(SDO_C, data, dataSize);
-//
-//    if (nWritten < dataSize) { bufferPartial = true; } // If SDO Fifo buffer is too small, data can be refilled in the loop.
-//
-//
-//
-//
-//    // download data
-//    do {
-//        uint32_t timeDifference_us = 10000;
-//        CO_SDO_abortCode_t abortCode = CO_SDO_AB_NONE;
-//
-//        SDO_ret = CO_SDOclientDownload (	SDO_C,
-//        									timeDifference_us,
-//											false, bufferPartial,
-//											&abortCode,
-//											NULL,
-//											NULL
-//										);
-//
-//        if (SDO_ret < 0) {  return abortCode;}
-//
-//        HAL_Delay(timeDifference_us/1000); //sleep_us(timeDifference_us);
-//
-//       } while (SDO_ret > 0);
-//
-//    return CO_SDO_AB_NONE;
-//}
-//
 
 //////////////////////////////////////////////////////////
 void CAN_interface_Test(void)
@@ -510,7 +335,7 @@ void Board_Name_to_Terminal(void)
 	const char Message_1[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
 //  const char Message_1[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
 //	const char Message_1[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
-//    const char Message_1[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
+//  const char Message_1[]={"*  STM32F4DISCOVERY Green_board Original *\n\r"};
 	char Array_for_Messages[128]={};
 	uint16_t Msg_Length;
 //	uint32_t Chip_ID_96bit[4]={};

@@ -57,14 +57,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define CO_Aliex_Disco407green	0x3A
-#define CO_Disco407_Blue		0x3b
-#define CO_Lower__f407xx		0x3c
-#define CO_Upper_F407XX			0x3d
-#define CO_Disco407_Green_1		0x3e
 
-#define Make_Read_SDO			1
-#define TerminalInterface		huart2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -234,7 +227,9 @@ int main(void)
   HAL_UART_Receive_DMA(&huart2, Array_from_Terminal, sizeof Array_from_Terminal );
   //HAL_Delay(1500);
   Board_Name_to_Terminal();
+  OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
 
+  Message_2_UART_u16("TEST", 0xfede);
 
     /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications.
      *             It can be FDCan or CAN and CANOpenSTM32 Driver will take of care of handling that
@@ -255,11 +250,11 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
-   //canOpenNodeSTM32.desiredNodeID = 0xff;//unconfigured
+   //canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
+   canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
    canOpenNodeSTM32.baudrate = 125*4;
    uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
-   	CO_Init_Return_State(Ret_value );
+   CO_Init_Return_State(Ret_value );
 
    	 //SDO_Read_Write_Read();
 
@@ -279,6 +274,7 @@ int main(void)
 		  HAL_Delay(50);
 	  	  Local_Count=0;
       	  OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000=0;
+		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);//Green
 
 		  while (1)
 		  {
@@ -288,24 +284,28 @@ int main(void)
 			 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 
 			canopen_app_process();
-			  Encoder_to_LCD();
-			  RTC_update_and_Terminal(2000);
+//			  Encoder_to_LCD();
+//			  RTC_update_and_Terminal(2000);
 //			if(tmp32u_1 != OD_PERSIST_COMM.x6001_nucleo_VAR32_6001){
 //				tmp32u_1 = OD_PERSIST_COMM.x6001_nucleo_VAR32_6001;
 //				TerminalInterface.gState = HAL_UART_STATE_READY;
 //				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);}
 
-			  if(HAL_GetTick() - Ticks>749)
+			  if(HAL_GetTick() - Ticks>1749)
 			  {
 				Ticks = HAL_GetTick();
-				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
-				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
-				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-				TerminalInterface.gState = HAL_UART_STATE_READY;
-				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
-				Local_Count++;Local_Count = Local_Count%4;
-				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
-				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
+				//LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->service);
+				LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->lssState);
+
+
+//				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
+//				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
+//				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
+//				TerminalInterface.gState = HAL_UART_STATE_READY;
+//				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
+//				Local_Count++;Local_Count = Local_Count%4;
+//				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
+//				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
 			  }
 
 
@@ -422,7 +422,8 @@ void Board_Name_to_Terminal(void)
 //	const char Message_1[]={"*  Upper Blackboard  STM32F4XX___Ali     *\n\r"};
 //	const char Message_2[]={"*  Lower Blackboard  STM32F4XX___Ali     *\n\r"};
 //	const char Message_3[]={"*  STM32F4DISCOVERY Green_board China    *\n\r"};
-	const char Message_3[]={"*  STM32F4DISCO Greenboard_STLINK_4323   *"};
+	const char Message_3[]={"*  STM32F4DISCO Greenboard_STLINK_4323   *\n\r"};
+//	const char Message_3[]={"*  STM32F4DISCO Greenboard_STLINK_2734   *\n\r"};
 //	const char Message_4[]={"*  STM32F4DISCOVERY Blue_board Original  *\n\r"};
 //	const char Message_5[]={"*       *\n\r"};
 	char Array_for_Messages[128]={};
@@ -572,14 +573,17 @@ default:
 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 HAL_Delay(50);
 	Lngth_of_Message = sprintf( Msg_2_Terminal,
-		  	  	  "   *  CANopenNodeSTM32 canOpenNodeSTM32;        *\n\r"
-		  	  	  "   *  .CANHandle = &hcan1;                      *\n\r"
-		  	  	  "   *  .HWInitFunction = MX_CAN1_Init            *\n\r"
-		  	  	  "   *  .timerHandle = &htim4                     *\n\r"
-		  	  	  "   *  .baudrate = 500kbps                       *\n\r"
-		  	  	  "   *  .desiredNodeID = STLINK_4323;             *\n\r\n\r"
-		  	  	  "   *  canopen_app_init(&canOpenNodeSTM32);      * \n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r"
-			   );
+		  	  	  "  *  CANopenNodeSTM32 canOpenNodeSTM32;      *\n\r"
+		  	  	  "  *  .CANHandle = &hcan1;                    *\n\r"
+		  	  	  "  *  .HWInitFunction = MX_CAN1_Init          *\n\r"
+		  	  	  "  *  .timerHandle = &htim4                   *\n\r"
+		  	  	  "  *  .baudrate = 500kbps                     *\n\r"
+	  	  	  	  "  *  .desiredNodeID = 0x%02X;                *\n\r\n\r"
+	  	  	  	  "  *  .activeNodeID = 0x%02X;                *\n\r\n\r"
+		  	  	  "  *  canopen_app_init(&canOpenNodeSTM32);* \n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r",
+  	  	  	  	  	  	  	  canOpenNodeSTM32.desiredNodeID,
+  	  	  	  	  	  	  	  canOpenNodeSTM32.activeNodeID
+			   	   	   	   	   );
 		HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)Msg_2_Terminal, Lngth_of_Message);
 		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 		HAL_Delay(50);

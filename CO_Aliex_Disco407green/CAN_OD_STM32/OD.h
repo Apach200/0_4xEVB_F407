@@ -22,10 +22,10 @@
     Device Info:
         Vendor Name:  Chromos_A
         Vendor ID:    0xAFFEFFd
-        Product Name: ALiex_Disco
-        Product ID:   0x3A
+        Product Name: ALiex_Disco_Link4323
+        Product ID:   0x3A3A3A3A
 
-        Description:  
+        Description:  CO_Aliex_Disco407green
 *******************************************************************************/
 
 #ifndef OD_H

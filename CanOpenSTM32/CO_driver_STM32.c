@@ -199,34 +199,44 @@ CO_CANmodule_disable(CO_CANmodule_t* CANmodule) {
 
 /******************************************************************************/
 CO_ReturnError_t
-CO_CANrxBufferInit(CO_CANmodule_t* CANmodule, uint16_t index, uint16_t ident, uint16_t mask, bool_t rtr, void* object,
-                   void (*CANrx_callback)(void* object, void* message)) {
-    CO_ReturnError_t ret = CO_ERROR_NO;
+CO_CANrxBufferInit(
+					CO_CANmodule_t* CANmodule,
+					uint16_t index,
+					uint16_t ident,
+					uint16_t mask,
+					bool_t rtr,
+					void* object,
+                   void (*CANrx_callback)(void* object, void* message)
+				   )
+{
+CO_ReturnError_t ret = CO_ERROR_NO;
 
-    if (CANmodule != NULL && object != NULL && CANrx_callback != NULL && index < CANmodule->rxSize) {
-        CO_CANrx_t* buffer = &CANmodule->rxArray[index];
+if (
+	CANmodule != NULL
+	&& object != NULL
+	&& CANrx_callback != NULL
+	&& index < CANmodule->rxSize
+	){
+		CO_CANrx_t* buffer = &CANmodule->rxArray[index];
 
-        /* Configure object variables */
-        buffer->object = object;
-        buffer->CANrx_callback = CANrx_callback;
+		/* Configure object variables */
+		buffer->object = object;
+		buffer->CANrx_callback = CANrx_callback;
 
-        /*
-         * Configure global identifier, including RTR bit
-         *
-         * This is later used for RX operation match case
-         */
-        buffer->ident = (ident & CANID_MASK) | (rtr ? FLAG_RTR : 0x00);
-        buffer->mask = (mask & CANID_MASK) | FLAG_RTR;
+		/*
+		 * Configure global identifier, including RTR bit
+		 *
+		 * This is later used for RX operation match case
+		 */
+		buffer->ident = (ident & CANID_MASK) | (rtr ? FLAG_RTR : 0x00);
+		buffer->mask  = (mask  & CANID_MASK) | FLAG_RTR;
 
-        /* Set CAN hardware module filter and mask. */
-        if (CANmodule->useCANrxFilters) {
-            __NOP();
-        }
-    } else {
-        ret = CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+		/* Set CAN hardware module filter and mask. */
+		if (CANmodule->useCANrxFilters) {__NOP();}
 
-    return ret;
+
+	} else {ret = CO_ERROR_ILLEGAL_ARGUMENT;}
+return ret;
 }
 
 /******************************************************************************/
@@ -260,60 +270,7 @@ prv_send_can_message(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer) {
     uint8_t success = 0;
 
     /* Check if TX FIFO is ready to accept more messages */
-#ifdef CO_STM32_FDCAN_Driver
-    static FDCAN_TxHeaderTypeDef tx_hdr;
-    if (HAL_FDCAN_GetTxFifoFreeLevel(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle) > 0) {
-        /*
-         * RTR flag is part of identifier value
-         * hence it needs to be properly decoded
-         */
-        tx_hdr.Identifier = buffer->ident & CANID_MASK;
-        tx_hdr.TxFrameType = (buffer->ident & FLAG_RTR) ? FDCAN_REMOTE_FRAME : FDCAN_DATA_FRAME;
-        tx_hdr.IdType = FDCAN_STANDARD_ID;
-        tx_hdr.FDFormat = FDCAN_CLASSIC_CAN;
-        tx_hdr.BitRateSwitch = FDCAN_BRS_OFF;
-        tx_hdr.MessageMarker = 0;
-        tx_hdr.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-        tx_hdr.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 
-        switch (buffer->DLC) {
-            case 0:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_0;
-                break;
-            case 1:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_1;
-                break;
-            case 2:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_2;
-                break;
-            case 3:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_3;
-                break;
-            case 4:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_4;
-                break;
-            case 5:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_5;
-                break;
-            case 6:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_6;
-                break;
-            case 7:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_7;
-                break;
-            case 8:
-                tx_hdr.DataLength = FDCAN_DLC_BYTES_8;
-                break;
-            default: /* Hard error... */
-                break;
-        }
-
-        /* Now add message to FIFO. Should not fail */
-        success =
-            HAL_FDCAN_AddMessageToTxFifoQ(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle, &tx_hdr, buffer->data)
-            == HAL_OK;
-    }
-#else
     static CAN_TxHeaderTypeDef tx_hdr;
     /* Check if TX FIFO is ready to accept more messages */
     if (HAL_CAN_GetTxMailboxesFreeLevel(((CANopenNodeSTM32*)CANmodule->CANptr)->CANHandle) > 0) {
@@ -334,7 +291,7 @@ prv_send_can_message(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer) {
                                        &TxMailboxNum)
                   == HAL_OK;
     }
-#endif
+
     return success;
 }
 

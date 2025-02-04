@@ -30,9 +30,9 @@ OD_readOriginal(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t* coun
     OD_size_t dataLenToCopy = stream->dataLength; /* length of OD variable */
     const uint8_t* dataOrig = stream->dataOrig;
 
-    if (dataOrig == NULL) {
-        return ODR_SUB_NOT_EXIST;
-    }
+    if (dataOrig == NULL) {return ODR_SUB_NOT_EXIST; }
+
+
 
     ODR_t returnCode = ODR_OK;
 

@@ -203,7 +203,8 @@ typedef struct {
 /**
  * RPDO object.
  */
-typedef struct {
+typedef struct
+{
     CO_PDO_common_t PDO_common; /**< PDO common properties, must be first element in this object */
     volatile void* CANrxNew[CO_RPDO_CAN_BUFFERS_COUNT]; /**< Variable indicates, if new PDO message received from CAN */
     uint8_t CANrxData[CO_RPDO_CAN_BUFFERS_COUNT][CO_PDO_MAX_SIZE]; /**< CO_PDO_MAX_SIZE data bytes of the received

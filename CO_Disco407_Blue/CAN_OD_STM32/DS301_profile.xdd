@@ -15,12 +15,12 @@
         <ProfileTechnology>CANopen</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xmlns:q1="http://www.canopen.org/xml/1.1" xsi:type="q1:ProfileBody_Device_CANopen" formatName="CANopen" formatVersion="1.0" fileName="DS301_profile.xdd" fileCreator="01.Nov.2024" fileCreationDate="2020-11-23" fileCreationTime="16:00:00.0000000+05:00" fileModifiedBy="" fileModificationDate="2024-11-05" fileModificationTime="21:12:20.4119423+05:00" fileVersion="1" supportedLanguages="en" xmlns="">
+    <ProfileBody xmlns:q1="http://www.canopen.org/xml/1.1" xsi:type="q1:ProfileBody_Device_CANopen" formatName="CANopen" formatVersion="1.0" fileName="DS301_profile.xdd" fileCreator="01.Nov.2024" fileCreationDate="2020-11-23" fileCreationTime="16:00:00.0000000+05:00" fileModifiedBy="" fileModificationDate="2025-02-02" fileModificationTime="21:21:53.0624065+05:00" fileVersion="1" supportedLanguages="en" xmlns="">
       <q1:DeviceIdentity>
         <q1:vendorName>Chromos_A</q1:vendorName>
         <q1:vendorID>0xAFFEAFFd</q1:vendorID>
-        <q1:productName>Disco407_Blue</q1:productName>
-        <q1:productID>0x3b</q1:productID>
+        <q1:productName>Disco407_Blue_Slave</q1:productName>
+        <q1:productID>0x3bbb3321</q1:productID>
         <q1:productText>
           <description lang="en">EVboard_Disco_F407_Blue</description>
         </q1:productText>
@@ -623,22 +623,22 @@
           <q1:parameter uniqueID="UID_SUB_101801">
             <label lang="en">Vendor-ID</label>
             <UDINT />
-            <q1:defaultValue value="0x00000000" />
+            <q1:defaultValue value="0xAFFEAFFd" />
           </q1:parameter>
           <q1:parameter uniqueID="UID_SUB_101802">
             <label lang="en">Product code</label>
             <UDINT />
-            <q1:defaultValue value="0x00000000" />
+            <q1:defaultValue value="0x3bbb3321" />
           </q1:parameter>
           <q1:parameter uniqueID="UID_SUB_101803">
             <label lang="en">Revision number</label>
             <UDINT />
-            <q1:defaultValue value="0x00000000" />
+            <q1:defaultValue value="0x00210085" />
           </q1:parameter>
           <q1:parameter uniqueID="UID_SUB_101804">
             <label lang="en">Serial number</label>
             <UDINT />
-            <q1:defaultValue value="0x00000000" />
+            <q1:defaultValue value="0x74857321" />
           </q1:parameter>
           <q1:parameter uniqueID="UID_OBJ_1019" access="readWrite">
             <description lang="en">* Value 0: SYNC message is transmitted with data length 0.
@@ -1255,7 +1255,7 @@
         <ProfileTechnology>CANopen</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xmlns:q2="http://www.canopen.org/xml/1.1" xsi:type="q2:ProfileBody_CommunicationNetwork_CANopen" formatName="CANopen" formatVersion="1.0" fileName="DS301_profile.xdd" fileCreator="01.Nov.2024" fileCreationDate="2020-11-23" fileCreationTime="16:00:00.0000000+05:00" fileModificationDate="2024-11-05" fileModificationTime="21:12:20.4119423+05:00" fileVersion="1" supportedLanguages="en" xmlns="">
+    <ProfileBody xmlns:q2="http://www.canopen.org/xml/1.1" xsi:type="q2:ProfileBody_CommunicationNetwork_CANopen" formatName="CANopen" formatVersion="1.0" fileName="DS301_profile.xdd" fileCreator="01.Nov.2024" fileCreationDate="2020-11-23" fileCreationTime="16:00:00.0000000+05:00" fileModificationDate="2025-02-02" fileModificationTime="21:21:53.0624065+05:00" fileVersion="1" supportedLanguages="en" xmlns="">
       <ApplicationLayers>
         <q2:CANopenObjectList>
           <CANopenObject index="1000" name="Device type" objectType="7" PDOmapping="no" uniqueIDRef="UID_OBJ_1000" />

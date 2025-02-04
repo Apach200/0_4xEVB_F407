@@ -87,14 +87,16 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 
     uint32_t heapMemoryUsed;
     CO = CO_new(config_ptr, &heapMemoryUsed);
-    if (CO == NULL) {
-        log_printf("Error: Can't allocate memory\n");
-        return 1;
-    } else {
-        //log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
-        Message_2_UART_u32((char*)"Allocated %u bytes for CANopen objects ",heapMemoryUsed);
+    if (CO == NULL)
+    {
+      //log_printf("Error: Can't allocate memory\n");
+      return 1;
 
-    }
+    } else {
+        	//log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
+    		//Message_2_UART_u32((char*)"bytes",heapMemoryUsed);
+    		//Message_2_UART((char*)"Allocated for CANopen objects");
+    		}
 
     canopenNodeSTM32->canOpenStack = CO;
 
@@ -109,16 +111,18 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
     }
 #endif
 
-    canopen_app_resetCommunication();
-    return 0;
+canopen_app_resetCommunication();
+return 0;
 }
+
+
 
 int
 canopen_app_resetCommunication()
 {
 /* CANopen communication reset - initialize CANopen objects *******************/
 //log_printf("CANopenNode - Reset communication...\n");
-Message_2_UART((char*)"CANopenNode - Reset communication...\n");
+//Message_2_UART((char*)"CANopenNode - Reset communication...\n");
 /* Wait rt_thread. */
 CO->CANmodule->CANnormal = false;
 
@@ -128,7 +132,8 @@ CO_CANmodule_disable(CO->CANmodule);
 
 /* initialize CANopen */
 err = CO_CANinit(CO, canopenNodeSTM32, 0); // Bitrate for STM32 microcontroller is being set in MXCube Settings
-if (err != CO_ERROR_NO) {
+if (err != CO_ERROR_NO)
+{
 	//log_printf("Error: CAN initialization failed: %d\n", err);
 	Message_2_UART_u16((char*)"Error: CAN initialization failed:",err);
 	return 1;
@@ -152,7 +157,9 @@ if (err != CO_ERROR_NO)
 	//log_printf("Error: LSS slave initialization failed: %d\n", err);
 	Message_2_UART_u16((char*)"Error: LSS slave initialization failed:",err);
 	return 2;
-}
+}  else	{
+		Message_2_UART_u16((char*)"160 LSS_slv_initOK:",err);
+		}
 
 canopenNodeSTM32->activeNodeID = canopenNodeSTM32->desiredNodeID;
 uint32_t errInfo = 0;
@@ -176,26 +183,32 @@ if (   err != CO_ERROR_NO
 	{
 		if (err == CO_ERROR_OD_PARAMETERS)
 			{
-				//log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-			Message_2_UART_u16((char*)"Error: Object Dictionary entry ",errInfo);
+			//log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
+			Message_2_UART_u16((char*)"187_OD_entry_Error:",errInfo);
 			} else {
-					log_printf("Error: CANopen initialization failed: %d\n", err);
-					Message_2_UART_u32((char*)"Error: CANopen initialization failed: ",err);
+					//log_printf("Error: CANopen initialization failed: %d\n", err);
+					Message_2_UART_u32((char*)"190_CO_initError:",err);
 					}
 	return 3;
 	}
 
-err = CO_CANopenInitPDO(CO, CO->em, OD, canopenNodeSTM32->activeNodeID, &errInfo);
+err = CO_CANopenInitPDO(
+						CO,
+						CO->em,
+						OD,
+						canopenNodeSTM32->activeNodeID,
+						&errInfo
+						);
 if (err != CO_ERROR_NO)
 	{
 	if (err == CO_ERROR_OD_PARAMETERS)
 		{
-		///////////////log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-		Message_2_UART_u32((char*)"Error: Object Dictionary entry ",errInfo);
+		////log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
+		Message_2_UART_u32((char*)"207_OD_entryError:",errInfo);
 
 		} else {
-				///////////////log_printf("Error: PDO initialization failed: %d\n", err);
-				Message_2_UART_u32((char*)"Error: PDO initialization failed:",err);
+				//log_printf("Error: PDO initialization failed: %d\n", err);
+				Message_2_UART_u32((char*)"211_PDOInitError:",err);
 				}
 	return 4;
 	}
@@ -240,6 +253,7 @@ canopen_app_process() {
         uint32_t timeDifference_us = (time_current - time_old) * 1000;
         time_old = time_current;
         reset_status = CO_process(CO, false, timeDifference_us, NULL);
+
         canopenNodeSTM32->outStatusLEDRed = CO_LED_RED(CO->LEDs, CO_LED_CANopen);
         canopenNodeSTM32->outStatusLEDGreen = CO_LED_GREEN(CO->LEDs, CO_LED_CANopen);
 
@@ -248,10 +262,14 @@ canopen_app_process() {
         	HAL_TIM_Base_Stop_IT(canopenNodeSTM32->timerHandle);
             CO_CANsetConfigurationMode((void*)canopenNodeSTM32);
             CO_delete(CO);
-            log_printf("CANopenNode Reset Communication request\n");
+            //log_printf("CANopenNode Reset Communication request\n");
+            Message_2_UART("canopen_app_process 252"
+            				"CANopenNode Reset Communication request ");
             canopen_app_init(canopenNodeSTM32); // Reset Communication routine
         } else if (reset_status == CO_RESET_APP) {
-            log_printf("CANopenNode Device Reset\n");
+            //log_printf("CANopenNode Device Reset\n");
+            Message_2_UART("canopen_app_process 257"
+            				"CANopenNode Device Reset\n");
             HAL_NVIC_SystemReset(); // Reset the STM32 Microcontroller
         }
     }

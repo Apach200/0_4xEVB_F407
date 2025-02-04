@@ -560,7 +560,13 @@ convertToLower(char* token, size_t maxCount) {
  * PROCESS FUNCTION
  ******************************************************************************/
 void
-CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint32_t* timerNext_us) {
+CO_GTWA_process(
+				CO_GTWA_t* gtwa,
+				bool_t enable,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
     (void)timerNext_us; /* may be unused */
 
     bool_t err = false; /* syntax or other error, true or false, I/O variable */
@@ -1019,6 +1025,11 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 err = true;
                 break;
             }
+            ret=CO_CANsend(gtwa->NMT->HB_CANdevTx, gtwa->NMT->HB_TXbuff);
+            gtwa->NMT->internalCommand = command2;
+            /* Send NMT master message. */
+            gtwa->NMT->HB_TXbuff->data[0]=(uint8_t)command2;
+            gtwa->NMT->HB_TXbuff->data[1]=(uint8_t)node;
             //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
 
             if (ret == CO_ERROR_NO) {
@@ -1041,7 +1052,11 @@ CO_GTWA_process(CO_GTWA_t* gtwa, bool_t enable, uint32_t timeDifference_us, uint
                 break;
             }
             //ret = CO_NMT_sendCommand(gtwa->NMT, command2, gtwa->node);
-
+            gtwa->NMT->internalCommand = command2;
+            /* Send NMT master message. */
+            gtwa->NMT->HB_TXbuff->data[0]=(uint8_t)command2;
+            gtwa->NMT->HB_TXbuff->data[1]=(uint8_t)node;
+            ret=CO_CANsend(gtwa->NMT->HB_CANdevTx, gtwa->NMT->HB_TXbuff);
             if (ret == CO_ERROR_NO) {
                 responseWithOK(gtwa);
             } else {

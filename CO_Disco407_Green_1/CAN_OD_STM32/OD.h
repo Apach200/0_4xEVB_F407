@@ -16,14 +16,14 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     10.11.2024 16:14:34
+        Modified:     02.02.2025 21:26:54
         Modified By:  
 
     Device Info:
         Vendor Name:  Chromos_A
         Vendor ID:    0xAFFEFFd
         Product Name: Discovery_F407_Green_01
-        Product ID:   0x3E
+        Product ID:   0x3E3E3E3E
 
         Description:  
 *******************************************************************************/

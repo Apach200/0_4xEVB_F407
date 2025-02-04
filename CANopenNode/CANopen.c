@@ -1277,42 +1277,45 @@ CO_CANopenInitPDO(
 					uint32_t* errInfo
 					)
 {
-    if (co == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT; }
+if (co == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT; }
 
-
-    if ((nodeId < 1U) || (nodeId > 127U) || co->nodeIdUnconfigured)
+if ((nodeId < 1U) || (nodeId > 127U) || co->nodeIdUnconfigured)
        { return (co->nodeIdUnconfigured) ? CO_ERROR_NODE_ID_UNCONFIGURED_LSS : CO_ERROR_ILLEGAL_ARGUMENT;}
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) != 0
 
-    if (CO_GET_CNT(RPDO) > 0U) {
-        						OD_entry_t* RPDOcomm = OD_GET(H1400, OD_H1400_RXPDO_1_PARAM);
-        						OD_entry_t* RPDOmap = OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
+if (CO_GET_CNT(RPDO) > 0U)
+	{
+								OD_entry_t* RPDOcomm = OD_GET(H1400, OD_H1400_RXPDO_1_PARAM);
+								OD_entry_t* RPDOmap = OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
 								for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++)
 								{
-									CO_ReturnError_t err;
-									uint16_t preDefinedCanId = 0;
-									if (i < CO_RPDO_DEFAULT_CANID_COUNT)
+								CO_ReturnError_t err;
+								uint16_t preDefinedCanId = 0;
+								if (i < CO_RPDO_DEFAULT_CANID_COUNT)
 											{
-#if CO_RPDO_DEFAULT_CANID_COUNT <= 4
 											preDefinedCanId = (uint16_t)((CO_CAN_ID_RPDO_1 + (i * 0x100U)) + nodeId);
-#else
-											uint16_t pdoOffset = i % 4;
-											uint16_t nodeIdOffset = i / 4;
-											preDefinedCanId = (CO_CAN_ID_RPDO_1 + pdoOffset * 0x100) + nodeId + nodeIdOffset;
-#endif
 											}//if (i < CO_RPDO_DEFAULT_CANID_COUNT)
-								err = CO_RPDO_init(&co->RPDO[i], od, em,
+								err = CO_RPDO_init(
+													&co->RPDO[i],
+													od,
+													em,
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-                               co->SYNC,
+													co->SYNC,
 #endif
-                               preDefinedCanId, RPDOcomm, RPDOmap, co->CANmodule, CO_GET_CO(RX_IDX_RPDO) + i, errInfo);
+													preDefinedCanId,
+													RPDOcomm,
+													RPDOmap,
+													co->CANmodule,
+													CO_GET_CO(RX_IDX_RPDO) + i,
+													errInfo
+													);
 							   if (err != CO_ERROR_NO) {return err;}
 							   RPDOcomm++;
 							   RPDOmap++;
 							 }//for (uint16_t i
 
-    }//if (CO_GET_CNT(RPDO) > 0U)
+	}//if (CO_GET_CNT(RPDO) > 0U)
 #endif
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0
@@ -1415,32 +1418,41 @@ CO_CANopenInitSRDO(CO_t* co, CO_EM_t* em, OD_t* od, uint8_t nodeId, uint32_t* er
 #endif
 
 CO_NMT_reset_cmd_t
-CO_process(CO_t* co, bool_t enableGateway, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    (void)enableGateway; /* may be unused */
-    CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
-    CO_NMT_internalState_t NMTstate = CO_NMT_getInternalState(co->NMT);
-    bool_t NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
+CO_process(
+			CO_t* co,
+			bool_t    enableGateway,
+			uint32_t  timeDifference_us,
+			uint32_t* timerNext_us
+			)
+{
+(void)enableGateway; /* may be unused */
+CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
+CO_NMT_internalState_t NMTstate = CO_NMT_getInternalState(co->NMT);
+bool_t NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
 
-    /* CAN module */
-    CO_CANmodule_process(co->CANmodule);
+/* CAN module */
+CO_CANmodule_process(co->CANmodule);
 
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE)
-    if (CO_GET_CNT(LSS_SLV) == 1U) {
-        if (CO_LSSslave_process(co->LSSslave)) {
-            reset = CO_RESET_COMM;
+    if (CO_GET_CNT(LSS_SLV) == 1U)
+    	{
+        if (CO_LSSslave_process(co->LSSslave)) {reset = CO_RESET_COMM;}
         }
-    }
 #endif
 
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) != 0
+
     bool_t unc = co->nodeIdUnconfigured;
     uint16_t CANerrorStatus = co->CANmodule->CANerrorStatus;
     bool_t LSSslave_configuration = false;
+
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
-    if (CO_GET_CNT(LSS_SLV) == 1U) {
-        if (CO_LSSslave_getState(co->LSSslave) == CO_LSS_STATE_CONFIGURATION) {
-            LSSslave_configuration = true;
-        }
+    if (CO_GET_CNT(LSS_SLV) == 1U)
+    	{
+        if (CO_LSSslave_getState(co->LSSslave) == CO_LSS_STATE_CONFIGURATION)
+			{
+        	 LSSslave_configuration = true;
+			}
     }
 #endif
 /* default macro, can be defined externally */
@@ -1507,8 +1519,10 @@ CO_process(CO_t* co, bool_t enableGateway, uint32_t timeDifference_us, uint32_t*
     }
 #endif
 
-    return reset;
+return reset;
 }
+
+
 
 #if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) != 0
 bool_t
