@@ -293,20 +293,23 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
         (void)memset(&LSSslave->TXbuff->data[0], 0, sizeof(LSSslave->TXbuff->data));///Init_at_first_time
 
         switch (LSSslave->service) {
-            case CO_LSS_SWITCH_STATE_GLOBAL: {
+            case CO_LSS_SWITCH_STATE_GLOBAL:
+            {
                 /* Node-Id was unconfigured before, now it is configured,
                  * enter the NMT Reset communication autonomously. */
                 resetCommunication = true;
                 break;
             }
 
-            case CO_LSS_SWITCH_STATE_SEL_SERIAL: {
+            case CO_LSS_SWITCH_STATE_SEL_SERIAL:
+            {
                 LSSslave->TXbuff->data[0] = CO_LSS_SWITCH_STATE_SEL;
                 CANsend = true;
                 break;
             }
 
-            case CO_LSS_CFG_NODE_ID: {
+            case CO_LSS_CFG_NODE_ID:
+            {
                 nid = LSSslave->CANdata[1];
                 errorCode = CO_LSS_CFG_NODE_ID_OK;
 
@@ -324,7 +327,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_CFG_BIT_TIMING: {
+            case CO_LSS_CFG_BIT_TIMING:
+            {
                 if (LSSslave->pFunctLSScheckBitRate == NULL) {
                     /* setting bit timing is not supported. Drop request */
                     break;
@@ -359,7 +363,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_CFG_ACTIVATE_BIT_TIMING: {
+            case CO_LSS_CFG_ACTIVATE_BIT_TIMING:
+            {
                 if (LSSslave->pFunctLSScheckBitRate == NULL) {
                     /* setting bit timing is not supported. Drop request */
                     break;
@@ -374,7 +379,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_CFG_STORE: {
+            case CO_LSS_CFG_STORE:
+            {
                 errorCode = CO_LSS_CFG_STORE_OK;
 
                 if (LSSslave->pFunctLSScfgStore == NULL) {
@@ -398,7 +404,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_INQUIRE_VENDOR: {
+            case CO_LSS_INQUIRE_VENDOR:
+            {
                 LSSslave->TXbuff->data[0] = LSSslave->service;
                 valSw = CO_SWAP_32(LSSslave->lssAddress.identity.vendorID);
                 (void)memcpy((void*)(&LSSslave->TXbuff->data[1]), (const void*)(&valSw), sizeof(valSw));
@@ -406,7 +413,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_INQUIRE_PRODUCT: {
+            case CO_LSS_INQUIRE_PRODUCT:
+            {
                 LSSslave->TXbuff->data[0] = LSSslave->service;
                 valSw = CO_SWAP_32(LSSslave->lssAddress.identity.productCode);
                 (void)memcpy((void*)(&LSSslave->TXbuff->data[1]), (const void*)(&valSw), sizeof(valSw));
@@ -414,7 +422,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_INQUIRE_REV: {
+            case CO_LSS_INQUIRE_REV:
+            {
                 LSSslave->TXbuff->data[0] = LSSslave->service;
                 valSw = CO_SWAP_32(LSSslave->lssAddress.identity.revisionNumber);
                 (void)memcpy((void*)(&LSSslave->TXbuff->data[1]), (const void*)(&valSw), sizeof(valSw));
@@ -422,7 +431,8 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_INQUIRE_SERIAL: {
+            case CO_LSS_INQUIRE_SERIAL:
+            {
                 LSSslave->TXbuff->data[0] = LSSslave->service;
                 valSw = CO_SWAP_32(LSSslave->lssAddress.identity.serialNumber);
                 (void)memcpy((void*)(&LSSslave->TXbuff->data[1]), (const void*)(&valSw), sizeof(valSw));
@@ -430,32 +440,36 @@ if (CO_FLAG_READ(LSSslave->sendResponse))
                 break;
             }
 
-            case CO_LSS_INQUIRE_NODE_ID: {
+            case CO_LSS_INQUIRE_NODE_ID:
+            {
                 LSSslave->TXbuff->data[0] = LSSslave->service;
                 LSSslave->TXbuff->data[1] = LSSslave->activeNodeID;
                 CANsend = true;
                 break;
             }
 
-            case CO_LSS_IDENT_FASTSCAN: {
+            case CO_LSS_IDENT_FASTSCAN:
+            {
                 LSSslave->TXbuff->data[0] = CO_LSS_IDENT_SLAVE;
                 CANsend = true;
                 break;
             }
-            default: {
-                /* none */
-                break;
-            }
-        }
+            default: {   /* none */ break;}
 
-        if (CANsend) {
-            (void)CO_CANsend(LSSslave->CANdevTx, LSSslave->TXbuff);
-        }
+        }/////switch (LSSslave->service)
+
+        if (CANsend) { (void)CO_CANsend(LSSslave->CANdevTx, LSSslave->TXbuff); }
 
         CO_FLAG_CLEAR(LSSslave->sendResponse);//ukazyvayet, dolzhen li otvet LSS byt' otpravlen osnovnoy funktsiyey obrabotki
-    }
+
+    }/////if (CO_FLAG_READ(LSSslave->sendResponse))
 
 return resetCommunication;
 }
 
+
 #endif /* (CO_CONFIG_LSS) & CO_CONFIG_LSS_SLAVE */
+
+
+
+

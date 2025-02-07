@@ -34,131 +34,156 @@ CO_LEDs_init(CO_LEDs_t* LEDs)
 }
 
 void
-CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalState_t NMTstate, bool_t LSSconfig,
-                bool_t ErrCANbusOff, bool_t ErrCANbusWarn, bool_t ErrRpdo, bool_t ErrSync, bool_t ErrHbCons,
-                bool_t ErrOther, bool_t firmwareDownload, uint32_t* timerNext_us) {
-    (void)timerNext_us; /* may be unused */
+CO_LEDs_process(
+				CO_LEDs_t* LEDs,
+				uint32_t timeDifference_us,
+				CO_NMT_internalState_t NMTstate,
+				bool_t LSSconfig,
+                bool_t ErrCANbusOff,
+				bool_t ErrCANbusWarn,
+				bool_t ErrRpdo,
+				bool_t ErrSync,
+				bool_t ErrHbCons,
+                bool_t ErrOther,
+				bool_t firmwareDownload,
+				uint32_t* timerNext_us
+				)
+{
+(void)timerNext_us; /* may be unused */
 
     uint8_t rd = 0;
     uint8_t gr = 0;
     bool_t tick = false;
 
-    LEDs->LEDtmr50ms += timeDifference_us;
-    while (LEDs->LEDtmr50ms >= 50000U) {
-        bool_t rdFlickerNext = (LEDs->LEDred & (uint8_t)CO_LED_flicker) == 0U;
+LEDs->LEDtmr50ms += timeDifference_us;
+while (LEDs->LEDtmr50ms >= 50000U)
+{
+bool_t rdFlickerNext = (LEDs->LEDred & (uint8_t)CO_LED_flicker) == 0U;
 
-        tick = true;
-        LEDs->LEDtmr50ms -= 50000U;
+tick = true;
+LEDs->LEDtmr50ms -= 50000U;
 
-        if (++LEDs->LEDtmr200ms > 3U) {
-            /* calculate 2,5Hz blinking and flashing */
-            LEDs->LEDtmr200ms = 0;
-            rd = 0;
-            gr = 0;
+if (++LEDs->LEDtmr200ms > 3U)
+		{
+			/* calculate 2,5Hz blinking and flashing */
+			LEDs->LEDtmr200ms = 0;
+			rd = 0;
+			gr = 0;
 
-            if ((LEDs->LEDred & CO_LED_blink) == 0U) {
-                rd |= CO_LED_blink;
-            } else {
-                gr |= CO_LED_blink;
-            }
+			if ((LEDs->LEDred & CO_LED_blink) == 0U) {
+				rd |= CO_LED_blink;
+			} else {
+				gr |= CO_LED_blink;
+			}
 
-            switch (++LEDs->LEDtmrflash_1) {
-                case 1: rd |= CO_LED_flash_1; break;
-                case 2: gr |= CO_LED_flash_1; break;
-                case 6: LEDs->LEDtmrflash_1 = 0; break;
-                default: /* none */ break;
-            }
-            switch (++LEDs->LEDtmrflash_2) {
-                case 1:
-                case 3: rd |= CO_LED_flash_2; break;
-                case 2:
-                case 4: gr |= CO_LED_flash_2; break;
-                case 8: LEDs->LEDtmrflash_2 = 0; break;
-                default: /* none */ break;
-            }
-            switch (++LEDs->LEDtmrflash_3) {
-                case 1:
-                case 3:
-                case 5: rd |= CO_LED_flash_3; break;
-                case 2:
-                case 4:
-                case 6: gr |= CO_LED_flash_3; break;
-                case 10: LEDs->LEDtmrflash_3 = 0; break;
-                default: /* none */ break;
-            }
-            switch (++LEDs->LEDtmrflash_4) {
-                case 1:
-                case 3:
-                case 5:
-                case 7: rd |= CO_LED_flash_4; break;
-                case 2:
-                case 4:
-                case 6:
-                case 8: gr |= CO_LED_flash_4; break;
-                case 12: LEDs->LEDtmrflash_4 = 0; break;
-                default: /* none */ break;
-            }
-        } else {
-            /* clear flicker and CANopen bits, keep others */
-            rd = LEDs->LEDred & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
-            gr = LEDs->LEDgreen & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
-        }
+			switch (++LEDs->LEDtmrflash_1) {
+				case 1: rd |= CO_LED_flash_1; break;
+				case 2: gr |= CO_LED_flash_1; break;
+				case 6: LEDs->LEDtmrflash_1 = 0; break;
+				default: /* none */ break;
+			}
+			switch (++LEDs->LEDtmrflash_2) {
+				case 1:
+				case 3: rd |= CO_LED_flash_2; break;
+				case 2:
+				case 4: gr |= CO_LED_flash_2; break;
+				case 8: LEDs->LEDtmrflash_2 = 0; break;
+				default: /* none */ break;
+			}
+			switch (++LEDs->LEDtmrflash_3) {
+				case 1:
+				case 3:
+				case 5: rd |= CO_LED_flash_3; break;
+				case 2:
+				case 4:
+				case 6: gr |= CO_LED_flash_3; break;
+				case 10: LEDs->LEDtmrflash_3 = 0; break;
+				default: /* none */ break;
+			}
+			switch (++LEDs->LEDtmrflash_4) {
+				case 1:
+				case 3:
+				case 5:
+				case 7: rd |= CO_LED_flash_4; break;
+				case 2:
+				case 4:
+				case 6:
+				case 8: gr |= CO_LED_flash_4; break;
+				case 12: LEDs->LEDtmrflash_4 = 0; break;
+				default: /* none */ break;
+			}
 
-        /* calculate 10Hz flickering */
-        if (rdFlickerNext) {
-            rd |= CO_LED_flicker;
-        } else {
-            gr |= CO_LED_flicker;
-        }
+		} else {
+            	/* clear flicker and CANopen bits, keep others */
+            	rd = LEDs->LEDred   & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
+            	gr = LEDs->LEDgreen & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
+        		}
 
-    } /* while (LEDs->LEDtmr50ms >= 50000) */
+/* calculate 10Hz flickering */
+if (rdFlickerNext) 	{ rd |= CO_LED_flicker;  } else {  gr |= CO_LED_flicker; }
 
-    if (tick) {
-        uint8_t rd_co, gr_co;
 
-        /* CANopen red ERROR LED */
-        if (ErrCANbusOff) {
-            rd_co = 1;
-        } else if (NMTstate == CO_NMT_INITIALIZING) {
-            rd_co = rd & CO_LED_flicker;
-        } else if (ErrRpdo) {
-            rd_co = rd & CO_LED_flash_4;
-        } else if (ErrSync) {
-            rd_co = rd & CO_LED_flash_3;
-        } else if (ErrHbCons) {
-            rd_co = rd & CO_LED_flash_2;
-        } else if (ErrCANbusWarn) {
-            rd_co = rd & CO_LED_flash_1;
-        } else if (ErrOther) {
-            rd_co = rd & CO_LED_blink;
-        } else {
-            rd_co = 0;
-        }
+} /* while (LEDs->LEDtmr50ms >= 50000) */
 
-        /* CANopen green RUN LED */
-        if (LSSconfig) {
-            gr_co = gr & CO_LED_flicker;
-        } else if (firmwareDownload) {
-            gr_co = gr & CO_LED_flash_3;
-        } else if (NMTstate == CO_NMT_STOPPED) {
-            gr_co = gr & CO_LED_flash_1;
-        } else if (NMTstate == CO_NMT_PRE_OPERATIONAL) {
-            gr_co = gr & CO_LED_blink;
-        } else if (NMTstate == CO_NMT_OPERATIONAL) {
-            gr_co = 1;
-        } else {
-            gr_co = 0;
-        }
+if (tick)
+	{
+	uint8_t rd_co, gr_co;
 
-        if (rd_co != 0U) {
-            rd |= CO_LED_CANopen;
-        }
-        if (gr_co != 0U) {
-            gr |= CO_LED_CANopen;
-        }
-        LEDs->LEDred = rd;
-        LEDs->LEDgreen = gr;
-    } /* if (tick) */
+		/* CANopen red ERROR LED */
+		if (ErrCANbusOff)
+		{
+		 rd_co = 1;
+		} else if (NMTstate == CO_NMT_INITIALIZING)
+			{
+			 rd_co = rd & CO_LED_flicker;
+			} else if (ErrRpdo)
+				{
+				 rd_co = rd & CO_LED_flash_4;
+				} else if (ErrSync)
+					{
+					 rd_co = rd & CO_LED_flash_3;
+					} else if (ErrHbCons)
+						{
+						 rd_co = rd & CO_LED_flash_2;
+						} else if (ErrCANbusWarn)
+							{
+							 rd_co = rd & CO_LED_flash_1;
+							} else if (ErrOther)
+								{
+								 rd_co = rd & CO_LED_blink;
+								} else {
+										 rd_co = 0;
+										}
+
+	/* CANopen green RUN LED */
+	if (LSSconfig)
+		{
+		 gr_co = gr & CO_LED_flicker;
+		} else if (firmwareDownload)
+			{
+			 gr_co = gr & CO_LED_flash_3;
+			} else if (NMTstate == CO_NMT_STOPPED)
+				{
+				 gr_co = gr & CO_LED_flash_1;
+				} else if (NMTstate == CO_NMT_PRE_OPERATIONAL)
+					{
+					 gr_co = gr & CO_LED_blink;
+					} else if (NMTstate == CO_NMT_OPERATIONAL)
+						{
+						 gr_co = 1;
+						} else  {
+								 gr_co = 0;
+								}
+
+
+if (rd_co != 0U) { rd |= CO_LED_CANopen; }
+
+if (gr_co != 0U) { gr |= CO_LED_CANopen;	}
+
+LEDs->LEDred = rd;
+LEDs->LEDgreen = gr;
+
+} /* if (tick) */
 
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_FLAG_TIMERNEXT) != 0
     if (timerNext_us != NULL) {

@@ -40,6 +40,8 @@
 #include "301/CO_SDOclient.h"
 #include "CANopen.h"
 #include "OD.h"
+#include "CO_PDO.h"
+
 
 #include "format_out.h"
 #include "SDO_utils.h"
@@ -250,8 +252,8 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   //canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
-   canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
+   canOpenNodeSTM32.desiredNodeID = CO_Aliex_Disco407green;//	0x3A
+   //canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
    canOpenNodeSTM32.baudrate = 125*4;
    uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
    CO_Init_Return_State(Ret_value );
@@ -275,7 +277,13 @@ int main(void)
 	  	  Local_Count=0;
       	  OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000=0;
 		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);//Green
+		  				//tmp32u_0 = OD_PERSIST_COMM.x6000_lowerF_VAR32_6000;
 
+//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );HAL_Delay(50);
+//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );HAL_Delay(50);
+//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );HAL_Delay(50);
+//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );HAL_Delay(50);
+			Ticks = HAL_GetTick();
 		  while (1)
 		  {
 			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
@@ -284,28 +292,29 @@ int main(void)
 			 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 
 			canopen_app_process();
-//			  Encoder_to_LCD();
-//			  RTC_update_and_Terminal(2000);
-//			if(tmp32u_1 != OD_PERSIST_COMM.x6001_nucleo_VAR32_6001){
-//				tmp32u_1 = OD_PERSIST_COMM.x6001_nucleo_VAR32_6001;
-//				TerminalInterface.gState = HAL_UART_STATE_READY;
-//				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)(&tmp32u_1), 4);}
+			  Encoder_to_LCD();
+			  RTC_update_and_Terminal(2000);
 
-			  if(HAL_GetTick() - Ticks>1749)
+
+			  if(HAL_GetTick() - Ticks>399)
 			  {
 				Ticks = HAL_GetTick();
+
+			if(tmp32u_1 != OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001)
+				{
+				tmp32u_1 = OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001;
+				}
+
+				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
+				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
+				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
+				TerminalInterface.gState = HAL_UART_STATE_READY;
+				HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
+				Local_Count++;Local_Count = Local_Count%4;
+				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
+				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
 				//LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->service);
-				LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->lssState);
-
-
-//				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
-//				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
-//				//CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-//				TerminalInterface.gState = HAL_UART_STATE_READY;
-//				HAL_UART_Transmit_DMA( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
-//				Local_Count++;Local_Count = Local_Count%4;
-//				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
-//				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
+				//LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->lssState);
 			  }
 
 

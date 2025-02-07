@@ -29,7 +29,7 @@
 
 /* default configuration, see CO_config.h */
 #ifndef CO_CONFIG_SDO_CLI
-#define CO_CONFIG_SDO_CLI (CO_CONFIG_SDO_CLI_ENABLE)
+#define CO_CONFIG_SDO_CLI (CO_CONFIG_SDO_CLI_ENABLE|CO_CONFIG_SDO_CLI_SEGMENTED|CO_CONFIG_SDO_CLI_BLOCK)
 #endif
 
 #ifndef CO_DOXYGEN

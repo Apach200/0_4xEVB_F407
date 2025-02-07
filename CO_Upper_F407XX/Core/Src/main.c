@@ -193,8 +193,8 @@ int main(void)
    canOpenNodeSTM32.CANHandle = &hcan1;
    canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
    canOpenNodeSTM32.timerHandle = &htim4;
-   //canOpenNodeSTM32.desiredNodeID = CO_Upper_F407XX;  //0x3d;
-   canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
+   canOpenNodeSTM32.desiredNodeID = CO_Upper_F407XX;  //0x3d;
+   //canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
    canOpenNodeSTM32.baudrate = 125*4;
    uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
    CO_Init_Return_State(Ret_value);

@@ -98,8 +98,8 @@ typedef struct {
 /* Transmit message object */
 typedef struct {
     uint32_t ident;
-    uint8_t DLC;
-    uint8_t data[8];
+    uint8_t  DLC;
+    uint8_t  data[8];
     volatile bool_t bufferFull;
     volatile bool_t syncFlag;
 } CO_CANtx_t;

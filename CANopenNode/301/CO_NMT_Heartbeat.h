@@ -27,7 +27,7 @@
 
 /* default configuration, see CO_config.h */
 #ifndef CO_CONFIG_NMT
-#define CO_CONFIG_NMT (CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT)
+#define CO_CONFIG_NMT (CO_CONFIG_NMT_MASTER|CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT)
 #endif
 
 #ifdef __cplusplus
@@ -78,14 +78,18 @@ typedef enum {
 /**
  * Commands from NMT master.
  */
-typedef enum {
-    CO_NMT_NO_COMMAND = 0,              /**< 0, No command */
-    CO_NMT_ENTER_OPERATIONAL = 1,       /**< 1, Start device */
-    CO_NMT_ENTER_STOPPED = 2,           /**< 2, Stop device */
-    CO_NMT_ENTER_PRE_OPERATIONAL = 128, /**< 128, Put device into pre-operational */
-    CO_NMT_RESET_NODE = 129,            /**< 129, Reset device */
-    CO_NMT_RESET_COMMUNICATION = 130    /**< 130, Reset CANopen communication on device */
+typedef enum
+{
+    CO_NMT_NO_COMMAND 				= 0,	/**< 0,   No command */
+    CO_NMT_ENTER_OPERATIONAL 		= 1,	/**< 1,   Start device */
+    CO_NMT_ENTER_STOPPED 			= 2,	/**< 2,   Stop device */
+    CO_NMT_ENTER_PRE_OPERATIONAL 	= 128, 	/**< 128, Put device into pre-operational */
+    CO_NMT_RESET_NODE = 129,            	/**< 129, Reset device */
+    CO_NMT_RESET_COMMUNICATION		= 130	/**< 130, Reset CANopen communication on device */
+
 } CO_NMT_command_t;
+
+
 
 /**
  * Return code from CO_NMT_process() that tells application code what to reset.
@@ -187,13 +191,26 @@ typedef struct {
  *
  * @return #CO_ReturnError_t CO_ERROR_NO on success.
  */
-CO_ReturnError_t CO_NMT_init(CO_NMT_t* NMT, OD_entry_t* OD_1017_ProducerHbTime, CO_EM_t* em, uint8_t nodeId,
-                             uint16_t NMTcontrol, uint16_t firstHBTime_ms, CO_CANmodule_t* NMT_CANdevRx,
-                             uint16_t NMT_rxIdx, uint16_t CANidRxNMT,
+CO_ReturnError_t CO_NMT_init(
+							CO_NMT_t* NMT,
+							OD_entry_t* OD_1017_ProducerHbTime,
+							CO_EM_t* em,
+							uint8_t nodeId,
+							uint16_t NMTcontrol,
+							uint16_t firstHBTime_ms,
+							CO_CANmodule_t* NMT_CANdevRx,
+							uint16_t NMT_rxIdx,
+							uint16_t CANidRxNMT,
 #if (((CO_CONFIG_NMT)&CO_CONFIG_NMT_MASTER) != 0) || defined CO_DOXYGEN
-                             CO_CANmodule_t* NMT_CANdevTx, uint16_t NMT_txIdx, uint16_t CANidTxNMT,
+							CO_CANmodule_t* NMT_CANdevTx,
+							uint16_t NMT_txIdx,
+							uint16_t CANidTxNMT,
 #endif
-                             CO_CANmodule_t* HB_CANdevTx, uint16_t HB_txIdx, uint16_t CANidTxHB, uint32_t* errInfo);
+							CO_CANmodule_t* HB_CANdevTx,
+							uint16_t HB_txIdx,
+							uint16_t CANidTxHB,
+							uint32_t* errInfo
+							);
 
 #if (((CO_CONFIG_NMT)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0) || defined CO_DOXYGEN
 /**
@@ -235,8 +252,12 @@ void CO_NMT_initCallbackChanged(CO_NMT_t* NMT, void (*pFunctNMT)(CO_NMT_internal
  *
  * @return #CO_NMT_reset_cmd_t
  */
-CO_NMT_reset_cmd_t CO_NMT_process(CO_NMT_t* NMT, CO_NMT_internalState_t* NMTstate, uint32_t timeDifference_us,
-                                  uint32_t* timerNext_us);
+CO_NMT_reset_cmd_t CO_NMT_process(
+									CO_NMT_t* NMT,
+									CO_NMT_internalState_t* NMTstate,
+									uint32_t timeDifference_us,
+									uint32_t* timerNext_us
+								  );
 
 /**
  * Query current NMT state
@@ -246,8 +267,9 @@ CO_NMT_reset_cmd_t CO_NMT_process(CO_NMT_t* NMT, CO_NMT_internalState_t* NMTstat
  * @return @ref CO_NMT_internalState_t
  */
 static inline CO_NMT_internalState_t
-CO_NMT_getInternalState(CO_NMT_t* NMT) {
-    return (NMT == NULL) ? CO_NMT_INITIALIZING : NMT->operatingState;
+CO_NMT_getInternalState(CO_NMT_t* NMT)
+{
+ return (NMT == NULL) ? CO_NMT_INITIALIZING : NMT->operatingState;
 }
 
 /**
@@ -269,10 +291,10 @@ CO_NMT_sendInternalCommand(CO_NMT_t* NMT, CO_NMT_command_t command) {
 /**
  * Send NMT master command.
  *
- * This functionality may only be used from NMT master, as specified by standard CiA302-2. Standard provides one
- * exception, where application from slave node may send NMT master command: "If CANopen object 0x1F80 has value of
- * **0x2**, then NMT slave shall execute the NMT service start remote node (CO_NMT_ENTER_OPERATIONAL) with nodeID set to
- * 0."
+ * This functionality may only be used from NMT master, as specified by standard CiA302-2.
+ * Standard provides one exception, where application from slave node may send NMT master command:
+ * 					 "If CANopen object 0x1F80 has value of 0x2****,
+ * then NMT slave shall execute the NMT service start remote node (CO_NMT_ENTER_OPERATIONAL) with nodeID set to 0."
  *
  * @param NMT This object.
  * @param command NMT command from CO_NMT_command_t.

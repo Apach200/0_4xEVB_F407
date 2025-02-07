@@ -186,72 +186,87 @@ CO_NMT_initCallbackChanged(CO_NMT_t* NMT, void (*pFunctNMT)(CO_NMT_internalState
 #endif
 
 CO_NMT_reset_cmd_t
-CO_NMT_process(CO_NMT_t* NMT, CO_NMT_internalState_t* NMTstate, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    (void)timerNext_us; /* may be unused */
-    CO_NMT_internalState_t NMTstateCpy = NMT->operatingState;
-    CO_NMT_reset_cmd_t resetCommand = CO_RESET_NOT;
-    bool_t NNTinit = NMTstateCpy == CO_NMT_INITIALIZING;
+CO_NMT_process(
+				CO_NMT_t* NMT,
+				CO_NMT_internalState_t* NMTstate,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
+(void)timerNext_us; /* may be unused */
+CO_NMT_internalState_t 	NMTstateCpy  = NMT->operatingState;
+CO_NMT_reset_cmd_t 		resetCommand = CO_RESET_NOT;
+bool_t 					NNTinit  =  NMTstateCpy == CO_NMT_INITIALIZING;
 
-    NMT->HBproducerTimer = (NMT->HBproducerTimer > timeDifference_us) ? (NMT->HBproducerTimer - timeDifference_us) : 0U;
+NMT->HBproducerTimer = (NMT->HBproducerTimer > timeDifference_us) ? (NMT->HBproducerTimer - timeDifference_us) : 0U;
 
     /* Send heartbeat producer message if:
      * - First start, send bootup message or
      * - HB producer enabled and: Timer expired or NMT->operatingState changed */
-    if (NNTinit
-        || ((NMT->HBproducerTime_us != 0U)
-            && ((NMT->HBproducerTimer == 0U) || (NMTstateCpy != NMT->operatingStatePrev)))) {
-        NMT->HB_TXbuff->data[0] = (uint8_t)NMTstateCpy;
-        (void)CO_CANsend(NMT->HB_CANdevTx, NMT->HB_TXbuff);
+if (  NNTinit
+		||(
+			( NMT->HBproducerTime_us != 0U)
+			&& ( (NMT->HBproducerTimer == 0U) || (NMTstateCpy != NMT->operatingStatePrev) )
+		  )
+   ) {
+	  NMT->HB_TXbuff->data[0] = (uint8_t)NMTstateCpy;
+	  (void)CO_CANsend(NMT->HB_CANdevTx, NMT->HB_TXbuff);
 
-        if (NMTstateCpy == CO_NMT_INITIALIZING) {
+	  if (NMTstateCpy == CO_NMT_INITIALIZING)
+	  	  {
             /* NMT slave self starting */
             NMTstateCpy = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_STARTUP_TO_OPERATIONAL) != 0U)
                               ? CO_NMT_OPERATIONAL
                               : CO_NMT_PRE_OPERATIONAL;
-        } else {
-            /* Start timer from the beginning. If OS is slow, time sliding may occur. However,
-             * heartbeat is not for synchronization, it is for health report. In case of
-             * initializing, timer is set in the CO_NMT_init() function with pre-defined value. */
+	  	  } else {
+            /* Start timer from the beginning. If OS is slow, time sliding may occur.
+             * However, heartbeat is not for synchronization, it is for health report.
+             * In case of initializing, timer is set in the CO_NMT_init() function with pre-defined value. */
             NMT->HBproducerTimer = NMT->HBproducerTime_us;
         }
-    }
+    }//////if (  NNTinit
     NMT->operatingStatePrev = NMTstateCpy;
 
-    /* process internal NMT commands, received from CO_NMT_receive() or CO_NMT_sendCommand() */
-    if (NMT->internalCommand != CO_NMT_NO_COMMAND) {
-        switch (NMT->internalCommand) {
-            case CO_NMT_ENTER_OPERATIONAL: NMTstateCpy = CO_NMT_OPERATIONAL; break;
-            case CO_NMT_ENTER_STOPPED: NMTstateCpy = CO_NMT_STOPPED; break;
-            case CO_NMT_ENTER_PRE_OPERATIONAL: NMTstateCpy = CO_NMT_PRE_OPERATIONAL; break;
-            case CO_NMT_RESET_NODE: resetCommand = CO_RESET_APP; break;
-            case CO_NMT_RESET_COMMUNICATION: resetCommand = CO_RESET_COMM; break;
-            case CO_NMT_NO_COMMAND:
-            default:
-                /* done */
-                break;
-        }
-        NMT->internalCommand = CO_NMT_NO_COMMAND;
-    }
+/* process internal NMT commands, received from CO_NMT_receive() or CO_NMT_sendCommand() */
+if (NMT->internalCommand != CO_NMT_NO_COMMAND)
+{
+	switch (NMT->internalCommand)
+	{
+		case CO_NMT_ENTER_OPERATIONAL: NMTstateCpy = CO_NMT_OPERATIONAL; break;
+		case CO_NMT_ENTER_STOPPED: NMTstateCpy = CO_NMT_STOPPED; break;
+		case CO_NMT_ENTER_PRE_OPERATIONAL: NMTstateCpy = CO_NMT_PRE_OPERATIONAL; break;
+		case CO_NMT_RESET_NODE: resetCommand = CO_RESET_APP; break;
+		case CO_NMT_RESET_COMMUNICATION: resetCommand = CO_RESET_COMM; break;
+		case CO_NMT_NO_COMMAND:
+		default:break;
+			/* done */
+	}///switch (NMT->internalCommand)
+ NMT->internalCommand = CO_NMT_NO_COMMAND;
+}
 
-    /* verify NMT transitions based on error register */
-    bool_t ErrOnBusOffHB = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_ON_BUSOFF_HB) != 0U);
-    bool_t ErrBusOff = CO_isError(NMT->em, CO_EM_CAN_TX_BUS_OFF);
-    bool_t ErrHbCons = CO_isError(NMT->em, CO_EM_HEARTBEAT_CONSUMER);
-    bool_t ErrHbConsRemote = CO_isError(NMT->em, CO_EM_HB_CONSUMER_REMOTE_RESET);
-    bool_t busOff_HB = ErrOnBusOffHB && (ErrBusOff || ErrHbCons || ErrHbConsRemote);
+/* verify NMT transitions based on error register */
+bool_t ErrOnBusOffHB = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_ON_BUSOFF_HB) != 0U);
+bool_t ErrBusOff = CO_isError(NMT->em, CO_EM_CAN_TX_BUS_OFF);
+bool_t ErrHbCons = CO_isError(NMT->em, CO_EM_HEARTBEAT_CONSUMER);
+bool_t ErrHbConsRemote = CO_isError(NMT->em, CO_EM_HB_CONSUMER_REMOTE_RESET);
+bool_t busOff_HB = ErrOnBusOffHB && (ErrBusOff || ErrHbCons || ErrHbConsRemote);
 
-    bool_t ErrNMTErrReg = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_ON_ERR_REG) != 0U);
-    bool_t ErrNMTcontrol = ((CO_getErrorRegister(NMT->em) & (uint8_t)NMT->NMTcontrol) != 0U);
-    bool_t errRegMasked = ErrNMTErrReg && ErrNMTcontrol;
+bool_t ErrNMTErrReg = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_ON_ERR_REG) != 0U);
+bool_t ErrNMTcontrol = ((CO_getErrorRegister(NMT->em) & (uint8_t)NMT->NMTcontrol) != 0U);
+bool_t errRegMasked = ErrNMTErrReg && ErrNMTcontrol;
 
-    if ((NMTstateCpy == CO_NMT_OPERATIONAL) && (busOff_HB || errRegMasked)) {
-        NMTstateCpy = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_TO_STOPPED) != 0U) ? CO_NMT_STOPPED
-                                                                                            : CO_NMT_PRE_OPERATIONAL;
-    } else if ((((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_FREE_TO_OPERATIONAL) != 0U)
-               && (NMTstateCpy == CO_NMT_PRE_OPERATIONAL) && (!busOff_HB && !errRegMasked)) {
-        NMTstateCpy = CO_NMT_OPERATIONAL;
-    } else { /* MISRA C 2004 14.10 */
-    }
+if ((NMTstateCpy == CO_NMT_OPERATIONAL) && (busOff_HB || errRegMasked))
+{
+	NMTstateCpy = (((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_TO_STOPPED) != 0U) ? CO_NMT_STOPPED
+																						: CO_NMT_PRE_OPERATIONAL;
+}
+else if (
+		 ( ((uint16_t)NMT->NMTcontrol & (uint16_t)CO_NMT_ERR_FREE_TO_OPERATIONAL) != 0U )
+		   && (NMTstateCpy == CO_NMT_PRE_OPERATIONAL) && (!busOff_HB && !errRegMasked)
+		){
+			NMTstateCpy = CO_NMT_OPERATIONAL;
+		 } else {} /* MISRA C 2004 14.10 */
+
 
 #if ((CO_CONFIG_NMT)&CO_CONFIG_NMT_CALLBACK_CHANGE) != 0
     /* Notify operating state change */
@@ -284,20 +299,25 @@ CO_NMT_process(CO_NMT_t* NMT, CO_NMT_internalState_t* NMTstate, uint32_t timeDif
 
 #if ((CO_CONFIG_NMT)&CO_CONFIG_NMT_MASTER) != 0
 CO_ReturnError_t
-CO_NMT_sendCommand(CO_NMT_t* NMT, CO_NMT_command_t command, uint8_t nodeID) {
-    /* verify arguments */
-    if (NMT == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+CO_NMT_sendCommand(
+					CO_NMT_t* NMT,
+					CO_NMT_command_t command,
+					uint8_t nodeID
+					)
+{
+if (NMT == NULL) { return CO_ERROR_ILLEGAL_ARGUMENT; }/* verify arguments */
 
-    /* Apply NMT command also to this node, if set so. */
-    if ((nodeID == 0U) || (nodeID == NMT->nodeId)) {
-        NMT->internalCommand = command;
-    }
+/* Apply NMT command also to this node, if set so. */
+if ((nodeID == 0U) || (nodeID == NMT->nodeId))
+	{
+	 NMT->internalCommand = command;
+	}
 
-    /* Send NMT master message. */
-    NMT->NMT_TXbuff->data[0] = (uint8_t)command;
-    NMT->NMT_TXbuff->data[1] = nodeID;
-    return CO_CANsend(NMT->NMT_CANdevTx, NMT->NMT_TXbuff);
+/* Send NMT master message. */
+NMT->NMT_TXbuff->data[0] = (uint8_t)command;
+NMT->NMT_TXbuff->data[1] = nodeID;
+
+return CO_CANsend(NMT->NMT_CANdevTx, NMT->NMT_TXbuff);
 }
+
 #endif

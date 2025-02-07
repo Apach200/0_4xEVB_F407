@@ -107,18 +107,18 @@ typedef enum {
  * Attributes (bit masks) for OD sub-object.
  */
 typedef enum {
-    ODA_SDO_R = 0x01U,  /**< SDO server may read from the variable */
-    ODA_SDO_W = 0x02U,  /**< SDO server may write to the variable */
-    ODA_SDO_RW = 0x03U, /**< SDO server may read from or write to the variable */
-    ODA_TPDO = 0x04U,   /**< Variable is mappable into TPDO (can be read) */
-    ODA_RPDO = 0x08U,   /**< Variable is mappable into RPDO (can be written) */
-    ODA_TRPDO = 0x0CU,  /**< Variable is mappable into TPDO or RPDO */
-    ODA_TSRDO = 0x10U,  /**< Variable is mappable into transmitting SRDO */
-    ODA_RSRDO = 0x20U,  /**< Variable is mappable into receiving SRDO */
-    ODA_TRSRDO = 0x30U, /**< Variable is mappable into tx or rx SRDO */
-    ODA_MB = 0x40U,     /**< Variable is multi-byte ((u)int16_t to (u)int64_t) */
-    ODA_STR = 0x80U     /**< Shorter value, than specified variable size, may be written to the variable. SDO write will
-                           fill remaining memory with zeroes. Attribute is used for VISIBLE_STRING and UNICODE_STRING. */
+    ODA_SDO_R 	= 0x01U,	/**< SDO server may read from the variable */
+    ODA_SDO_W 	= 0x02U,	/**< SDO server may write to the variable */
+    ODA_SDO_RW 	= 0x03U,	/**< SDO server may read from or write to the variable */
+    ODA_TPDO 	= 0x04U,	/**< Variable is mappable into TPDO (can be read) */
+    ODA_RPDO 	= 0x08U,   	/**< Variable is mappable into RPDO (can be written) */
+    ODA_TRPDO 	= 0x0CU,  	/**< Variable is mappable into TPDO or RPDO */
+    ODA_TSRDO 	= 0x10U,  	/**< Variable is mappable into transmitting SRDO */
+    ODA_RSRDO 	= 0x20U,  	/**< Variable is mappable into receiving SRDO */
+    ODA_TRSRDO 	= 0x30U, 	/**< Variable is mappable into tx or rx SRDO */
+    ODA_MB 		= 0x40U,	/**< Variable is multi-byte ((u)int16_t to (u)int64_t) */
+    ODA_STR 	= 0x80U     /**< Shorter value, than specified variable size, may be written to the variable. SDO write will
+                           	   	   fill remaining memory with zeroes. Attribute is used for VISIBLE_STRING and UNICODE_STRING. */
 } OD_attributes_t;
 
 /**
@@ -161,44 +161,52 @@ typedef enum {
 /**
  * IO stream structure, used for read/write access to OD variable, part of @ref OD_IO_t.
  */
-typedef struct {
-    void* dataOrig; /**< Pointer to original data object, defined by Object Dictionary. Default read/write functions
-                     * operate on it. If memory for data object is not specified by Object Dictionary, then dataOrig is
-                     * NULL. */
-    void* object; /**< Pointer to object, passed by @ref OD_extension_init(). Can be used inside read / write functions
-                   * from IO   extension. */
+typedef struct
+{
+    void* dataOrig; /**< Pointer to original data object, defined by Object Dictionary.
+                     *  Default read/write functions operate on it.
+                     * If memory for data object is not specified by Object Dictionary, then dataOrig is NULL. */
+    void* object; /**< Pointer to object, passed by @ref OD_extension_init().
+                   *   Can be used inside read / write functions from IO   extension. */
+
     OD_size_t dataLength; /**< Data length in bytes or 0, if length is not specified */
     OD_size_t dataOffset; /**< In case of large data, dataOffset indicates position of already transferred data */
     OD_attr_t attribute;  /**< Attribute bit-field of the OD sub-object, see @ref OD_attributes_t */
-    uint16_t index;       /**< Index of the OD object, informative */
-    uint8_t subIndex;     /**< Sub index of the OD sub-object, informative */
+    uint16_t  index;       /**< Index of the OD object, informative */
+    uint8_t   subIndex;     /**< Sub index of the OD sub-object, informative */
 } OD_stream_t;
 
+
+
 /**
- * Structure for input / output on the OD variable. It is initialized with @ref OD_getSub() function. Access principle
- * to OD variable is via read/write functions operating on stream, similar as standard read/write.
+ * Structure for input / output on the OD variable.
+ * It is initialized with @ref OD_getSub() function.
+ *  Access principle to OD variable is via read/write functions operating on stream, similar as standard read/write.
  */
 typedef struct {
     /** Object Dictionary stream object, passed to read or write */
     OD_stream_t stream;
     /**
-     * Function pointer for reading value from specified variable from Object Dictionary. If OD variable is larger than
-     * buf, then this function must be called several times. After completed successful read function returns 'ODR_OK'.
-     * If read is partial, it returns 'ODR_PARTIAL'. In case of errors function returns code similar to SDO abort code.
+     * Function pointer for reading value from specified variable from Object Dictionary.
+     * If OD variable is larger than buf, then this function must be called several times.
+     * After completed successful read function returns 'ODR_OK'.
+     * If read is partial, it returns 'ODR_PARTIAL'.
+     * In case of errors function returns code similar to SDO abort code.
      *
      * Read can be restarted with @ref OD_rwRestart() function.
      *
-     * At the moment, when Object Dictionary is initialized, every variable has assigned the same "read" function. This
-     * default function simply copies data from Object Dictionary variable. Application can bind its own "read" function
-     * for specific object. In that case application is able to calculate data for reading from own internal state at
-     * the moment of "read" function call. Own "read" function on OD object can be initialized with @ref
-     * OD_extension_init() function.
+     * At the moment, when Object Dictionary is initialized, every variable has assigned the same "read" function.
+     * This default function simply copies data from Object Dictionary variable.
+     * Application can bind its own "read" function for specific object.
+     * In that case application is able to calculate data for reading from own internal state at the moment of "read" function call.
+     * Own "read" function on OD object can be initialized with @ref OD_extension_init() function.
      *
-     * "read" function must always copy all own data to buf, except if "buf" is not large enough. ("*returnCode" must
-     * not return 'ODR_PARTIAL', if there is still space in "buf".)
      *
-     * @warning Do not use @ref CO_LOCK_OD() and @ref CO_UNLOCK_OD() macros inside the read() function. See also @ref
-     * CO_critical_sections.
+     * "read" function must always copy all own data to buf, except if "buf" is not large enough.
+     * ("*returnCode" must not return 'ODR_PARTIAL', if there is still space in "buf".)
+     *
+     * @warning Do not use @ref CO_LOCK_OD() and @ref CO_UNLOCK_OD() macros inside the read() function.
+     * See also @ref CO_critical_sections.
      *
      * @param stream Object Dictionary stream object.
      * @param buf Pointer to external buffer, where to data will be copied.

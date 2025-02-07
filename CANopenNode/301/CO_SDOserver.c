@@ -251,13 +251,26 @@ OD_write_1201_additional(OD_stream_t* stream, const void* buf, OD_size_t count, 
 #endif /* (CO_CONFIG_SDO_SRV) & CO_CONFIG_FLAG_OD_DYNAMIC */
 
 CO_ReturnError_t
-CO_SDOserver_init(CO_SDOserver_t* SDO, OD_t* OD, OD_entry_t* OD_1200_SDOsrvPar, uint8_t nodeId,
-                  uint16_t SDOtimeoutTime_ms, CO_CANmodule_t* CANdevRx, uint16_t CANdevRxIdx, CO_CANmodule_t* CANdevTx,
-                  uint16_t CANdevTxIdx, uint32_t* errInfo) {
-    /* verify arguments */
-    if ((SDO == NULL) || (OD == NULL) || (CANdevRx == NULL) || (CANdevTx == NULL)) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+CO_SDOserver_init(
+					CO_SDOserver_t* SDO,
+					OD_t* OD,
+					OD_entry_t* OD_1200_SDOsrvPar,
+					uint8_t nodeId,
+					uint16_t SDOtimeoutTime_ms,
+					CO_CANmodule_t* CANdevRx,
+					uint16_t CANdevRxIdx,
+					CO_CANmodule_t* CANdevTx,
+					uint16_t CANdevTxIdx,
+					uint32_t* errInfo
+					)
+{
+ /* verify arguments */
+ if(
+	    (SDO      == NULL)
+	 || (OD       == NULL)
+	 || (CANdevRx == NULL)
+	 || (CANdevTx == NULL)
+   ) { return CO_ERROR_ILLEGAL_ARGUMENT; }
 
     /* Configure object variables */
     SDO->OD = OD;
@@ -278,72 +291,79 @@ CO_SDOserver_init(CO_SDOserver_t* SDO, OD_t* OD, OD_entry_t* OD_1200_SDOsrvPar, 
     /* configure CAN identifiers and SDO server parameters if available */
     uint16_t CanId_ClientToServer, CanId_ServerToClient;
 
-    if (OD_1200_SDOsrvPar == NULL) {
-        /* configure default SDO channel */
-        if ((nodeId < 1U) || (nodeId > 127U)) {
-            return CO_ERROR_ILLEGAL_ARGUMENT;
-        }
+    if (OD_1200_SDOsrvPar == NULL)
+		{
+			/* configure default SDO channel */
+			if ((nodeId < 1U) || (nodeId > 127U)) {  return CO_ERROR_ILLEGAL_ARGUMENT;  }
 
-        CanId_ClientToServer = CO_CAN_ID_SDO_CLI + nodeId;
-        CanId_ServerToClient = CO_CAN_ID_SDO_SRV + nodeId;
-        SDO->valid = true;
-    } else {
-        uint16_t OD_SDOsrvParIdx = OD_getIndex(OD_1200_SDOsrvPar);
+			CanId_ClientToServer = CO_CAN_ID_SDO_CLI + nodeId;
+			CanId_ServerToClient = CO_CAN_ID_SDO_SRV + nodeId;
+			SDO->valid = true;
+		} else {
+				uint16_t OD_SDOsrvParIdx = OD_getIndex(OD_1200_SDOsrvPar);
 
-        if (OD_SDOsrvParIdx == (uint16_t)OD_H1200_SDO_SERVER_1_PARAM) {
-            /* configure default SDO channel and SDO server parameters for it */
-            if ((nodeId < 1U) || (nodeId > 127U)) {
-                return CO_ERROR_ILLEGAL_ARGUMENT;
-            }
+				if (OD_SDOsrvParIdx == (uint16_t)OD_H1200_SDO_SERVER_1_PARAM) {
+					/* configure default SDO channel and SDO server parameters for it */
+					if ((nodeId < 1U) || (nodeId > 127U)) {
+						return CO_ERROR_ILLEGAL_ARGUMENT;
+					}
 
-            CanId_ClientToServer = CO_CAN_ID_SDO_CLI + nodeId;
-            CanId_ServerToClient = CO_CAN_ID_SDO_SRV + nodeId;
-            SDO->valid = true;
+					CanId_ClientToServer = CO_CAN_ID_SDO_CLI + nodeId;
+					CanId_ServerToClient = CO_CAN_ID_SDO_SRV + nodeId;
+					SDO->valid = true;
 
-            (void)OD_set_u32(OD_1200_SDOsrvPar, 1, CanId_ClientToServer, true);
-            (void)OD_set_u32(OD_1200_SDOsrvPar, 2, CanId_ServerToClient, true);
-        } else if ((OD_SDOsrvParIdx > (uint16_t)OD_H1200_SDO_SERVER_1_PARAM)
-                   && (OD_SDOsrvParIdx <= ((uint16_t)OD_H1200_SDO_SERVER_1_PARAM + 0x7FU))) {
-            /* configure additional SDO channel and SDO server parameters for it */
-            uint8_t maxSubIndex;
-            uint32_t COB_IDClientToServer32, COB_IDServerToClient32;
+					(void)OD_set_u32(OD_1200_SDOsrvPar, 1, CanId_ClientToServer, true);
+					(void)OD_set_u32(OD_1200_SDOsrvPar, 2, CanId_ServerToClient, true);
 
-            /* get and verify parameters from Object Dictionary (initial values) */
-            ODR_t odRet0 = OD_get_u8(OD_1200_SDOsrvPar, 0, &maxSubIndex, true);
-            ODR_t odRet1 = OD_get_u32(OD_1200_SDOsrvPar, 1, &COB_IDClientToServer32, true);
-            ODR_t odRet2 = OD_get_u32(OD_1200_SDOsrvPar, 2, &COB_IDServerToClient32, true);
+				} else if (
+								(OD_SDOsrvParIdx > (uint16_t)OD_H1200_SDO_SERVER_1_PARAM)
+							&& (OD_SDOsrvParIdx <= ((uint16_t)OD_H1200_SDO_SERVER_1_PARAM + 0x7FU))
+						  ) {
+								/* configure additional SDO channel and SDO server parameters for it */
+								uint8_t maxSubIndex;
+								uint32_t COB_IDClientToServer32, COB_IDServerToClient32;
 
-            if ((odRet0 != ODR_OK) || ((maxSubIndex != 2U) && (maxSubIndex != 3U)) || (odRet1 != ODR_OK)
-                || (odRet2 != ODR_OK)) {
-                if (errInfo != NULL) {
-                    *errInfo = OD_SDOsrvParIdx;
-                }
-                return CO_ERROR_OD_PARAMETERS;
-            }
+								/* get and verify parameters from Object Dictionary (initial values) */
+								ODR_t odRet0 = OD_get_u8(OD_1200_SDOsrvPar, 0, &maxSubIndex, true);
+								ODR_t odRet1 = OD_get_u32(OD_1200_SDOsrvPar, 1, &COB_IDClientToServer32, true);
+								ODR_t odRet2 = OD_get_u32(OD_1200_SDOsrvPar, 2, &COB_IDServerToClient32, true);
 
-            CanId_ClientToServer = ((COB_IDClientToServer32 & 0x80000000U) == 0U)
-                                       ? (uint16_t)(COB_IDClientToServer32 & 0x7FFU)
-                                       : 0U;
-            CanId_ServerToClient = ((COB_IDServerToClient32 & 0x80000000U) == 0U)
-                                       ? (uint16_t)(COB_IDServerToClient32 & 0x7FFU)
-                                       : 0U;
+								if (
+									   ( odRet0 != ODR_OK)
+									|| ((maxSubIndex != 2U) && (maxSubIndex != 3U))
+									|| (odRet1 != ODR_OK)
+									|| (odRet2 != ODR_OK)
+								   )
+									{
+									 if (errInfo != NULL) { *errInfo = OD_SDOsrvParIdx; }
+									 return CO_ERROR_OD_PARAMETERS;
+									}
 
-#if ((CO_CONFIG_SDO_SRV)&CO_CONFIG_FLAG_OD_DYNAMIC) != 0
-            SDO->OD_1200_extension.object = SDO;
-            SDO->OD_1200_extension.read = OD_readOriginal;
-            SDO->OD_1200_extension.write = OD_write_1201_additional;
-            ODR_t odRetE = OD_extension_init(OD_1200_SDOsrvPar, &SDO->OD_1200_extension);
-            if (odRetE != ODR_OK) {
-                if (errInfo != NULL) {
-                    *errInfo = OD_SDOsrvParIdx;
-                }
-                return CO_ERROR_OD_PARAMETERS;
-            }
-#endif
-        } else {
-            return CO_ERROR_ILLEGAL_ARGUMENT;
-        }
-    }
+								CanId_ClientToServer = ((COB_IDClientToServer32 & 0x80000000U) == 0U)
+														   ? (uint16_t)(COB_IDClientToServer32 & 0x7FFU)
+														   : 0U;
+								CanId_ServerToClient = ((COB_IDServerToClient32 & 0x80000000U) == 0U)
+														   ? (uint16_t)(COB_IDServerToClient32 & 0x7FFU)
+														   : 0U;
+
+
+					#if ((CO_CONFIG_SDO_SRV)&CO_CONFIG_FLAG_OD_DYNAMIC) != 0
+
+								SDO->OD_1200_extension.object = SDO;
+								SDO->OD_1200_extension.read = OD_readOriginal;
+								SDO->OD_1200_extension.write = OD_write_1201_additional;
+								ODR_t odRetE = OD_extension_init(OD_1200_SDOsrvPar, &SDO->OD_1200_extension);
+								if (odRetE != ODR_OK)
+									{
+										if (errInfo != NULL) { *errInfo = OD_SDOsrvParIdx;	}
+										return CO_ERROR_OD_PARAMETERS;
+									}
+				  #endif
+						 } else { return CO_ERROR_ILLEGAL_ARGUMENT;  }
+
+
+    }/////    if (OD_1200_SDOsrvPar == NULL)else
+
     CO_FLAG_CLEAR(SDO->CANrxNew);
 
     /* store the parameters and configure CANrx and CANtx */
@@ -357,9 +377,19 @@ CO_SDOserver_init(CO_SDOserver_t* SDO, OD_t* OD, OD_entry_t* OD_1200_SDOsrvPar, 
 #endif
     SDO->CANdevTx = CANdevTx;
 
-    return CO_SDOserver_init_canRxTx(SDO, CANdevRx, CANdevRxIdx, CANdevTxIdx, CanId_ClientToServer,
-                                     CanId_ServerToClient);
+return CO_SDOserver_init_canRxTx(
+								SDO,
+								CANdevRx,
+								CANdevRxIdx,
+								CANdevTxIdx,
+								CanId_ClientToServer,
+                                CanId_ServerToClient
+								);
+
 }
+
+
+
 
 #if ((CO_CONFIG_SDO_SRV)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0
 void
@@ -469,9 +499,14 @@ validateAndWriteToOD(CO_SDOserver_t* SDO, CO_SDO_abortCode_t* abortCode, uint8_t
 
     /* write data */
     OD_size_t countWritten = 0;
-
+    OD_size_t sumCountWritten = 0;
+    ODR_t odRet;
     CO_LOCK_OD(SDO->CANdevTx);
-    ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, SDO->buf, SDO->bufOffsetWr, &countWritten);
+    odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, SDO->buf, SDO->bufOffsetWr, &countWritten);
+//    do {
+//        odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, SDO->buf, SDO->bufOffsetWr, &countWritten);
+//        sumCountWritten += countWritten;
+//       } while ((odRet == ODR_PARTIAL) && (SDO->bufOffsetWr > sumCountWritten));
     CO_UNLOCK_OD(SDO->CANdevTx);
 
     SDO->bufOffsetWr = 0;

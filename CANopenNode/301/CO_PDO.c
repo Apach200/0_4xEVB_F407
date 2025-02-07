@@ -1186,14 +1186,17 @@ if (ret != CO_ERROR_NO) {return ret;}
  * @return Same as CO_CANsend().
  */
 static CO_ReturnError_t
-CO_TPDOsend(CO_TPDO_t* TPDO) {
-    CO_PDO_common_t* PDO = &TPDO->PDO_common;
-    uint8_t* dataTPDO = &TPDO->CANtxBuff->data[0];
-    OD_size_t verifyLength = 0U;
+CO_TPDOsend(CO_TPDO_t* TPDO)
+{
+CO_PDO_common_t* PDO = &TPDO->PDO_common;
+uint8_t* dataTPDO = &TPDO->CANtxBuff->data[0];
+OD_size_t verifyLength = 0U;
 
 #if OD_FLAGS_PDO_SIZE > 0
-    bool_t eventDriven = ((TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC)
-                          || (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO));
+    bool_t eventDriven = (
+    						( TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC )
+                          || (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
+						 );
 #endif
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_OD_IO_ACCESS) != 0

@@ -16,7 +16,7 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     10.11.2024 16:03:36
+        Modified:     05.02.2025 10:31:27
         Modified By:  
 
     Device Info:
@@ -45,7 +45,7 @@
 #define OD_CNT_SDO_SRV 1
 #define OD_CNT_SDO_CLI 1
 #define OD_CNT_RPDO 1
-#define OD_CNT_TPDO 3
+#define OD_CNT_TPDO 4
 
 
 /*******************************************************************************
@@ -128,6 +128,14 @@ typedef struct {
         uint8_t SYNCStartValue;
     } x1802_TPDOCommunicationParameter;
     struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByTPDO;
+        uint8_t transmissionType;
+        uint16_t inhibitTime;
+        uint16_t eventTimer;
+        uint8_t SYNCStartValue;
+    } x1803_TPDOCommunicationParameter;
+    struct {
         uint8_t numberOfMappedApplicationObjectsInPDO;
         uint32_t applicationObject1;
         uint32_t applicationObject2;
@@ -160,12 +168,30 @@ typedef struct {
         uint32_t applicationObject7;
         uint32_t applicationObject8;
     } x1A02_TPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1A03_TPDOMappingParameter;
     uint32_t x6000_ALiex_Disco_VAR32_6000;
     uint32_t x6001_ALiex_Disco_VAR32_6001;
     uint64_t x6002_ALiex_Disco_VAR64_6002;
     uint32_t x6003_ALiex_Disco_VAR32_6003;
     uint8_t x6039_ALiex_Disco_Array_sub0;
     uint16_t x6039_ALiex_Disco_Array[OD_CNT_ARR_6039];
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t dfgdf;
+        uint32_t redffh;
+        uint32_t vbn;
+        uint32_t asd4;
+    } x603A_aliex_Record;
 } OD_PERSIST_COMM_t;
 
 typedef struct {
@@ -222,14 +248,17 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1800 &OD->list[19]
 #define OD_ENTRY_H1801 &OD->list[20]
 #define OD_ENTRY_H1802 &OD->list[21]
-#define OD_ENTRY_H1A00 &OD->list[22]
-#define OD_ENTRY_H1A01 &OD->list[23]
-#define OD_ENTRY_H1A02 &OD->list[24]
-#define OD_ENTRY_H6000 &OD->list[25]
-#define OD_ENTRY_H6001 &OD->list[26]
-#define OD_ENTRY_H6002 &OD->list[27]
-#define OD_ENTRY_H6003 &OD->list[28]
-#define OD_ENTRY_H6039 &OD->list[29]
+#define OD_ENTRY_H1803 &OD->list[22]
+#define OD_ENTRY_H1A00 &OD->list[23]
+#define OD_ENTRY_H1A01 &OD->list[24]
+#define OD_ENTRY_H1A02 &OD->list[25]
+#define OD_ENTRY_H1A03 &OD->list[26]
+#define OD_ENTRY_H6000 &OD->list[27]
+#define OD_ENTRY_H6001 &OD->list[28]
+#define OD_ENTRY_H6002 &OD->list[29]
+#define OD_ENTRY_H6003 &OD->list[30]
+#define OD_ENTRY_H6039 &OD->list[31]
+#define OD_ENTRY_H603A &OD->list[32]
 
 
 /*******************************************************************************
@@ -257,14 +286,17 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[19]
 #define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[20]
 #define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[21]
-#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[22]
-#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[23]
-#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[24]
-#define OD_ENTRY_H6000_ALiex_Disco_VAR32_6000 &OD->list[25]
-#define OD_ENTRY_H6001_ALiex_Disco_VAR32_6001 &OD->list[26]
-#define OD_ENTRY_H6002_ALiex_Disco_VAR64_6002 &OD->list[27]
-#define OD_ENTRY_H6003_ALiex_Disco_VAR32_6003 &OD->list[28]
-#define OD_ENTRY_H6039_ALiex_Disco_Array &OD->list[29]
+#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[22]
+#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[23]
+#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[24]
+#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[25]
+#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[26]
+#define OD_ENTRY_H6000_ALiex_Disco_VAR32_6000 &OD->list[27]
+#define OD_ENTRY_H6001_ALiex_Disco_VAR32_6001 &OD->list[28]
+#define OD_ENTRY_H6002_ALiex_Disco_VAR64_6002 &OD->list[29]
+#define OD_ENTRY_H6003_ALiex_Disco_VAR32_6003 &OD->list[30]
+#define OD_ENTRY_H6039_ALiex_Disco_Array &OD->list[31]
+#define OD_ENTRY_H603A_aliex_Record &OD->list[32]
 
 
 /*******************************************************************************

@@ -242,12 +242,14 @@ if (err != CO_ERROR_NO)
 }
 
 void
-canopen_app_process() {
+canopen_app_process()
+{
     /* loop for normal program execution ******************************************/
     /* get time difference since last function call */
     time_current = HAL_GetTick();
 
-    if ((time_current - time_old) > 0) { // Make sure more than 1ms elapsed
+    if ((time_current - time_old) > 0)
+    { // Make sure more than 1ms elapsed
         /* CANopen process */
         CO_NMT_reset_cmd_t reset_status;
         uint32_t timeDifference_us = (time_current - time_old) * 1000;
@@ -266,14 +268,18 @@ canopen_app_process() {
             Message_2_UART("canopen_app_process 252"
             				"CANopenNode Reset Communication request ");
             canopen_app_init(canopenNodeSTM32); // Reset Communication routine
-        } else if (reset_status == CO_RESET_APP) {
-            //log_printf("CANopenNode Device Reset\n");
-            Message_2_UART("canopen_app_process 257"
-            				"CANopenNode Device Reset\n");
-            HAL_NVIC_SystemReset(); // Reset the STM32 Microcontroller
-        }
-    }
+        } else if (reset_status == CO_RESET_APP)
+				{
+					//log_printf("CANopenNode Device Reset\n");
+					Message_2_UART("canopen_app_process 257"
+									"CANopenNode Device Reset\n");
+					HAL_NVIC_SystemReset(); // Reset the STM32 Microcontroller
+				}
+    }////////////if ((time_current - time_old) > 0)
+
 }
+
+
 
 /* Thread function executes in constant intervals, this function can be called from FreeRTOS tasks or Timers ********/
 void
