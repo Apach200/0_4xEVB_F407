@@ -66,21 +66,23 @@ extern	uint8_t Local_Count;
 
 CO_SDO_abortCode_t	read_SDO	(
 								  CO_SDOclient_t* SDO_C,
-								  uint8_t nodeId, 	//Remote_NodeID
-								  uint16_t index,	//OD_Index_of_entire_at_Remote_NodeID
+								  uint8_t nodeId, 	// Remote_NodeID
+								  uint16_t index,	// OD_Index_of_entire_at_Remote_NodeID
 								  uint8_t subIndex, // OD_SubIndex_of_entire_at_Remote_NodeID
-								  uint8_t* buf, 	//Saved_Data_Array
-								  size_t bufSize, 	//Number_of_Bytes_Read_from_Remote_NodeID
-								  size_t* readSize 	//pointer_at_Number_of_Bytes_to_save
+								  uint8_t* buf, 	// Saved_Data_Array
+								  size_t bufSize, 	// Number_of_Bytes_Read_from_Remote_NodeID
+								  size_t* readSize 	// pointer_at_Number_of_Bytes_to_save
 								  )
 {
-    CO_SDO_return_t SDO_ret;
+CO_SDO_return_t SDO_ret;
 
-    // setup client (this can be skipped, if remote device don't change)
-    SDO_ret = CO_SDOclient_setup (
-    								SDO_C, CO_CAN_ID_SDO_CLI + nodeId,
-									CO_CAN_ID_SDO_SRV + nodeId,
-									nodeId);
+// setup client (this can be skipped, if remote device don't change)
+SDO_ret = CO_SDOclient_setup (
+						 	 SDO_C,
+							 CO_CAN_ID_SDO_CLI + nodeId,
+							 CO_CAN_ID_SDO_SRV + nodeId,
+							 nodeId
+							);
 
     if (SDO_ret != CO_SDO_RT_ok_communicationEnd) { return (CO_SDO_AB_GENERAL); }
 

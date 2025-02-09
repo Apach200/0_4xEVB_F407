@@ -94,7 +94,7 @@ void UART_interface_Test(void);
 //void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Blink, uint16_t Period_of_blink_ms);
 void Board_Name_to_Terminal(void);
 void CO_Init_Return_State(uint16_t Returned_Code);
-
+void Test_Duration(void);
 
 
 /* USER CODE END PFP */
@@ -194,305 +194,18 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-   canopen_app_process();
-
 	Local_Count=0;
 	OD_PERSIST_COMM.x6000_lowerF_VAR32_6000=0;
-	uint16_t	Measure_Enable=1;
-	uint32_t	Ticks_e;
-	uint32_t	Ticks_b;
+
 
   while (1)
   {
+	  OD_PERSIST_COMM.x6000_lowerF_VAR32_6000++;
+
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 //		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6 );//LED1_Pin___//LED1_GPIO_Port//green
-if(
-	HAL_GetTick()>8000
-	&&
-	Measure_Enable
-//	&&
-//	htim4.Instance->CNT<=1
-	)
-	{
-	Ticks_b = HAL_GetTick();
-	//Ticks = htim4.Instance->CNT;
-	Measure_Enable=2;
-	}
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-
-
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-
-
-
-
-
-
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-
-
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
-	canopen_app_process();
-
-	if(Measure_Enable==2	) {
-								//Ticks = HAL_GetTick() - Ticks;
-								Ticks_e = HAL_GetTick();
-								//uint16_t LL = sprintf(Message_to_Terminal,"Duration canopen_app_process() in while(1) =0x%X ms %d\n\r ",(uint16_t)(Ticks_b),(uint16_t)Ticks_e);
-								uint16_t LL = sprintf(Message_to_Terminal,"Duration canopen_app_process() Ticks_b =0x%X ms \n\r Ticks_e =0x%X ms \n\r ",(uint16_t)(Ticks_b),(uint16_t)Ticks_e);
-								HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)Message_to_Terminal, LL);
-							    Measure_Enable=0;
-						      }
-
 
     /* USER CODE END WHILE */
 
@@ -724,6 +437,40 @@ HAL_Delay(50);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void Test_Duration(void)
+{
+	uint16_t	Measure_Enable=1;
+	uint32_t	Ticks_e;
+	uint32_t	Ticks_b;
+	//uint16_t Count_while=0;
+	uint16_t LL;
+
+
+	if(
+		HAL_GetTick()>8000
+		&&
+		Measure_Enable
+	//	&&
+	//	htim4.Instance->CNT<=1
+		)
+		{
+		Ticks_b = HAL_GetTick();
+		//Ticks = htim4.Instance->CNT;
+		Measure_Enable=2;
+		}
+		//canopen_app_process();
+
+		if(Measure_Enable==2	) {
+									//Ticks = HAL_GetTick() - Ticks;
+									Ticks_e = HAL_GetTick();
+									// LL = sprintf(Message_to_Terminal,"Duration canopen_app_process() in while(1) =0x%X ms %d\n\r ",(uint16_t)(Ticks_b),(uint16_t)Ticks_e);
+									 LL = sprintf(Message_to_Terminal,"Duration canopen_app_process() Ticks_b =0x%X ms \n\r Ticks_e =0x%X ms \n\r ",(uint16_t)(Ticks_b),(uint16_t)Ticks_e);
+									HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)Message_to_Terminal, LL);
+								    Measure_Enable=0;
+							      }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /* USER CODE END 4 */
 
 /**

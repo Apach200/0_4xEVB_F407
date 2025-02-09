@@ -1470,7 +1470,8 @@ CO_CANmodule_process(co->CANmodule);
 
 			CO_LEDs_process(
 							co->LEDs,
-							timeDifference_us, unc ? CO_NMT_INITIALIZING : NMTstate,
+							timeDifference_us,
+							unc ? CO_NMT_INITIALIZING : NMTstate,
 							LSSslave_configuration,
 							(CANerrorStatus & CO_CAN_ERRTX_BUS_OFF) != 0U,
 							(CANerrorStatus & CO_CAN_ERR_WARN_PASSIVE) != 0U,
@@ -1545,49 +1546,79 @@ return reset;
 
 #if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) != 0
 bool_t
-CO_process_SYNC(CO_t* co, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    bool_t syncWas = false;
+CO_process_SYNC(
+				CO_t* co,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
+bool_t syncWas = false;
 
-    if ((!co->nodeIdUnconfigured) && (CO_GET_CNT(SYNC) == 1U)) {
-        CO_NMT_internalState_t NMTstate = CO_NMT_getInternalState(co->NMT);
-        bool_t NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
+  if(
+	 (!co->nodeIdUnconfigured)
+	 && (CO_GET_CNT(SYNC) == 1U)
+	)
+	{
+		CO_NMT_internalState_t NMTstate = CO_NMT_getInternalState(co->NMT);
 
-        CO_SYNC_status_t sync_process = CO_SYNC_process(co->SYNC, NMTisPreOrOperational, timeDifference_us,
-                                                        timerNext_us);
+		bool_t
+		NMTisPreOrOperational = (
+								   (NMTstate == CO_NMT_PRE_OPERATIONAL)
+								|| (NMTstate == CO_NMT_OPERATIONAL    )
+								);
 
-        switch (sync_process) {
-            case CO_SYNC_NONE: break;
-            case CO_SYNC_RX_TX: syncWas = true; break;
-            case CO_SYNC_PASSED_WINDOW: CO_CANclearPendingSyncPDOs(co->CANmodule); break;
-            default:
-                /* MISRA C 2004 15.3 */
-                break;
-        }
-    }
+		CO_SYNC_status_t
+		sync_process = CO_SYNC_process (
+										co->SYNC,
+										NMTisPreOrOperational,
+										timeDifference_us,
+										timerNext_us);
 
-    return syncWas;
-}
+		switch (sync_process)
+		{
+			case CO_SYNC_NONE: break;
+			case CO_SYNC_RX_TX: syncWas = true; break;
+			case CO_SYNC_PASSED_WINDOW: CO_CANclearPendingSyncPDOs(co->CANmodule); break;
+			default:	break;	/* MISRA C 2004 15.3 */
+		}
+
+	}
+
+return syncWas;
+}///CO_process_SYNC()
 #endif
+
+
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) != 0
 void
-CO_process_RPDO(CO_t* co, bool_t syncWas, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    (void)timeDifference_us;
-    (void)timerNext_us;
-    if (co->nodeIdUnconfigured) {
-        return;
-    }
+CO_process_RPDO(
+				CO_t* co,
+				bool_t syncWas,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
+(void)timeDifference_us;
+(void)timerNext_us;
+if (co->nodeIdUnconfigured) { return; }
 
-    bool_t NMTisOperational = CO_NMT_getInternalState(co->NMT) == CO_NMT_OPERATIONAL;
+bool_t
+NMTisOperational = CO_NMT_getInternalState(co->NMT) == CO_NMT_OPERATIONAL;
 
-    for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++) {
-        CO_RPDO_process(&co->RPDO[i],
+for ( uint16_t i = 0;  i < CO_GET_CNT(RPDO);  i++)
+		{
+         CO_RPDO_process(
+        		 	 	 &co->RPDO[i],
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0
                         timeDifference_us, timerNext_us,
 #endif
-                        NMTisOperational, syncWas);
-    }
-}
+                        NMTisOperational,
+						syncWas
+						);
+		}////for
+
+}///CO_process_RPDO(
 #endif
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0

@@ -283,9 +283,12 @@ canopen_app_process()
 
 /* Thread function executes in constant intervals, this function can be called from FreeRTOS tasks or Timers ********/
 void
-canopen_app_interrupt(void) {
-    CO_LOCK_OD(CO->CANmodule);
-    if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal) {
+canopen_app_interrupt(void)
+{
+CO_LOCK_OD(CO->CANmodule);
+
+if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal)
+    {
         bool_t syncWas = false;
         /* get time difference since last function call */
         uint32_t timeDifference_us = 1000; // 1ms second

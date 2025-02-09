@@ -16,7 +16,7 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     05.02.2025 10:31:27
+        Modified:     08.02.2025 23:46:53
         Modified By:  
 
     Device Info:
@@ -44,7 +44,6 @@
 #define OD_CNT_HB_PROD 1
 #define OD_CNT_SDO_SRV 1
 #define OD_CNT_SDO_CLI 1
-#define OD_CNT_RPDO 1
 #define OD_CNT_TPDO 4
 
 
@@ -86,23 +85,6 @@ typedef struct {
         uint32_t COB_IDServerToClientRx;
         uint8_t node_IDOfTheSDOServer;
     } x1280_SDOClientParameter;
-    struct {
-        uint8_t highestSub_indexSupported;
-        uint32_t COB_IDUsedByRPDO;
-        uint8_t transmissionType;
-        uint16_t eventTimer;
-    } x1400_RPDOCommunicationParameter;
-    struct {
-        uint8_t numberOfMappedApplicationObjectsInPDO;
-        uint32_t applicationObject1;
-        uint32_t applicationObject2;
-        uint32_t applicationObject3;
-        uint32_t applicationObject4;
-        uint32_t applicationObject5;
-        uint32_t applicationObject6;
-        uint32_t applicationObject7;
-        uint32_t applicationObject8;
-    } x1600_RPDOMappingParameter;
     struct {
         uint8_t highestSub_indexSupported;
         uint32_t COB_IDUsedByTPDO;
@@ -181,8 +163,12 @@ typedef struct {
     } x1A03_TPDOMappingParameter;
     uint32_t x6000_ALiex_Disco_VAR32_6000;
     uint32_t x6001_ALiex_Disco_VAR32_6001;
-    uint64_t x6002_ALiex_Disco_VAR64_6002;
+    uint32_t x6002_ALiex_Disco_VAR32_6002;
     uint32_t x6003_ALiex_Disco_VAR32_6003;
+    uint32_t x6004_ALiex_Disco_VAR32_6004;
+    uint32_t x6005_ALiex_Disco_VAR32_6005;
+    uint32_t x6006_ALiex_Disco_VAR32_6006;
+    uint32_t x6007_ALiex_Disco_VAR32_6007;
     uint8_t x6039_ALiex_Disco_Array_sub0;
     uint16_t x6039_ALiex_Disco_Array[OD_CNT_ARR_6039];
     struct {
@@ -243,22 +229,24 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1019 &OD->list[14]
 #define OD_ENTRY_H1200 &OD->list[15]
 #define OD_ENTRY_H1280 &OD->list[16]
-#define OD_ENTRY_H1400 &OD->list[17]
-#define OD_ENTRY_H1600 &OD->list[18]
-#define OD_ENTRY_H1800 &OD->list[19]
-#define OD_ENTRY_H1801 &OD->list[20]
-#define OD_ENTRY_H1802 &OD->list[21]
-#define OD_ENTRY_H1803 &OD->list[22]
-#define OD_ENTRY_H1A00 &OD->list[23]
-#define OD_ENTRY_H1A01 &OD->list[24]
-#define OD_ENTRY_H1A02 &OD->list[25]
-#define OD_ENTRY_H1A03 &OD->list[26]
-#define OD_ENTRY_H6000 &OD->list[27]
-#define OD_ENTRY_H6001 &OD->list[28]
-#define OD_ENTRY_H6002 &OD->list[29]
-#define OD_ENTRY_H6003 &OD->list[30]
-#define OD_ENTRY_H6039 &OD->list[31]
-#define OD_ENTRY_H603A &OD->list[32]
+#define OD_ENTRY_H1800 &OD->list[17]
+#define OD_ENTRY_H1801 &OD->list[18]
+#define OD_ENTRY_H1802 &OD->list[19]
+#define OD_ENTRY_H1803 &OD->list[20]
+#define OD_ENTRY_H1A00 &OD->list[21]
+#define OD_ENTRY_H1A01 &OD->list[22]
+#define OD_ENTRY_H1A02 &OD->list[23]
+#define OD_ENTRY_H1A03 &OD->list[24]
+#define OD_ENTRY_H6000 &OD->list[25]
+#define OD_ENTRY_H6001 &OD->list[26]
+#define OD_ENTRY_H6002 &OD->list[27]
+#define OD_ENTRY_H6003 &OD->list[28]
+#define OD_ENTRY_H6004 &OD->list[29]
+#define OD_ENTRY_H6005 &OD->list[30]
+#define OD_ENTRY_H6006 &OD->list[31]
+#define OD_ENTRY_H6007 &OD->list[32]
+#define OD_ENTRY_H6039 &OD->list[33]
+#define OD_ENTRY_H603A &OD->list[34]
 
 
 /*******************************************************************************
@@ -281,22 +269,24 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1019_synchronousCounterOverflowValue &OD->list[14]
 #define OD_ENTRY_H1200_SDOServerParameter &OD->list[15]
 #define OD_ENTRY_H1280_SDOClientParameter &OD->list[16]
-#define OD_ENTRY_H1400_RPDOCommunicationParameter &OD->list[17]
-#define OD_ENTRY_H1600_RPDOMappingParameter &OD->list[18]
-#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[19]
-#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[20]
-#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[21]
-#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[22]
-#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[23]
-#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[24]
-#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[25]
-#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[26]
-#define OD_ENTRY_H6000_ALiex_Disco_VAR32_6000 &OD->list[27]
-#define OD_ENTRY_H6001_ALiex_Disco_VAR32_6001 &OD->list[28]
-#define OD_ENTRY_H6002_ALiex_Disco_VAR64_6002 &OD->list[29]
-#define OD_ENTRY_H6003_ALiex_Disco_VAR32_6003 &OD->list[30]
-#define OD_ENTRY_H6039_ALiex_Disco_Array &OD->list[31]
-#define OD_ENTRY_H603A_aliex_Record &OD->list[32]
+#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[17]
+#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[18]
+#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[19]
+#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[20]
+#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[21]
+#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[22]
+#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[23]
+#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[24]
+#define OD_ENTRY_H6000_ALiex_Disco_VAR32_6000 &OD->list[25]
+#define OD_ENTRY_H6001_ALiex_Disco_VAR32_6001 &OD->list[26]
+#define OD_ENTRY_H6002_ALiex_Disco_VAR32_6002 &OD->list[27]
+#define OD_ENTRY_H6003_ALiex_Disco_VAR32_6003 &OD->list[28]
+#define OD_ENTRY_H6004_ALiex_Disco_VAR32_6004 &OD->list[29]
+#define OD_ENTRY_H6005_ALiex_Disco_VAR32_6005 &OD->list[30]
+#define OD_ENTRY_H6006_ALiex_Disco_VAR32_6006 &OD->list[31]
+#define OD_ENTRY_H6007_ALiex_Disco_VAR32_6007 &OD->list[32]
+#define OD_ENTRY_H6039_ALiex_Disco_Array &OD->list[33]
+#define OD_ENTRY_H603A_aliex_Record &OD->list[34]
 
 
 /*******************************************************************************
@@ -326,9 +316,9 @@ extern OD_ATTR_OD OD_t *OD;
     (config).ENTRY_H1006 = OD_ENTRY_H1006;\
     (config).ENTRY_H1007 = OD_ENTRY_H1007;\
     (config).ENTRY_H1019 = OD_ENTRY_H1019;\
-    (config).CNT_RPDO = OD_CNT_RPDO;\
-    (config).ENTRY_H1400 = OD_ENTRY_H1400;\
-    (config).ENTRY_H1600 = OD_ENTRY_H1600;\
+    (config).CNT_RPDO = 0;\
+    (config).ENTRY_H1400 = NULL;\
+    (config).ENTRY_H1600 = NULL;\
     (config).CNT_TPDO = OD_CNT_TPDO;\
     (config).ENTRY_H1800 = OD_ENTRY_H1800;\
     (config).ENTRY_H1A00 = OD_ENTRY_H1A00;\

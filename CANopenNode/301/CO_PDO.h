@@ -348,10 +348,9 @@ CO_ReturnError_t CO_TPDO_init(CO_TPDO_t* TPDO, OD_t* OD, CO_EM_t* em,
  * @param TPDO TPDO object.
  */
 static inline void
-CO_TPDOsendRequest(CO_TPDO_t* TPDO) {
-    if (TPDO != NULL) {
-        TPDO->sendRequest = true;
-    }
+CO_TPDOsendRequest(CO_TPDO_t* TPDO)
+{
+ if (TPDO != NULL) {TPDO->sendRequest = true; }
 }
 
 /**

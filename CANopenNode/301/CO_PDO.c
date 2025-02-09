@@ -619,51 +619,72 @@ ODR_t odRet;
 
     /* verify arguments */
 if (
-	(RPDO == NULL) || (OD == NULL) || (em == NULL)
-	|| (OD_14xx_RPDOCommPar == NULL) || (OD_16xx_RPDOMapPar == NULL)
+	   (RPDO     == NULL)
+	|| (OD       == NULL)
+	|| (em       == NULL)
+	|| (OD_14xx_RPDOCommPar == NULL)
+	|| (OD_16xx_RPDOMapPar  == NULL)
 	|| (CANdevRx == NULL)
 	) {return CO_ERROR_ILLEGAL_ARGUMENT;}
 
-    /* clear object */
-    (void)memset(RPDO, 0, sizeof(CO_RPDO_t));
+/* clear object */
+(void)memset(RPDO, 0, sizeof(CO_RPDO_t));
 
-    /* Configure object variables */
-    PDO->em = em;
-    PDO->CANdev = CANdevRx;
+/* Configure object variables */
+PDO->em = em;
+PDO->CANdev = CANdevRx;
 
-    /* Configure mapping parameters */
-    uint32_t erroneousMap = 0;
-    ret = PDO_initMapping(PDO, OD, OD_16xx_RPDOMapPar, true, errInfo, &erroneousMap);
-    if (ret != CO_ERROR_NO) {
-        return ret;
-    }
+/* Configure mapping parameters */
+uint32_t erroneousMap = 0;
 
-    /* Configure communication parameter - COB-ID */
-    uint32_t COB_ID = 0;
-    odRet = OD_get_u32(OD_14xx_RPDOCommPar, 1, &COB_ID, true);
-    if (odRet != ODR_OK) {
-        if (errInfo != NULL) {
-            *errInfo = (((uint32_t)OD_getIndex(OD_14xx_RPDOCommPar)) << 8) | 1U;
-        }
-        return CO_ERROR_OD_PARAMETERS;
-    }
+ret = PDO_initMapping (
+						PDO,
+						OD,
+						OD_16xx_RPDOMapPar,
+						true,
+						errInfo,
+						&erroneousMap
+						);
 
-    bool_t valid = (COB_ID & 0x80000000U) == 0U;
-    uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
-    if (valid && ((PDO->mappedObjectsCount == 0U) || (CAN_ID == 0U))) {
-        valid = false;
-        if (erroneousMap == 0U) {
-            erroneousMap = 1;
-        }
-    }
+if (ret != CO_ERROR_NO) { return ret; }
 
-    if (erroneousMap != 0U) {
-        CO_errorReport(PDO->em, CO_EM_PDO_WRONG_MAPPING, CO_EMC_PROTOCOL_ERROR,
-                       (erroneousMap != 1U) ? erroneousMap : COB_ID);
-    }
-    if (!valid) {
-        CAN_ID = 0;
-    }
+/* Configure communication parameter - COB-ID */
+uint32_t COB_ID = 0;
+odRet = OD_get_u32(OD_14xx_RPDOCommPar, 1, &COB_ID, true);
+if (odRet != ODR_OK)
+	{
+		if (errInfo != NULL)
+		{
+		*errInfo = (((uint32_t)OD_getIndex(OD_14xx_RPDOCommPar)) << 8) | 1U;
+		}
+		return CO_ERROR_OD_PARAMETERS;
+	}
+
+bool_t valid = (COB_ID & 0x80000000U) == 0U;
+uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FFU);
+if (
+	valid
+		&& ((PDO->mappedObjectsCount == 0U) || (CAN_ID == 0U))
+   ){
+	valid = false;
+	if (erroneousMap == 0U) { erroneousMap = 1;	}
+	}
+
+
+
+if (erroneousMap != 0U)
+	{
+	 CO_errorReport (
+			 	 	 PDO->em,
+					 CO_EM_PDO_WRONG_MAPPING,
+					 CO_EMC_PROTOCOL_ERROR,
+				     (erroneousMap != 1U) ? erroneousMap : COB_ID
+					);
+	}
+
+if (!valid) { CAN_ID = 0; }
+
+
 
     /* If default CAN-ID is stored in OD (without Node-ID), add Node-ID */
     if ((CAN_ID != 0U) && (CAN_ID == (preDefinedCanId & 0xFF80U))) {

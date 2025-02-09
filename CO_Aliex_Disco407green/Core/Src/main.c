@@ -93,6 +93,7 @@ uint8_t Array_from_Terminal[128]={0};
 uint8_t Length_of_Message;
 uint8_t Length_of_Ext_Var=0;
 uint8_t Local_Count=0;
+uint32_t Duration_of_the_CO_process;
 uint64_t Count_of_while1=0;
 float ChipTemperature;
 
@@ -106,6 +107,9 @@ uint64_t            tmp64u_0   = 0x0e1f1a1b56789a;
 uint64_t            tmp64u_1   = 0x0e1f1a1b56789a;
 uint32_t            Ticks;
 uint32_t            Ticks_1;
+uint32_t            Ticks_2;
+uint32_t            Ticks_3;
+
 char String_H[]={"String_for_Test_UART_"};
 char String_L[]={"String_for_Test_UART_"};
 char buff[16]={8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
@@ -279,50 +283,117 @@ int main(void)
 		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);//Green
 		  				//tmp32u_0 = OD_PERSIST_COMM.x6000_lowerF_VAR32_6000;
 
-//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );HAL_Delay(50);
-//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );HAL_Delay(50);
-//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );HAL_Delay(50);
-//			CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );HAL_Delay(50);
-			Ticks = HAL_GetTick();
-		  while (1)
-		  {
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
-			 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
-			 // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
+Ticks = HAL_GetTick();
+uint32_t T_Get =  HAL_GetTick()>>10;
 
-			canopen_app_process();
-			  Encoder_to_LCD();
-			  RTC_update_and_Terminal(2000);
+while ( (HAL_GetTick()-Ticks)<3000 )
+//	while (1)
+	{
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
+	canopen_app_process();
+
+	if(T_Get != HAL_GetTick()>>10 )
+		{
+		 T_Get =  HAL_GetTick()>>10;
+		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+		}
+
+	}////while (HAL_GetTick() - Ticks<5000)
+HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET );
 
 
-			  if(HAL_GetTick() - Ticks>399)
-			  {
-				Ticks = HAL_GetTick();
+Ticks_2 = HAL_GetTick();
+Ticks_3 = HAL_GetTick();
 
-			if(tmp32u_1 != OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001)
+while (HAL_GetTick() - Ticks_2<10000)
+	{
+
+	if(T_Get != HAL_GetTick()>>10 )
+		{
+		 T_Get =  HAL_GetTick()>>10;
+		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+		}
+
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
+	// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
+	// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
+
+//	DWT->CTRL |= 1 ; // enable the counter
+//	DWT->CYCCNT = 0; // reset the counter
+//	canopen_app_process();
+//	Duration_of_the_CO_process= DWT->CYCCNT;
+
+	//Encoder_to_LCD();
+	RTC_update_and_Terminal(1999);
+
+	if(HAL_GetTick() - Ticks_3>39)
+		{
+		Ticks_3 = HAL_GetTick();
+		}////if(HAL_GetTick() - Ticks>39)
+		//Local_Count=5;
+			switch (Local_Count)
 				{
-				tmp32u_1 = OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001;
-				}
+				case 0:
+					OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
+					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
+					tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
+					Local_Count=2;
+					break;
+				case 1:
+				//					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
+				//					tmp32u_0 = OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001;
+				//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
+					Local_Count=2;
+					break;
+				case 2:
+					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
+					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
+					tmp32u_0 = OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003;
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+					Local_Count=0;
+					break;
+				case 3:
+				//					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
+				//					tmp32u_0 = OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003;
+				//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+				//					Local_Count=0;
+					break;
+				default:
+					Local_Count=0;
+					break;
+		}///switch (Local_Count)
 
-				OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
-				tmp32u_0 = OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000;
-				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-				TerminalInterface.gState = HAL_UART_STATE_READY;
-				HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)( &tmp32u_0 ), 4);
-				Local_Count++;Local_Count = Local_Count%4;
-				if(Local_Count==0){OD_PERSIST_COMM.x6039_ALiex_Disco_Array[0]++;}
-				CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[Local_Count] );
-				//LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->service);
-				//LSS_Service_Info(canOpenNodeSTM32.canOpenStack->LSSslave->lssState);
-			  }
+	}///while (HAL_GetTick() - Ticks<10000)
+
+uint8_t LL = sprintf(
+					Message_to_Terminal,
+					"_Duration_of_the_CO_process = 0x%04X%04X \n\r",
+					(uint16_t)(Duration_of_the_CO_process >> 16 ),
+					(uint16_t)(Duration_of_the_CO_process & 0x0FFFF )
+					);
+TerminalInterface.gState = HAL_UART_STATE_READY;
+HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)(Message_to_Terminal), LL);
+HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET );
 
 
+while (1)
+{
+HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
+HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
+canopen_app_process();
 
-    /* USER CODE END WHILE */
+/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
+/* USER CODE BEGIN 3 */
+}
+
   /* USER CODE END 3 */
 }
 
@@ -746,7 +817,7 @@ HAL_Delay(50);
 	  				0x600E,										//Index_of_OD_variable_Disco_Blue_VAR64_600e_TX_at_remote_Node
 	  				0,											//Sub_Index_of_OD_variable
 	  				Rx_Array,									//Saved_Received_Data
-	  				4,											//Number_of_Byte_to_read
+	  				4,											//Number_of_Byte_to_read_from_Remote_OD
 	  				(size_t*)&Length_of_Ext_Var );
 
 	  #if 1

@@ -105,7 +105,8 @@ typedef struct {
 } CO_CANtx_t;
 
 /* CAN module object */
-typedef struct {
+typedef struct
+{
     void* CANptr;
     CO_CANrx_t* rxArray;
     uint16_t rxSize;

@@ -205,14 +205,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-		  OD_PERSIST_COMM.x6000_upper_F4XX_VAR32_6000_TX=0;
-		  Local_Count=0;
-		  while (1)
-		  {
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-			  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, canOpenNodeSTM32.outStatusLEDRed  );
-
-			  canopen_app_process();
+	  OD_PERSIST_COMM.x6000_upper_F4XX_VAR32_6000_TX=0;
+	  Local_Count=0;
+   while (1)
+  {
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, canOpenNodeSTM32.outStatusLEDRed  );
+		  canopen_app_process();
 
     /* USER CODE END WHILE */
 

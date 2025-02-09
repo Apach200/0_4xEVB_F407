@@ -492,42 +492,58 @@ CO_EM_initCallbackPre(CO_EM_t* em, void* object, void (*pFunctSignal)(void* obje
 #endif
 
 void
-CO_EM_process(CO_EM_t* em, bool_t NMTisPreOrOperational, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    (void)timerNext_us; /* may be unused */
+CO_EM_process (
+				CO_EM_t* em,
+				bool_t NMTisPreOrOperational,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
+(void)timerNext_us; /* may be unused */
 
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_PROD_INHIBIT) == 0
+
     (void)timeDifference_us; /* may be unused */
+
 #endif
 
     /* verify errors from driver */
-    uint16_t CANerrSt = em->CANdevTx->CANerrorStatus;
-    if (CANerrSt != em->CANerrorStatusOld) {
-        uint16_t CANerrStChanged = CANerrSt ^ em->CANerrorStatusOld;
-        em->CANerrorStatusOld = CANerrSt;
+uint16_t CANerrSt = em->CANdevTx->CANerrorStatus;
 
-        if ((CANerrStChanged & (CO_CAN_ERRTX_WARNING | CO_CAN_ERRRX_WARNING)) != 0U) {
-            CO_error(em, (CANerrSt & (CO_CAN_ERRTX_WARNING | CO_CAN_ERRRX_WARNING)) != 0U, CO_EM_CAN_BUS_WARNING,
-                     CO_EMC_NO_ERROR, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRTX_PASSIVE) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRTX_PASSIVE) != 0U, CO_EM_CAN_TX_BUS_PASSIVE, CO_EMC_CAN_PASSIVE, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRTX_BUS_OFF) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRTX_BUS_OFF) != 0U, CO_EM_CAN_TX_BUS_OFF, CO_EMC_BUS_OFF_RECOVERED, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRTX_OVERFLOW) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRTX_OVERFLOW) != 0U, CO_EM_CAN_TX_OVERFLOW, CO_EMC_CAN_OVERRUN, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRTX_PDO_LATE) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRTX_PDO_LATE) != 0U, CO_EM_TPDO_OUTSIDE_WINDOW, CO_EMC_COMMUNICATION, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRRX_PASSIVE) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRRX_PASSIVE) != 0U, CO_EM_CAN_RX_BUS_PASSIVE, CO_EMC_CAN_PASSIVE, 0);
-        }
-        if ((CANerrStChanged & CO_CAN_ERRRX_OVERFLOW) != 0U) {
-            CO_error(em, (CANerrSt & CO_CAN_ERRRX_OVERFLOW) != 0U, CO_EM_CAN_RXB_OVERFLOW, CO_EMC_CAN_OVERRUN, 0);
-        }
-    }
+if (CANerrSt != em->CANerrorStatusOld)
+	{
+		uint16_t CANerrStChanged = CANerrSt ^ em->CANerrorStatusOld;
+		em->CANerrorStatusOld = CANerrSt;
+
+		if ((CANerrStChanged & (CO_CAN_ERRTX_WARNING | CO_CAN_ERRRX_WARNING)) != 0U  )
+			{
+			CO_error  (
+						em,
+						(CANerrSt & (CO_CAN_ERRTX_WARNING | CO_CAN_ERRRX_WARNING)) != 0U,
+						CO_EM_CAN_BUS_WARNING,
+						 CO_EMC_NO_ERROR,
+						 0 );
+			}
+
+		if ((CANerrStChanged & CO_CAN_ERRTX_PASSIVE) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRTX_PASSIVE) != 0U, CO_EM_CAN_TX_BUS_PASSIVE, CO_EMC_CAN_PASSIVE, 0);
+		}
+		if ((CANerrStChanged & CO_CAN_ERRTX_BUS_OFF) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRTX_BUS_OFF) != 0U, CO_EM_CAN_TX_BUS_OFF, CO_EMC_BUS_OFF_RECOVERED, 0);
+		}
+		if ((CANerrStChanged & CO_CAN_ERRTX_OVERFLOW) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRTX_OVERFLOW) != 0U, CO_EM_CAN_TX_OVERFLOW, CO_EMC_CAN_OVERRUN, 0);
+		}
+		if ((CANerrStChanged & CO_CAN_ERRTX_PDO_LATE) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRTX_PDO_LATE) != 0U, CO_EM_TPDO_OUTSIDE_WINDOW, CO_EMC_COMMUNICATION, 0);
+		}
+		if ((CANerrStChanged & CO_CAN_ERRRX_PASSIVE) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRRX_PASSIVE) != 0U, CO_EM_CAN_RX_BUS_PASSIVE, CO_EMC_CAN_PASSIVE, 0);
+		}
+		if ((CANerrStChanged & CO_CAN_ERRRX_OVERFLOW) != 0U) {
+			CO_error(em, (CANerrSt & CO_CAN_ERRRX_OVERFLOW) != 0U, CO_EM_CAN_RXB_OVERFLOW, CO_EMC_CAN_OVERRUN, 0);
+	}
+}
 
     /* calculate Error register */
     uint8_t errorRegister = 0U;
@@ -645,38 +661,38 @@ CO_EM_process(CO_EM_t* em, bool_t NMTisPreOrOperational, uint32_t timeDifference
 
 void
 CO_error(
-		CO_EM_t* em,
-		bool_t setError,
-		const uint8_t errorBit,
-		uint16_t errorCode,
-		uint32_t infoCode
+		 CO_EM_t* em,
+		 bool_t setError,
+		 const uint8_t errorBit,
+		 uint16_t errorCode,
+		 uint32_t infoCode
 		)
 {
 if (em == NULL) {return;}
     uint8_t index = errorBit >> 3;
     uint8_t bitmask = 1U << (errorBit & 0x7U);
 
-    /* if unsupported errorBit, change to 'CO_EM_WRONG_ERROR_REPORT' */
-    if (index >= (CO_CONFIG_EM_ERR_STATUS_BITS_COUNT / 8U))
-    {
-        index = CO_EM_WRONG_ERROR_REPORT >> 3;
-        bitmask = 1U << (CO_EM_WRONG_ERROR_REPORT & 0x7U);
-        errorCode = CO_EMC_SOFTWARE_INTERNAL;
-        infoCode = errorBit;
-    }
+/* if unsupported errorBit, change to 'CO_EM_WRONG_ERROR_REPORT' */
+if (index >= (CO_CONFIG_EM_ERR_STATUS_BITS_COUNT / 8U))
+{
+	index = CO_EM_WRONG_ERROR_REPORT >> 3;
+	bitmask = 1U << (CO_EM_WRONG_ERROR_REPORT & 0x7U);
+	errorCode = CO_EMC_SOFTWARE_INTERNAL;
+	infoCode = errorBit;
+}
 
-    uint8_t* errorStatusBits = &em->errorStatusBits[index];
-    uint8_t errorStatusBitMasked = *errorStatusBits & bitmask;
+uint8_t* errorStatusBits = &em->errorStatusBits[index];
+uint8_t errorStatusBitMasked = *errorStatusBits & bitmask;
 
-    /* If error is already set (or unset), return without further actions,
-     * otherwise toggle bit and continue with error indication. */
-    if (setError)
-    {
-     if (errorStatusBitMasked != 0U) {return;}
-    } else 	{
-        	if (errorStatusBitMasked == 0U) {return; }
-        	errorCode = CO_EMC_NO_ERROR;
-			}
+/* If error is already set (or unset), return without further actions,
+ * otherwise toggle bit and continue with error indication. */
+if (setError)
+{
+ if (errorStatusBitMasked != 0U) {return;}
+} else 	{
+		if (errorStatusBitMasked == 0U) {return; }
+		errorCode = CO_EMC_NO_ERROR;
+		}
 
 #if ((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) != 0
     /* prepare emergency message. Error register will be added in post-process */
@@ -686,9 +702,9 @@ if (em == NULL) {return;}
 #endif
 #endif
 
-    /* safely write data, and increment pointers */
-    CO_LOCK_EMCY(em->CANdevTx);
-    if (setError) {*errorStatusBits |= bitmask;} else { *errorStatusBits &= ~bitmask; }
+/* safely write data, and increment pointers */
+CO_LOCK_EMCY(em->CANdevTx);
+if (setError) { *errorStatusBits |= bitmask; } else { *errorStatusBits &= ~bitmask; }
 
 #if ((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) != 0
 
