@@ -271,63 +271,42 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-
-//   canopen_app_process();
+HAL_Delay(1);
+canopen_app_process();
+HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);//Green
+OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000=0;
 
 #if Make_Read_SDO
 #endif//Make_Read_SDO
-
-		  HAL_Delay(50);
-	  	  Local_Count=3;
-      	  OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000=0;
-		  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);//Green
-		  				//tmp32u_0 = OD_PERSIST_COMM.x6000_lowerF_VAR32_6000;
 
 Ticks = HAL_GetTick();
 uint32_t T_Get =  HAL_GetTick()>>10;
 
 while ( (HAL_GetTick()-Ticks)<3000 )
-//	while (1)
 	{
-
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 	canopen_app_process();
 
-	if(T_Get != HAL_GetTick()>>10 )
-		{
-		 T_Get =  HAL_GetTick()>>10;
-		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-		}
+	if(T_Get != HAL_GetTick()>>10 )	{
+									 T_Get =  HAL_GetTick()>>10;
+									 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+									}
 
-	}////while (HAL_GetTick() - Ticks<5000)
+
+	}////while (HAL_GetTick() - Ticks<3000)
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET );
 
-
+	  	  Local_Count=0;
 Ticks_2 = HAL_GetTick();
 Ticks_3 = HAL_GetTick();
 
 DWT->CTRL |= 1 ; // Enable_the_Counter_of_Core_circles
 
-while (HAL_GetTick() - Ticks_2<3500)
+while (0)		////   while (HAL_GetTick() - Ticks_2<6500)
 	{
-
-//	if(T_Get != HAL_GetTick()>>10 )
-//		{
-//		 T_Get =  HAL_GetTick()>>10;
-//		 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-//		}
-
-
-
-
-	//Encoder_to_LCD();
-	//RTC_update_and_Terminal(1999);
-
-//	if(HAL_GetTick() - Ticks_3>39)
-//		{
-//		Ticks_3 = HAL_GetTick();
-//		}////if(HAL_GetTick() - Ticks>39)
+	Encoder_to_LCD();
+	RTC_update_and_Terminal(1999);
 
 			switch (Local_Count)
 				{
@@ -343,14 +322,6 @@ while (HAL_GetTick() - Ticks_2<3500)
 					break;
 
 				case 1:
-					canopen_app_process();
-					HAL_Delay(5);
-					canopen_app_process();
-					HAL_Delay(5);
-					canopen_app_process();
-					HAL_Delay(5);
-					canopen_app_process();
-					HAL_Delay(5);
 					Local_Count=2;
 					break;
 
@@ -397,7 +368,6 @@ HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET );
 
 //**********************************************************************************************
 Ticks_2=HAL_GetTick();
-HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 while (HAL_GetTick() - Ticks_2<1000)
 {
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
@@ -410,9 +380,8 @@ canopen_app_process();
 Local_Count=3;
 
 Ticks_2=HAL_GetTick();
-HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 
-while (HAL_GetTick() - Ticks_2<2500)	/// 	while (0) //
+while (HAL_GetTick() - Ticks_2<55000)	/// 	while (0) //
 	{
 			switch (Local_Count)
 				{
@@ -439,36 +408,13 @@ while (HAL_GetTick() - Ticks_2<2500)	/// 	while (0) //
  					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
 					Local_Count=3;
-					//canopen_app_process();
 					break;
 
 				case 3:
  					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 					Local_Count=0;
-					//canopen_app_process();
 					break;
-
-				case 4:
-	 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
-						CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
-						Local_Count=5;
-						//canopen_app_process();
-						break;
-
-				case 5:
-	 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
-						CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
-						//canopen_app_process();
-						Local_Count=6;
-						break;
-
-				case 6:
-	 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
-						CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
-						Local_Count=0;
-						//canopen_app_process();
-						break;
 
 				default:
 					Local_Count=0;
@@ -484,15 +430,18 @@ while (HAL_GetTick() - Ticks_2<2500)	/// 	while (0) //
 
 
 		DWT->CYCCNT = 0; // reset the counter
-		canopen_app_process();HAL_Delay(1);
+		canopen_app_process();
 		Duration_of_the_CO_process= DWT->CYCCNT;
+		HAL_Delay(1);
+		Encoder_to_LCD();
+		RTC_update_and_Terminal(1999);
 
 	}///while (HAL_GetTick() - Ticks<2500)
 
 
 uint8_t LLL = sprintf(
 					Message_to_Terminal,
-					"_Duration_of_the_CO_process = 0x%04X%04X \n\r",
+					"_Duration_of_the_CO_process = 0x%04X%04X \n\r\n\r\n\r\n\r\n\r\n\r\n\r",
 					(uint16_t)(Duration_of_the_CO_process >> 16 ),
 					(uint16_t)(Duration_of_the_CO_process & 0x0FFFF )
 					);

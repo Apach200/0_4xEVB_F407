@@ -549,8 +549,8 @@ void Get_Time_output(uint8_t *Uhren,uint8_t *Minutn,uint8_t *Sekundn)
 
 		HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)(Array_char_x_32), Length_Msg+8);
 		//CDC_Transmit_FS  (                   (uint8_t*)(Array_char_x_32), Length_Msg+8  );
-		//LCD_SetPos(0, 1);	            HAL_Delay(1);
-		//LCD_String(8+Array_char_x_32);  HAL_Delay(1);
+		LCD_SetPos(0, 1);	            HAL_Delay(1);
+		LCD_String(8+Array_char_x_32);  HAL_Delay(1);
 		//while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 }
 
