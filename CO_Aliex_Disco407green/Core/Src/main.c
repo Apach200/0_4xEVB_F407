@@ -285,19 +285,20 @@ DWT->CTRL |= 1 ; // Enable_the_Counter_of_Core_circles
 
 //**********************************************************************************************
 Ticks_2=HAL_GetTick();
-while (HAL_GetTick() - Ticks_2<1000)
+while (HAL_GetTick() - Ticks_2<500)
 {
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 canopen_app_process();
 }
 
+#if 0
+uint32_t Delta_T[4];/////Measurement_of_duration_canopen_app_process();
+#endif
 
 //**********************************************************************************************
 Local_Count=0;
-
 Ticks_2=HAL_GetTick();
-
 while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 	{
 			switch (Local_Count)
@@ -305,17 +306,11 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 				case 0:
 					OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
 					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
-//					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
-// 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
-// 					OD_PERSIST_COMM.x6004_ALiex_Disco_VAR32_6004++;
-// 					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
-// 					OD_PERSIST_COMM.x6006_ALiex_Disco_VAR32_6006++;
-// 					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
-
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[0]= DWT->CYCCNT;//// 2581circles * 6ns = 15.5ms// Delta_T[0] = 0x00000A15
 					Local_Count=1;
 					break;
 
@@ -323,6 +318,10 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
  					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
+
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[1]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
 					Local_Count=2;
 					break;
 
@@ -330,7 +329,10 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
  					OD_PERSIST_COMM.x6004_ALiex_Disco_VAR32_6004++;
  					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[2]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
 					Local_Count=3;
 					break;
 
@@ -338,6 +340,10 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
  					OD_PERSIST_COMM.x6006_ALiex_Disco_VAR32_6006++;
  					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[3]= DWT->CYCCNT;//// 2573circles * 6ns = 15.5ms// Delta_T[3] = 0x00000A0D
 					Local_Count=0;
 					break;
 
@@ -353,11 +359,8 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
 		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 
-
 		DWT->CYCCNT = 0; // reset the counter
-
 		canopen_app_process();
-
 		Duration_of_the_CO_process= DWT->CYCCNT;//// 2575circles * 6ns = 15.5ms
 
 		HAL_Delay(1);
@@ -366,18 +369,45 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 
 	}///while (HAL_GetTick() - Ticks<17123)
 
+#if 0
 
-uint8_t LLL = sprintf(
+uint16_t LLL = sprintf(
 					Message_to_Terminal,
-					"\n\r\n\r_Duration_of_the_CO_process = 0x%04X%04X \n\r\n\r\n\r\n\r\n\r\n\r\n\r",
-					(uint16_t)(Duration_of_the_CO_process >> 16 ),
-					(uint16_t)(Duration_of_the_CO_process & 0x0FFFF )
+					"\n\r Duration_of_the_CO_process \n\r"
 					);
+
+ LLL = LLL + sprintf(
+					Message_to_Terminal+LLL,
+					"\n\r Delta_T[0] = 0x%04X%04X \n\r",
+					(uint16_t)(Delta_T[0] >> 16 ),
+					(uint16_t)(Delta_T[0] & 0x0FFFF )
+					);
+
+ LLL = LLL + sprintf(
+					Message_to_Terminal+LLL,
+					"\n\r Delta_T[1] = 0x%04X%04X \n\r",
+					(uint16_t)(Delta_T[1] >> 16 ),
+					(uint16_t)(Delta_T[1] & 0x0FFFF )
+					);
+
+ LLL = LLL + sprintf(
+					Message_to_Terminal+LLL,
+					"\n\r Delta_T[2] = 0x%04X%04X \n\r",
+					(uint16_t)(Delta_T[2] >> 16 ),
+					(uint16_t)(Delta_T[2] & 0x0FFFF )
+					);
+
+ LLL = LLL + sprintf(
+					Message_to_Terminal+LLL,
+					"\n\r Delta_T[3] = 0x%04X%04X \n\r\n\r\n\r\n\r\n\r",
+					(uint16_t)(Delta_T[3] >> 16 ),
+					(uint16_t)(Delta_T[3] & 0x0FFFF )
+					);
+
 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)(Message_to_Terminal), LLL);
-HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET );
 //while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
-
+#endif///Measurement_of_duration_canopen_app_process();
 
 //**********************************************************************************************
 
