@@ -307,31 +307,37 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
 //					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
 // 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
+// 					OD_PERSIST_COMM.x6004_ALiex_Disco_VAR32_6004++;
+// 					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
+// 					OD_PERSIST_COMM.x6006_ALiex_Disco_VAR32_6006++;
+// 					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
 
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
+//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
 //					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
 //					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 					Local_Count=1;
 					break;
 
 				case 1:
-//					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
+					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
+ 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
 					Local_Count=2;
 					break;
 
 				case 2:
-					OD_PERSIST_COMM.x6002_ALiex_Disco_VAR32_6002++;
- 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
+ 					OD_PERSIST_COMM.x6004_ALiex_Disco_VAR32_6004++;
+ 					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
-					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 					Local_Count=3;
 					break;
 
 				case 3:
-// 					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
-//					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
+ 					OD_PERSIST_COMM.x6006_ALiex_Disco_VAR32_6006++;
+ 					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
+					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 					Local_Count=0;
 					break;
 
