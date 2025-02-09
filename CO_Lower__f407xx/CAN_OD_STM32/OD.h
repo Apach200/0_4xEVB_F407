@@ -16,7 +16,7 @@
 
         Created:      23.11.2020 16:00:00
         Created By:   
-        Modified:     05.02.2025 13:50:26
+        Modified:     09.02.2025 21:03:31
         Modified By:  
 
     Device Info:
@@ -44,7 +44,7 @@
 #define OD_CNT_HB_PROD 1
 #define OD_CNT_SDO_SRV 1
 #define OD_CNT_SDO_CLI 1
-#define OD_CNT_RPDO 1
+#define OD_CNT_RPDO 4
 #define OD_CNT_TPDO 12
 
 
@@ -93,6 +93,24 @@ typedef struct {
         uint16_t eventTimer;
     } x1400_RPDOCommunicationParameter;
     struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1401_RPDOCommunicationParameter;
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1402_RPDOCommunicationParameter;
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1403_RPDOCommunicationParameter;
+    struct {
         uint8_t numberOfMappedApplicationObjectsInPDO;
         uint32_t applicationObject1;
         uint32_t applicationObject2;
@@ -103,6 +121,39 @@ typedef struct {
         uint32_t applicationObject7;
         uint32_t applicationObject8;
     } x1600_RPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1601_RPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1602_RPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1603_RPDOMappingParameter;
     struct {
         uint8_t highestSub_indexSupported;
         uint32_t COB_IDUsedByTPDO;
@@ -337,6 +388,14 @@ typedef struct {
     uint32_t x6003_lowerF_VAR32_6003;
     uint8_t x6038_lowerF_Array_sub0;
     uint16_t x6038_lowerF_Array[OD_CNT_ARR_6038];
+    uint32_t x6040_lowerF_6040;
+    uint32_t x6041_lowerF_6041;
+    uint32_t x6042_lowerF_6042;
+    uint32_t x6043_lowerF_6043;
+    uint32_t x6044_lowerF_6044;
+    uint32_t x6045_lowerF_6045;
+    uint32_t x6046_lowerF_6046;
+    uint32_t x6047_lowerF_6047;
 } OD_PERSIST_COMM_t;
 
 typedef struct {
@@ -389,36 +448,50 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1200 &OD->list[15]
 #define OD_ENTRY_H1280 &OD->list[16]
 #define OD_ENTRY_H1400 &OD->list[17]
-#define OD_ENTRY_H1600 &OD->list[18]
-#define OD_ENTRY_H1800 &OD->list[19]
-#define OD_ENTRY_H1801 &OD->list[20]
-#define OD_ENTRY_H1802 &OD->list[21]
-#define OD_ENTRY_H1803 &OD->list[22]
-#define OD_ENTRY_H1804 &OD->list[23]
-#define OD_ENTRY_H1805 &OD->list[24]
-#define OD_ENTRY_H1806 &OD->list[25]
-#define OD_ENTRY_H1807 &OD->list[26]
-#define OD_ENTRY_H1808 &OD->list[27]
-#define OD_ENTRY_H1809 &OD->list[28]
-#define OD_ENTRY_H180A &OD->list[29]
-#define OD_ENTRY_H180B &OD->list[30]
-#define OD_ENTRY_H1A00 &OD->list[31]
-#define OD_ENTRY_H1A01 &OD->list[32]
-#define OD_ENTRY_H1A02 &OD->list[33]
-#define OD_ENTRY_H1A03 &OD->list[34]
-#define OD_ENTRY_H1A04 &OD->list[35]
-#define OD_ENTRY_H1A05 &OD->list[36]
-#define OD_ENTRY_H1A06 &OD->list[37]
-#define OD_ENTRY_H1A07 &OD->list[38]
-#define OD_ENTRY_H1A08 &OD->list[39]
-#define OD_ENTRY_H1A09 &OD->list[40]
-#define OD_ENTRY_H1A0A &OD->list[41]
-#define OD_ENTRY_H1A0B &OD->list[42]
-#define OD_ENTRY_H6000 &OD->list[43]
-#define OD_ENTRY_H6001 &OD->list[44]
-#define OD_ENTRY_H6002 &OD->list[45]
-#define OD_ENTRY_H6003 &OD->list[46]
-#define OD_ENTRY_H6038 &OD->list[47]
+#define OD_ENTRY_H1401 &OD->list[18]
+#define OD_ENTRY_H1402 &OD->list[19]
+#define OD_ENTRY_H1403 &OD->list[20]
+#define OD_ENTRY_H1600 &OD->list[21]
+#define OD_ENTRY_H1601 &OD->list[22]
+#define OD_ENTRY_H1602 &OD->list[23]
+#define OD_ENTRY_H1603 &OD->list[24]
+#define OD_ENTRY_H1800 &OD->list[25]
+#define OD_ENTRY_H1801 &OD->list[26]
+#define OD_ENTRY_H1802 &OD->list[27]
+#define OD_ENTRY_H1803 &OD->list[28]
+#define OD_ENTRY_H1804 &OD->list[29]
+#define OD_ENTRY_H1805 &OD->list[30]
+#define OD_ENTRY_H1806 &OD->list[31]
+#define OD_ENTRY_H1807 &OD->list[32]
+#define OD_ENTRY_H1808 &OD->list[33]
+#define OD_ENTRY_H1809 &OD->list[34]
+#define OD_ENTRY_H180A &OD->list[35]
+#define OD_ENTRY_H180B &OD->list[36]
+#define OD_ENTRY_H1A00 &OD->list[37]
+#define OD_ENTRY_H1A01 &OD->list[38]
+#define OD_ENTRY_H1A02 &OD->list[39]
+#define OD_ENTRY_H1A03 &OD->list[40]
+#define OD_ENTRY_H1A04 &OD->list[41]
+#define OD_ENTRY_H1A05 &OD->list[42]
+#define OD_ENTRY_H1A06 &OD->list[43]
+#define OD_ENTRY_H1A07 &OD->list[44]
+#define OD_ENTRY_H1A08 &OD->list[45]
+#define OD_ENTRY_H1A09 &OD->list[46]
+#define OD_ENTRY_H1A0A &OD->list[47]
+#define OD_ENTRY_H1A0B &OD->list[48]
+#define OD_ENTRY_H6000 &OD->list[49]
+#define OD_ENTRY_H6001 &OD->list[50]
+#define OD_ENTRY_H6002 &OD->list[51]
+#define OD_ENTRY_H6003 &OD->list[52]
+#define OD_ENTRY_H6038 &OD->list[53]
+#define OD_ENTRY_H6040 &OD->list[54]
+#define OD_ENTRY_H6041 &OD->list[55]
+#define OD_ENTRY_H6042 &OD->list[56]
+#define OD_ENTRY_H6043 &OD->list[57]
+#define OD_ENTRY_H6044 &OD->list[58]
+#define OD_ENTRY_H6045 &OD->list[59]
+#define OD_ENTRY_H6046 &OD->list[60]
+#define OD_ENTRY_H6047 &OD->list[61]
 
 
 /*******************************************************************************
@@ -442,36 +515,50 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H1200_SDOServerParameter &OD->list[15]
 #define OD_ENTRY_H1280_SDOClientParameter &OD->list[16]
 #define OD_ENTRY_H1400_RPDOCommunicationParameter &OD->list[17]
-#define OD_ENTRY_H1600_RPDOMappingParameter &OD->list[18]
-#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[19]
-#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[20]
-#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[21]
-#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[22]
-#define OD_ENTRY_H1804_TPDOCommunicationParameter &OD->list[23]
-#define OD_ENTRY_H1805_TPDOCommunicationParameter &OD->list[24]
-#define OD_ENTRY_H1806_TPDOCommunicationParameter &OD->list[25]
-#define OD_ENTRY_H1807_TPDOCommunicationParameter &OD->list[26]
-#define OD_ENTRY_H1808_TPDOCommunicationParameter &OD->list[27]
-#define OD_ENTRY_H1809_TPDOCommunicationParameter &OD->list[28]
-#define OD_ENTRY_H180A_TPDOCommunicationParameter &OD->list[29]
-#define OD_ENTRY_H180B_TPDOCommunicationParameter &OD->list[30]
-#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[31]
-#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[32]
-#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[33]
-#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[34]
-#define OD_ENTRY_H1A04_TPDOMappingParameter &OD->list[35]
-#define OD_ENTRY_H1A05_TPDOMappingParameter &OD->list[36]
-#define OD_ENTRY_H1A06_TPDOMappingParameter &OD->list[37]
-#define OD_ENTRY_H1A07_TPDOMappingParameter &OD->list[38]
-#define OD_ENTRY_H1A08_TPDOMappingParameter &OD->list[39]
-#define OD_ENTRY_H1A09_TPDOMappingParameter &OD->list[40]
-#define OD_ENTRY_H1A0A_TPDOMappingParameter &OD->list[41]
-#define OD_ENTRY_H1A0B_TPDOMappingParameter &OD->list[42]
-#define OD_ENTRY_H6000_lowerF_VAR32_6000 &OD->list[43]
-#define OD_ENTRY_H6001_lowerF_VAR32_6001 &OD->list[44]
-#define OD_ENTRY_H6002_lowerF_VAR32_6002 &OD->list[45]
-#define OD_ENTRY_H6003_lowerF_VAR32_6003 &OD->list[46]
-#define OD_ENTRY_H6038_lowerF_Array &OD->list[47]
+#define OD_ENTRY_H1401_RPDOCommunicationParameter &OD->list[18]
+#define OD_ENTRY_H1402_RPDOCommunicationParameter &OD->list[19]
+#define OD_ENTRY_H1403_RPDOCommunicationParameter &OD->list[20]
+#define OD_ENTRY_H1600_RPDOMappingParameter &OD->list[21]
+#define OD_ENTRY_H1601_RPDOMappingParameter &OD->list[22]
+#define OD_ENTRY_H1602_RPDOMappingParameter &OD->list[23]
+#define OD_ENTRY_H1603_RPDOMappingParameter &OD->list[24]
+#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[25]
+#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[26]
+#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[27]
+#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[28]
+#define OD_ENTRY_H1804_TPDOCommunicationParameter &OD->list[29]
+#define OD_ENTRY_H1805_TPDOCommunicationParameter &OD->list[30]
+#define OD_ENTRY_H1806_TPDOCommunicationParameter &OD->list[31]
+#define OD_ENTRY_H1807_TPDOCommunicationParameter &OD->list[32]
+#define OD_ENTRY_H1808_TPDOCommunicationParameter &OD->list[33]
+#define OD_ENTRY_H1809_TPDOCommunicationParameter &OD->list[34]
+#define OD_ENTRY_H180A_TPDOCommunicationParameter &OD->list[35]
+#define OD_ENTRY_H180B_TPDOCommunicationParameter &OD->list[36]
+#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[37]
+#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[38]
+#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[39]
+#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[40]
+#define OD_ENTRY_H1A04_TPDOMappingParameter &OD->list[41]
+#define OD_ENTRY_H1A05_TPDOMappingParameter &OD->list[42]
+#define OD_ENTRY_H1A06_TPDOMappingParameter &OD->list[43]
+#define OD_ENTRY_H1A07_TPDOMappingParameter &OD->list[44]
+#define OD_ENTRY_H1A08_TPDOMappingParameter &OD->list[45]
+#define OD_ENTRY_H1A09_TPDOMappingParameter &OD->list[46]
+#define OD_ENTRY_H1A0A_TPDOMappingParameter &OD->list[47]
+#define OD_ENTRY_H1A0B_TPDOMappingParameter &OD->list[48]
+#define OD_ENTRY_H6000_lowerF_VAR32_6000 &OD->list[49]
+#define OD_ENTRY_H6001_lowerF_VAR32_6001 &OD->list[50]
+#define OD_ENTRY_H6002_lowerF_VAR32_6002 &OD->list[51]
+#define OD_ENTRY_H6003_lowerF_VAR32_6003 &OD->list[52]
+#define OD_ENTRY_H6038_lowerF_Array &OD->list[53]
+#define OD_ENTRY_H6040_lowerF_6040 &OD->list[54]
+#define OD_ENTRY_H6041_lowerF_6041 &OD->list[55]
+#define OD_ENTRY_H6042_lowerF_6042 &OD->list[56]
+#define OD_ENTRY_H6043_lowerF_6043 &OD->list[57]
+#define OD_ENTRY_H6044_lowerF_6044 &OD->list[58]
+#define OD_ENTRY_H6045_lowerF_6045 &OD->list[59]
+#define OD_ENTRY_H6046_lowerF_6046 &OD->list[60]
+#define OD_ENTRY_H6047_lowerF_6047 &OD->list[61]
 
 
 /*******************************************************************************
