@@ -1313,120 +1313,126 @@ OD_size_t verifyLength = 0U;
 }
 
 void
-CO_TPDO_process(CO_TPDO_t* TPDO,
+CO_TPDO_process(
+				CO_TPDO_t* TPDO,
 #if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
-                uint32_t timeDifference_us, uint32_t* timerNext_us,
+                uint32_t timeDifference_us,
+				uint32_t* timerNext_us,
 #endif
-                bool_t NMTisOperational, bool_t syncWas) {
-    CO_PDO_common_t* PDO = &TPDO->PDO_common;
+                bool_t NMTisOperational,
+				bool_t syncWas)
+{
+CO_PDO_common_t* PDO = &TPDO->PDO_common;
 #if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE)) != 0
-    (void)timerNext_us;
+(void)timerNext_us;
 #endif
-    (void)syncWas;
+(void)syncWas;
 
-    if (PDO->valid && NMTisOperational) {
+if (PDO->valid && NMTisOperational)
+	{
 
-        /* check for event timer or application event */
-#if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || (OD_FLAGS_PDO_SIZE > 0)
-        if ((TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC)
-            || (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)) {
-            /* event timer */
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
-            if (TPDO->eventTime_us != 0U) {
-                TPDO->eventTimer = (TPDO->eventTimer > timeDifference_us) ? (TPDO->eventTimer - timeDifference_us) : 0U;
-                if (TPDO->eventTimer == 0U) {
-                    TPDO->sendRequest = true;
-                }
-#if ((CO_CONFIG_PDO)&CO_CONFIG_FLAG_TIMERNEXT) != 0
-                if ((timerNext_us != NULL) && (*timerNext_us > TPDO->eventTimer)) {
-                    /* Schedule for next event time */
-                    *timerNext_us = TPDO->eventTimer;
-                }
-#endif
-            }
-#endif
-            /* check for any OD_requestTPDO() */
-#if OD_FLAGS_PDO_SIZE > 0
-            if (!TPDO->sendRequest) {
-                for (uint8_t i = 0; i < PDO->mappedObjectsCount; i++) {
-                    uint8_t* flagPDObyte = PDO->flagPDObyte[i];
-                    if (flagPDObyte != NULL) {
-                        if ((*flagPDObyte & PDO->flagPDObitmask[i]) == 0U) {
-                            TPDO->sendRequest = true;
-                            break;
-                        }
-                    }
-                }
-            }
-#endif
-        }
-#endif /* ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE)||(OD_FLAGS_PDO_SIZE>0) */
+			/* check for event timer or application event */
+	#if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || (OD_FLAGS_PDO_SIZE > 0)
 
-        /* Send PDO by application request or by Event timer */
-        if (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
-            TPDO->inhibitTimer = (TPDO->inhibitTimer > timeDifference_us) ? (TPDO->inhibitTimer - timeDifference_us)
-                                                                          : 0U;
+			if ((TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC)
+				|| (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO)
+				) {
+					/* event timer */
+		#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
+					if (TPDO->eventTime_us != 0U)
+						{
+						 TPDO->eventTimer = (TPDO->eventTimer > timeDifference_us) ? (TPDO->eventTimer - timeDifference_us) : 0U;
+						 if (TPDO->eventTimer == 0U)  { TPDO->sendRequest = true; }
 
-            /* send TPDO */
-            if (TPDO->sendRequest && (TPDO->inhibitTimer == 0U)) {
-                (void)CO_TPDOsend(TPDO);
-            }
+			#if ((CO_CONFIG_PDO)&CO_CONFIG_FLAG_TIMERNEXT) != 0
+							if ((timerNext_us != NULL) && (*timerNext_us > TPDO->eventTimer)) {
+								/* Schedule for next event time */
+								*timerNext_us = TPDO->eventTimer;
+							}
+			#endif
+						}
+		#endif
+					/* check for any OD_requestTPDO() */
+		#if OD_FLAGS_PDO_SIZE > 0
 
-#if ((CO_CONFIG_PDO)&CO_CONFIG_FLAG_TIMERNEXT) != 0
-            if (TPDO->sendRequest && (timerNext_us != NULL) && (*timerNext_us > TPDO->inhibitTimer)) {
-                /* Schedule for just beyond inhibit window */
-                *timerNext_us = TPDO->inhibitTimer;
-            }
-#endif
-#else
-            if (TPDO->sendRequest) {
-                (void)CO_TPDOsend(TPDO);
-            }
-#endif
-        } /* if (TPDO->transmissionType >= CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) */
+					if (!TPDO->sendRequest)
+						{
+							for (uint8_t i = 0; i < PDO->mappedObjectsCount; i++)
+								{
+								 uint8_t* flagPDObyte = PDO->flagPDObyte[i];
+								 if (flagPDObyte != NULL)
+								 	 {	if ((*flagPDObyte & PDO->flagPDObitmask[i]) == 0U) { TPDO->sendRequest = true; break; } }
+								}///for
+						}
+		#endif
+				}
+	#endif /* ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE)||(OD_FLAGS_PDO_SIZE>0) */
 
-        /* Synchronous PDOs */
-#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-        else if ((TPDO->SYNC != NULL) && syncWas) {
-            /* send synchronous acyclic TPDO */
-            if (TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC) {
-                if (TPDO->sendRequest) {
-                    (void)CO_TPDOsend(TPDO);
-                }
-            }
-            /* send synchronous cyclic TPDO */
-            else {
-                /* is the start of synchronous TPDO transmission */
-                if (TPDO->syncCounter == 255U) {
-                    if ((TPDO->SYNC->counterOverflowValue != 0U) && (TPDO->syncStartValue != 0U)) {
-                        /* syncStartValue is in use */
-                        TPDO->syncCounter = 254;
-                    } else {
-                        /* Send first TPDO somewhere in the middle */
-                        TPDO->syncCounter = (TPDO->transmissionType / 2U) + 1U;
-                    }
-                }
-                /* If the syncStartValue is in use, start first TPDO after SYNC with matched syncStartValue. */
-                if (TPDO->syncCounter == 254U) {
-                    if (TPDO->SYNC->counter == TPDO->syncStartValue) {
-                        TPDO->syncCounter = TPDO->transmissionType;
-                        (void)CO_TPDOsend(TPDO);
-                    }
-                }
-                /* Send TPDO after every N-th Sync */
-                else if (--TPDO->syncCounter == 0U) {
-                    TPDO->syncCounter = TPDO->transmissionType;
-                    (void)CO_TPDOsend(TPDO);
-                } else { /* MISRA C 2004 14.10 */
-                }
-            }
-        }      /* else if (TPDO->SYNC && syncWas) */
-        else { /* MISRA C 2004 14.10 */
-        }
-#endif
+			/* Send PDO by application request or by Event timer */
+			if (TPDO->transmissionType >= (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {
+	#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0
+				TPDO->inhibitTimer = (TPDO->inhibitTimer > timeDifference_us) ? (TPDO->inhibitTimer - timeDifference_us)
+																			  : 0U;
 
-    } else {
+				/* send TPDO */
+				if (TPDO->sendRequest && (TPDO->inhibitTimer == 0U)) {
+					(void)CO_TPDOsend(TPDO);
+				}
+
+	#if ((CO_CONFIG_PDO)&CO_CONFIG_FLAG_TIMERNEXT) != 0
+				if (TPDO->sendRequest && (timerNext_us != NULL) && (*timerNext_us > TPDO->inhibitTimer)) {
+					/* Schedule for just beyond inhibit window */
+					*timerNext_us = TPDO->inhibitTimer;
+				}
+	#endif
+	#else
+				if (TPDO->sendRequest) {
+					(void)CO_TPDOsend(TPDO);
+				}
+	#endif
+			} /* if (TPDO->transmissionType >= CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) */
+
+			/* Synchronous PDOs */
+	#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
+			else if ((TPDO->SYNC != NULL) && syncWas) {
+				/* send synchronous acyclic TPDO */
+				if (TPDO->transmissionType == (uint8_t)CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC) {
+					if (TPDO->sendRequest) {
+						(void)CO_TPDOsend(TPDO);
+					}
+				}
+				/* send synchronous cyclic TPDO */
+				else {
+					/* is the start of synchronous TPDO transmission */
+					if (TPDO->syncCounter == 255U) {
+						if ((TPDO->SYNC->counterOverflowValue != 0U) && (TPDO->syncStartValue != 0U)) {
+							/* syncStartValue is in use */
+							TPDO->syncCounter = 254;
+						} else {
+							/* Send first TPDO somewhere in the middle */
+							TPDO->syncCounter = (TPDO->transmissionType / 2U) + 1U;
+						}
+					}
+					/* If the syncStartValue is in use, start first TPDO after SYNC with matched syncStartValue. */
+					if (TPDO->syncCounter == 254U) {
+						if (TPDO->SYNC->counter == TPDO->syncStartValue) {
+							TPDO->syncCounter = TPDO->transmissionType;
+							(void)CO_TPDOsend(TPDO);
+						}
+					}
+					/* Send TPDO after every N-th Sync */
+					else if (--TPDO->syncCounter == 0U) {
+						TPDO->syncCounter = TPDO->transmissionType;
+						(void)CO_TPDOsend(TPDO);
+					} else { /* MISRA C 2004 14.10 */
+					}
+				}
+			}      /* else if (TPDO->SYNC && syncWas) */
+			else { /* MISRA C 2004 14.10 */
+			}
+	#endif
+
+		} else {
         /* Not operational or valid, reset triggers */
         TPDO->sendRequest = true;
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0

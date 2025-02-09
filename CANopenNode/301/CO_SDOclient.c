@@ -308,17 +308,20 @@ reverseBytes(void* start, OD_size_t size) {
 #endif
 
 CO_SDO_return_t
-CO_SDOclient_setup(CO_SDOclient_t* SDO_C, uint32_t COB_IDClientToServer, uint32_t COB_IDServerToClient,
-                   uint8_t nodeIDOfTheSDOServer) {
-    /* verify parameters */
-    if (SDO_C == NULL) {
-        return CO_SDO_RT_wrongArguments;
-    }
+CO_SDOclient_setup (
+					CO_SDOclient_t* SDO_C,
+					uint32_t COB_IDClientToServer,
+					uint32_t COB_IDServerToClient,
+					uint8_t  nodeIDOfTheSDOServer
+					)
+{
+/* verify parameters */
+if (SDO_C == NULL) { return CO_SDO_RT_wrongArguments; }
 
-    /* Configure object variables */
-    SDO_C->state = CO_SDO_ST_IDLE;
-    CO_FLAG_CLEAR(SDO_C->CANrxNew);
-    SDO_C->nodeIDOfTheSDOServer = nodeIDOfTheSDOServer;
+/* Configure object variables */
+SDO_C->state = CO_SDO_ST_IDLE;
+CO_FLAG_CLEAR(SDO_C->CANrxNew);
+SDO_C->nodeIDOfTheSDOServer = nodeIDOfTheSDOServer;
 
 #if ((CO_CONFIG_SDO_CLI)&CO_CONFIG_FLAG_OD_DYNAMIC) != 0
     /* proceed only, if parameters change */
@@ -331,30 +334,53 @@ CO_SDOclient_setup(CO_SDOclient_t* SDO_C, uint32_t COB_IDClientToServer, uint32_
     SDO_C->COB_IDServerToClient = COB_IDServerToClient;
 #endif
 
-    /* verify valid bit */
-    uint16_t CanIdC2S = ((COB_IDClientToServer & 0x80000000UL) == 0U) ? (uint16_t)(COB_IDClientToServer & 0x7FFU) : 0U;
-    uint16_t CanIdS2C = ((COB_IDServerToClient & 0x80000000UL) == 0U) ? (uint16_t)(COB_IDServerToClient & 0x7FFU) : 0U;
-    if ((CanIdC2S != 0U) && (CanIdS2C != 0U)) {
-        SDO_C->valid = true;
-    } else {
-        CanIdC2S = 0;
-        CanIdS2C = 0;
-        SDO_C->valid = false;
-    }
 
-    /* configure SDO client CAN reception */
-    CO_ReturnError_t ret = CO_CANrxBufferInit(SDO_C->CANdevRx, SDO_C->CANdevRxIdx, CanIdS2C, 0x7FF, false, (void*)SDO_C,
-                                              CO_SDOclient_receive);
+/* verify valid bit */
+uint16_t CanIdC2S = ((COB_IDClientToServer & 0x80000000UL) == 0U) ? (uint16_t)(COB_IDClientToServer & 0x7FFU) : 0U;
+uint16_t CanIdS2C = ((COB_IDServerToClient & 0x80000000UL) == 0U) ? (uint16_t)(COB_IDServerToClient & 0x7FFU) : 0U;
 
-    /* configure SDO client CAN transmission */
-    SDO_C->CANtxBuff = CO_CANtxBufferInit(SDO_C->CANdevTx, SDO_C->CANdevTxIdx, CanIdC2S, false, 8, false);
+ if	(
+		(CanIdC2S != 0U)
+	 && (CanIdS2C != 0U)
+	)
+	 { SDO_C->valid = true;} else
+								 {
+								  CanIdC2S = 0;
+								  CanIdS2C = 0;
+								  SDO_C->valid = false;
+								 }
 
-    if ((ret != CO_ERROR_NO) || (SDO_C->CANtxBuff == NULL)) {
-        SDO_C->valid = false;
-        return CO_SDO_RT_wrongArguments;
-    }
+/* configure SDO client CAN reception */
+CO_ReturnError_t
+ret = CO_CANrxBufferInit(
+						SDO_C->CANdevRx,
+						SDO_C->CANdevRxIdx,
+						CanIdS2C,
+						0x7FF,
+						false,
+						(void*)SDO_C,
+						CO_SDOclient_receive
+						);
 
-    return CO_SDO_RT_ok_communicationEnd;
+/* configure SDO client CAN transmission */
+SDO_C->CANtxBuff = CO_CANtxBufferInit (
+										SDO_C->CANdevTx,
+										SDO_C->CANdevTxIdx,
+										CanIdC2S,
+										false,
+										8,
+										false
+										);
+
+if(
+		(ret != CO_ERROR_NO)
+	|| (SDO_C->CANtxBuff == NULL)
+  ) {
+	SDO_C->valid = false;
+	return CO_SDO_RT_wrongArguments;
+	}
+
+return CO_SDO_RT_ok_communicationEnd;
 }
 
 /******************************************************************************

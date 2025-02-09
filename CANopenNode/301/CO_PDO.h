@@ -332,12 +332,21 @@ typedef struct {
  *
  * @return #CO_ReturnError_t CO_ERROR_NO on success.
  */
-CO_ReturnError_t CO_TPDO_init(CO_TPDO_t* TPDO, OD_t* OD, CO_EM_t* em,
+CO_ReturnError_t
+CO_TPDO_init(
+			CO_TPDO_t* TPDO,
+			OD_t* OD,
+			CO_EM_t* em,
 #if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
-                              CO_SYNC_t* SYNC,
+			CO_SYNC_t* SYNC,
 #endif
-                              uint16_t preDefinedCanId, OD_entry_t* OD_18xx_TPDOCommPar, OD_entry_t* OD_1Axx_TPDOMapPar,
-                              CO_CANmodule_t* CANdevTx, uint16_t CANdevTxIdx, uint32_t* errInfo);
+			uint16_t preDefinedCanId,
+			OD_entry_t* OD_18xx_TPDOCommPar,
+			OD_entry_t* OD_1Axx_TPDOMapPar,
+			CO_CANmodule_t* CANdevTx,
+			uint16_t CANdevTxIdx,
+			uint32_t* errInfo
+			);
 
 /**
  * Request transmission of TPDO message.
