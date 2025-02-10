@@ -223,7 +223,7 @@ int main(void)
   // Logo_to_1602LCD();
   Datum_to_1602LCD();
   //GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); 						// for_STM32F4XX_Ali_pcb
-//   GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
+   GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
   //UART_interface_Test(); //while(1){;}
   //CAN_interface_Test();
 
@@ -292,14 +292,14 @@ HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 canopen_app_process();
 }
 
-#if 0
+#if 1
 uint32_t Delta_T[4];/////Measurement_of_duration_canopen_app_process();
 #endif
 
 //**********************************************************************************************
 Local_Count=0;
 Ticks_2=HAL_GetTick();
-while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
+while (HAL_GetTick() - Ticks_2<7123)	/// 	 while (2) //   while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 	{
 			switch (Local_Count)
 				{
@@ -307,10 +307,11 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 					OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
 					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-
-//					DWT->CYCCNT = 0; // reset the counter
-//					canopen_app_process();
-//					Delta_T[0]= DWT->CYCCNT;//// 2581circles * 6ns = 15.5ms// Delta_T[0] = 0x00000A15
+																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+					DWT->CYCCNT = 0; // reset the counter
+					canopen_app_process();
+					Delta_T[0]= DWT->CYCCNT;//// 2581circles * 6ns = 15.5ms// Delta_T[0] = 0x00000A15
+																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=1;
 					break;
 
@@ -319,9 +320,11 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
  					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
 
-//					DWT->CYCCNT = 0; // reset the counter
-//					canopen_app_process();
-//					Delta_T[1]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
+																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+					DWT->CYCCNT = 0; // reset the counter
+					canopen_app_process();
+					Delta_T[1]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
+																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=2;
 					break;
 
@@ -330,9 +333,11 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
  					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
 
-//					DWT->CYCCNT = 0; // reset the counter
-//					canopen_app_process();
-//					Delta_T[2]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
+																					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+					DWT->CYCCNT = 0; // reset the counter
+					canopen_app_process();
+					Delta_T[2]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
+																					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=3;
 					break;
 
@@ -341,9 +346,11 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
  					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 
-//					DWT->CYCCNT = 0; // reset the counter
-//					canopen_app_process();
-//					Delta_T[3]= DWT->CYCCNT;//// 2573circles * 6ns = 15.5ms// Delta_T[3] = 0x00000A0D
+																						HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+					DWT->CYCCNT = 0; // reset the counter
+					canopen_app_process();
+					Delta_T[3]= DWT->CYCCNT;//// 2573circles * 6ns = 15.5ms// Delta_T[3] = 0x00000A0D
+																						HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=0;
 					break;
 
@@ -359,49 +366,61 @@ while (HAL_GetTick() - Ticks_2<17123)	/// 	while (0) //
 		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
 		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
 
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET );
 		DWT->CYCCNT = 0; // reset the counter
 		canopen_app_process();
 		Duration_of_the_CO_process= DWT->CYCCNT;//// 2575circles * 6ns = 15.5ms
-
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 		HAL_Delay(1);
 		Encoder_to_LCD();
 		RTC_update_and_Terminal(1999);
 
 	}///while (HAL_GetTick() - Ticks<17123)
 
-#if 0
+
+
+HAL_Delay(2);
+
+
+
+#if 1
 
 uint16_t LLL = sprintf(
 					Message_to_Terminal,
-					"\n\r Duration_of_the_CO_process \n\r"
+					"\n\r\n\r Duration_of_the_CO_process*6nc = %d\n\r",
+					(uint16_t)Duration_of_the_CO_process*6
 					);
 
  LLL = LLL + sprintf(
 					Message_to_Terminal+LLL,
-					"\n\r Delta_T[0] = 0x%04X%04X \n\r",
+					"\n\r Delta_T[0] = 0x%04X%04X -> %d ns\n\r",
 					(uint16_t)(Delta_T[0] >> 16 ),
-					(uint16_t)(Delta_T[0] & 0x0FFFF )
+					(uint16_t)(Delta_T[0] & 0x0FFFF ),
+					(uint16_t)(((float)Delta_T[0]*6.3333) )
 					);
 
  LLL = LLL + sprintf(
 					Message_to_Terminal+LLL,
-					"\n\r Delta_T[1] = 0x%04X%04X \n\r",
+					"\n\r Delta_T[0] = 0x%04X%04X -> %d ns\n\r",
 					(uint16_t)(Delta_T[1] >> 16 ),
-					(uint16_t)(Delta_T[1] & 0x0FFFF )
+					(uint16_t)(Delta_T[1] & 0x0FFFF ),
+					(uint16_t)(((float)Delta_T[1]*6.3333) )
 					);
 
  LLL = LLL + sprintf(
 					Message_to_Terminal+LLL,
-					"\n\r Delta_T[2] = 0x%04X%04X \n\r",
+					"\n\r Delta_T[0] = 0x%04X%04X -> %d ns\n\r",
 					(uint16_t)(Delta_T[2] >> 16 ),
-					(uint16_t)(Delta_T[2] & 0x0FFFF )
+					(uint16_t)(Delta_T[2] & 0x0FFFF ),
+					(uint16_t)(((float)Delta_T[2]*6.3333) )
 					);
 
  LLL = LLL + sprintf(
 					Message_to_Terminal+LLL,
-					"\n\r Delta_T[3] = 0x%04X%04X \n\r\n\r\n\r\n\r\n\r",
+					"\n\r Delta_T[0] = 0x%04X%04X -> %d ns\n\r\n\r\n\r\n\r\n\r",
 					(uint16_t)(Delta_T[3] >> 16 ),
-					(uint16_t)(Delta_T[3] & 0x0FFFF )
+					(uint16_t)(Delta_T[3] & 0x0FFFF ),
+					(uint16_t)(((float)Delta_T[3]*6.3333) )
 					);
 
 while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
