@@ -107,12 +107,13 @@ typedef struct {
 /* CAN module object */
 typedef struct
 {
+
     void* CANptr;
     CO_CANrx_t* rxArray;
     uint16_t rxSize;
     CO_CANtx_t* txArray;
     uint16_t txSize;
-    uint16_t CANerrorStatus;
+    uint16_t CANerrorStatus;/**< CAN error status bitfield, see @ref CO_CAN_ERR_status_t */
     volatile bool_t CANnormal;
     volatile bool_t useCANrxFilters;
     volatile bool_t bufferInhibitFlag;

@@ -28,9 +28,9 @@
 /* default configuration, see CO_config.h */
 #ifndef CO_CONFIG_PDO
 #define CO_CONFIG_PDO                                                                                                  \
-    (CO_CONFIG_RPDO_ENABLE | CO_CONFIG_TPDO_ENABLE | CO_CONFIG_RPDO_TIMERS_ENABLE | CO_CONFIG_TPDO_TIMERS_ENABLE       \
-     | CO_CONFIG_PDO_SYNC_ENABLE | CO_CONFIG_PDO_OD_IO_ACCESS | CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE                  \
-     | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
+          (CO_CONFIG_RPDO_ENABLE     | CO_CONFIG_TPDO_ENABLE      | CO_CONFIG_RPDO_TIMERS_ENABLE | CO_CONFIG_TPDO_TIMERS_ENABLE       \
+         | CO_CONFIG_PDO_SYNC_ENABLE | CO_CONFIG_PDO_OD_IO_ACCESS | CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE                  \
+         | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC )
 #endif
 
 #if (((CO_CONFIG_PDO) & (CO_CONFIG_RPDO_ENABLE | CO_CONFIG_TPDO_ENABLE)) != 0) || defined CO_DOXYGEN
@@ -155,7 +155,7 @@ typedef struct {
     bool_t valid;               /**< True, if PDO is enabled and valid */
     CO_PDO_size_t dataLength;   /**< Data length of the received PDO message. Calculated from mapping */
     uint8_t mappedObjectsCount; /**< Number of mapped objects in PDO */
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_OD_IO_ACCESS) != 0) || defined CO_DOXYGEN
+
     OD_IO_t OD_IO[CO_PDO_MAX_MAPPED_ENTRIES]; /**< Object dictionary interface for all mapped entries. OD_IO.dataOffset
                                                  has special usage with PDO. It stores information about mappedLength
                                                  of the variable. mappedLength can be less or equal to the
@@ -163,20 +163,11 @@ typedef struct {
                                                  erroneous mapping. OD_IO.dataOffset is set to 0 before read/write
                                                  function call and after the call OD_IO.dataOffset is set back to
                                                  mappedLength. */
-#if OD_FLAGS_PDO_SIZE > 0
-    uint8_t* flagPDObyte[CO_PDO_MAX_MAPPED_ENTRIES];   /**< Pointer to byte, which contains PDO flag bit from @ref
-                                                          OD_extension_t */
+
+    uint8_t* flagPDObyte[CO_PDO_MAX_MAPPED_ENTRIES];   /**< Pointer to byte, which contains PDO flag bit from @ref OD_extension_t */
+
     uint8_t flagPDObitmask[CO_PDO_MAX_MAPPED_ENTRIES]; /**< Bitmask for the flagPDObyte */
-#endif
-#else
-    /* Pointers to data objects inside OD, where PDO will be copied */
-    uint8_t* mapPointer[CO_PDO_MAX_SIZE];
-#if OD_FLAGS_PDO_SIZE > 0
-    uint8_t* flagPDObyte[CO_PDO_MAX_SIZE];
-    uint8_t flagPDObitmask[CO_PDO_MAX_SIZE];
-#endif
-#endif
-#if (((CO_CONFIG_PDO)&CO_CONFIG_FLAG_OD_DYNAMIC) != 0) || defined CO_DOXYGEN
+
     bool_t isRPDO;                            /**< True for RPDO, false for TPDO */
     OD_t* OD;                                 /**< From CO_xPDO_init() */
     uint16_t CANdevIdx;                       /**< From CO_xPDO_init() */
@@ -184,21 +175,20 @@ typedef struct {
     uint16_t configuredCanId;                 /**< Currently configured CAN identifier */
     OD_extension_t OD_communicationParam_ext; /**< Extension for OD object */
     OD_extension_t OD_mappingParam_extension; /**< Extension for OD object */
-#endif
+
 } CO_PDO_common_t;
 
 /*******************************************************************************
  *      R P D O
  ******************************************************************************/
-#if (((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) != 0) || defined CO_DOXYGEN
+
 /**
  * Number of buffers for received CAN message for RPDO
  */
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
+
 #define CO_RPDO_CAN_BUFFERS_COUNT 2
-#else
-#define CO_RPDO_CAN_BUFFERS_COUNT 1
-#endif
+
+
 
 /**
  * RPDO object.
@@ -206,23 +196,23 @@ typedef struct {
 typedef struct
 {
     CO_PDO_common_t PDO_common; /**< PDO common properties, must be first element in this object */
+
     volatile void* CANrxNew[CO_RPDO_CAN_BUFFERS_COUNT]; /**< Variable indicates, if new PDO message received from CAN */
-    uint8_t CANrxData[CO_RPDO_CAN_BUFFERS_COUNT][CO_PDO_MAX_SIZE]; /**< CO_PDO_MAX_SIZE data bytes of the received
-                                                                      message. */
+
+    uint8_t CANrxData[CO_RPDO_CAN_BUFFERS_COUNT][CO_PDO_MAX_SIZE]; /**< CO_PDO_MAX_SIZE data bytes of the received message. */
+
     uint8_t receiveError; /**< Indication of RPDO length errors, use with CO_PDO_receiveErrors_t */
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
+
     CO_SYNC_t* SYNC;    /**< From CO_RPDO_init() */
+
     bool_t synchronous; /**< True if transmissionType <= 240 */
-#endif
-#if (((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
-    uint32_t timeoutTime_us; /**< Maximum timeout time between received PDOs in microseconds. Configurable by OD
-                                variable RPDO communication parameter, event-timer. */
+
+    uint32_t timeoutTime_us; /**< Maximum timeout time between received PDOs in microseconds.
+     	 	 	 	 	 	 	 Configurable by OD variable RPDO communication parameter, event-timer. */
+
     uint32_t timeoutTimer;   /**< Timeout timer variable in microseconds */
-#endif
-#if (((CO_CONFIG_PDO)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0) || defined CO_DOXYGEN
-    void (*pFunctSignalPre)(void* object); /**< From CO_RPDO_initCallbackPre() or NULL */
-    void* functSignalObjectPre;            /**< From CO_RPDO_initCallbackPre() or NULL */
-#endif
+
+
 } CO_RPDO_t;
 
 /**
@@ -245,26 +235,20 @@ typedef struct
  *
  * @return #CO_ReturnError_t CO_ERROR_NO on success.
  */
-CO_ReturnError_t CO_RPDO_init(CO_RPDO_t* RPDO, OD_t* OD, CO_EM_t* em,
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
-                              CO_SYNC_t* SYNC,
-#endif
-                              uint16_t preDefinedCanId, OD_entry_t* OD_14xx_RPDOCommPar, OD_entry_t* OD_16xx_RPDOMapPar,
-                              CO_CANmodule_t* CANdevRx, uint16_t CANdevRxIdx, uint32_t* errInfo);
+CO_ReturnError_t
+CO_RPDO_init(
+			CO_RPDO_t* RPDO,
+			OD_t* OD,
+			CO_EM_t* em,
+			CO_SYNC_t* SYNC,
+			uint16_t preDefinedCanId,
+			OD_entry_t* OD_14xx_RPDOCommPar,
+			OD_entry_t* OD_16xx_RPDOMapPar,
+			CO_CANmodule_t* CANdevRx,
+			uint16_t CANdevRxIdx,
+			uint32_t* errInfo
+			);
 
-#if (((CO_CONFIG_PDO)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0) || defined CO_DOXYGEN
-/**
- * Initialize RPDO callback function.
- *
- * Function initializes optional callback function, which should immediately start processing of CO_RPDO_process()
- * function. Callback is called after RPDO message is received from the CAN bus.
- *
- * @param RPDO This object.
- * @param object Pointer to object, which will be passed to pFunctSignalPre().
- * @param pFunctSignalPre Pointer to the callback function. Not called if NULL.
- */
-void CO_RPDO_initCallbackPre(CO_RPDO_t* RPDO, void* object, void (*pFunctSignalPre)(void* object));
-#endif
 
 /**
  * Process received PDO messages.
@@ -279,17 +263,18 @@ void CO_RPDO_initCallbackPre(CO_RPDO_t* RPDO, void* object, void (*pFunctSignalP
  * @param NMTisOperational True if this node is in NMT_OPERATIONAL state.
  * @param syncWas True, if CANopen SYNC message was just received or transmitted.
  */
-void CO_RPDO_process(CO_RPDO_t* RPDO,
-#if (((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
-                     uint32_t timeDifference_us, uint32_t* timerNext_us,
-#endif
-                     bool_t NMTisOperational, bool_t syncWas);
-#endif /* (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE */
+void CO_RPDO_process (
+						CO_RPDO_t* RPDO,
+						uint32_t timeDifference_us,
+						uint32_t* timerNext_us,
+						bool_t NMTisOperational,
+						bool_t syncWas
+						);
+
 
 /*******************************************************************************
  *      T P D O
  ******************************************************************************/
-#if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0) || defined CO_DOXYGEN
 /**
  * TPDO object.
  */
@@ -299,18 +284,19 @@ typedef struct {
     uint8_t transmissionType;   /**< Copy of the variable from object dictionary */
     bool_t sendRequest;         /**< If this flag is set and TPDO is event driven (transmission type is 0, 254 or 255),
                                    then PDO will be sent by CO_TPDO_process(). */
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
+
     CO_SYNC_t* SYNC;        /**< From CO_TPDO_init() */
     uint8_t syncStartValue; /**< Copy of the variable from object dictionary */
     uint8_t syncCounter;    /**< SYNC counter used for PDO sending */
-#endif
-#if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
+
     uint32_t inhibitTime_us; /**< Inhibit time from object dictionary translated to microseconds */
     uint32_t eventTime_us;   /**< Event time from object dictionary translated to microseconds */
     uint32_t inhibitTimer;   /**< Inhibit timer variable in microseconds */
     uint32_t eventTimer;     /**< Event timer variable in microseconds */
-#endif
+
 } CO_TPDO_t;
+
+
 
 /**
  * Initialize TPDO object.
@@ -337,9 +323,7 @@ CO_TPDO_init(
 			CO_TPDO_t* TPDO,
 			OD_t* OD,
 			CO_EM_t* em,
-#if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
 			CO_SYNC_t* SYNC,
-#endif
 			uint16_t preDefinedCanId,
 			OD_entry_t* OD_18xx_TPDOCommPar,
 			OD_entry_t* OD_1Axx_TPDOMapPar,
@@ -357,10 +341,10 @@ CO_TPDO_init(
  * @param TPDO TPDO object.
  */
 static inline void
-CO_TPDOsendRequest(CO_TPDO_t* TPDO)
-{
- if (TPDO != NULL) {TPDO->sendRequest = true; }
-}
+CO_TPDOsendRequest(CO_TPDO_t* TPDO) { if (TPDO != NULL){TPDO->sendRequest = true;} }
+
+
+
 
 /**
  * Process transmitting PDO messages.
@@ -373,12 +357,15 @@ CO_TPDOsendRequest(CO_TPDO_t* TPDO)
  * @param NMTisOperational True if this node is in NMT_OPERATIONAL state.
  * @param syncWas True, if CANopen SYNC message was just received or transmitted.
  */
-void CO_TPDO_process(CO_TPDO_t* TPDO,
-#if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
-                     uint32_t timeDifference_us, uint32_t* timerNext_us,
-#endif
-                     bool_t NMTisOperational, bool_t syncWas);
-#endif /* (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE */
+void CO_TPDO_process (
+						CO_TPDO_t* TPDO,
+						uint32_t timeDifference_us,
+						uint32_t* timerNext_us,
+						bool_t NMTisOperational,
+						bool_t syncWas
+						);
+
+
 
 /** @} */ /* CO_PDO */
 

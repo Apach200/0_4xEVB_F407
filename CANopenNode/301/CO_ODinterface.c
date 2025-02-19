@@ -22,44 +22,53 @@
 #include "301/CO_ODinterface.h"
 
 ODR_t
-OD_readOriginal(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t* countRead) {
-    if ((stream == NULL) || (buf == NULL) || (countRead == NULL)) {
-        return ODR_DEV_INCOMPAT;
-    }
+OD_readOriginal(
+				OD_stream_t* stream,
+				void* buf,
+				OD_size_t count,
+				OD_size_t* countRead
+				)
+{
+if (
+		   (stream 		== NULL)
+		|| (buf 		== NULL)
+		|| (countRead 	== NULL)
+	) { return ODR_DEV_INCOMPAT; }
 
-    OD_size_t dataLenToCopy = stream->dataLength; /* length of OD variable */
-    const uint8_t* dataOrig = stream->dataOrig;
 
-    if (dataOrig == NULL) {return ODR_SUB_NOT_EXIST; }
+OD_size_t dataLenToCopy = stream->dataLength; /* length of OD variable */
+const uint8_t* dataOrig = stream->dataOrig;
 
+if (dataOrig == NULL) {return ODR_SUB_NOT_EXIST; }
 
+ODR_t returnCode = ODR_OK;
 
-    ODR_t returnCode = ODR_OK;
+/* If previous read was partial or OD variable length is larger than
+ * current buffer size, then data was (will be) read in several segments */
+if (
+	    stream->dataOffset > 0U
+	 || (dataLenToCopy > count)
+	)
+	{
+	 if (stream->dataOffset >= dataLenToCopy) {return ODR_DEV_INCOMPAT;}
+	   /* Reduce for already copied data */
+		dataLenToCopy -= stream->dataOffset;
+		dataOrig += stream->dataOffset;
 
-    /* If previous read was partial or OD variable length is larger than
-     * current buffer size, then data was (will be) read in several segments */
-    if ((stream->dataOffset > 0U) || (dataLenToCopy > count)) {
-        if (stream->dataOffset >= dataLenToCopy) {
-            return ODR_DEV_INCOMPAT;
-        }
-        /* Reduce for already copied data */
-        dataLenToCopy -= stream->dataOffset;
-        dataOrig += stream->dataOffset;
+		if (dataLenToCopy > count)
+			{
+			 /* Not enough space in destination buffer */
+			 dataLenToCopy = count;
+			 stream->dataOffset += dataLenToCopy;
+			 returnCode = ODR_PARTIAL;
+			} else 	{
+				     stream->dataOffset = 0; /* copy finished, reset offset */
+					}
+	}
 
-        if (dataLenToCopy > count) {
-            /* Not enough space in destination buffer */
-            dataLenToCopy = count;
-            stream->dataOffset += dataLenToCopy;
-            returnCode = ODR_PARTIAL;
-        } else {
-            stream->dataOffset = 0; /* copy finished, reset offset */
-        }
-    }
-
-    (void)memcpy((void*)buf, (const void*)dataOrig, dataLenToCopy);
-
-    *countRead = dataLenToCopy;
-    return returnCode;
+(void)memcpy((void*)buf, (const void*)dataOrig, dataLenToCopy);
+*countRead = dataLenToCopy;
+return returnCode;
 }
 
 ODR_t

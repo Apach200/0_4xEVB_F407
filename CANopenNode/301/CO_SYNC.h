@@ -29,7 +29,7 @@
 #ifndef CO_CONFIG_SYNC
 #define CO_CONFIG_SYNC                                                                                                 \
     (CO_CONFIG_SYNC_ENABLE | CO_CONFIG_SYNC_PRODUCER | CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE                           \
-     | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
+     | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC|CO_CONFIG_FLAG_TIMERNEXT)
 #endif
 
 #if (((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
@@ -74,34 +74,25 @@ typedef struct {
                                      (index 0x1019) */
     uint8_t counter;              /**< Counter of the SYNC message if counterOverflowValue is different than zero */
     bool_t syncIsOutsideWindow;   /**< True, if current time is outside "synchronous window" (OD 1007) */
-    uint32_t timer;               /**< Timer for the SYNC message in [microseconds]. Set to zero after received or
-                                     transmitted SYNC message */
+    uint32_t timer;               /**< Timer for the SYNC message in [microseconds].
+                                      Set to zero after received or transmitted SYNC message */
     uint32_t* OD_1006_period;     /**< Pointer to variable in OD, "Communication cycle period" in microseconds */
     uint32_t* OD_1007_window;     /**< Pointer to variable in OD, "Synchronous window length" in microseconds */
 
-#if (((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_PRODUCER) != 0) || defined CO_DOXYGEN
     bool_t isProducer;        /**< True, if device is SYNC producer. Calculated from _COB ID SYNC Message_ variable
                                  from Object dictionary(index 0x1005).*/
     CO_CANmodule_t* CANdevTx; /**< From CO_SYNC_init() */
     CO_CANtx_t* CANtxBuff;    /**< CAN transmit buffer inside CANdevTx */
-#endif
 
-#if ((CO_CONFIG_SYNC)&CO_CONFIG_FLAG_OD_DYNAMIC) || defined CO_DOXYGEN
+
     CO_CANmodule_t* CANdevRx;         /**< From CO_SYNC_init() */
     uint16_t CANdevRxIdx;             /**< From CO_SYNC_init() */
     OD_extension_t OD_1005_extension; /**< Extension for OD object */
     uint16_t CAN_ID;                  /**< CAN ID of the SYNC message. Calculated from _COB ID SYNC Message_ variable
                                          from Object dictionary (index 0x1005). */
-#if (((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_PRODUCER) != 0) || defined CO_DOXYGEN
     uint16_t CANdevTxIdx;             /**< From CO_SYNC_init() */
     OD_extension_t OD_1019_extension; /**< Extension for OD object */
-#endif
-#endif
 
-#if (((CO_CONFIG_SYNC)&CO_CONFIG_FLAG_CALLBACK_PRE) != 0) || defined CO_DOXYGEN
-    void (*pFunctSignalPre)(void* object); /**< From CO_SYNC_initCallbackPre() or NULL */
-    void* functSignalObjectPre;            /**< From CO_SYNC_initCallbackPre() or NULL */
-#endif
 } CO_SYNC_t;
 
 /**

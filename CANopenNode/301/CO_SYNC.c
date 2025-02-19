@@ -310,102 +310,122 @@ CO_SYNC_initCallbackPre(CO_SYNC_t* SYNC, void* object, void (*pFunctSignalPre)(v
 #endif
 
 CO_SYNC_status_t
-CO_SYNC_process(CO_SYNC_t* SYNC, bool_t NMTisPreOrOperational, uint32_t timeDifference_us, uint32_t* timerNext_us) {
-    (void)timerNext_us; /* may be unused */
+CO_SYNC_process(
+				CO_SYNC_t* SYNC,
+				bool_t NMTisPreOrOperational,
+				uint32_t timeDifference_us,
+				uint32_t* timerNext_us
+				)
+{
+(void)timerNext_us; /* may be unused */
 
-    CO_SYNC_status_t syncStatus = CO_SYNC_NONE;
+CO_SYNC_status_t syncStatus = CO_SYNC_NONE;
 
-    if (NMTisPreOrOperational) {
-        /* update sync timer, no overflow */
-        uint32_t timerNew = SYNC->timer + timeDifference_us;
-        if (timerNew > SYNC->timer) {
-            SYNC->timer = timerNew;
-        }
+if (NMTisPreOrOperational)
+	{
+		/* update sync timer, no overflow */
+		uint32_t timerNew = SYNC->timer + timeDifference_us;
 
-        /* was SYNC just received */
-        if (CO_FLAG_READ(SYNC->CANrxNew)) {
-            SYNC->timer = 0;
-            syncStatus = CO_SYNC_RX_TX;
-            CO_FLAG_CLEAR(SYNC->CANrxNew);
-        }
+		if (timerNew > SYNC->timer) {SYNC->timer = timerNew;}
 
-        uint32_t OD_1006_period = (SYNC->OD_1006_period != NULL) ? *SYNC->OD_1006_period : 0U;
 
-        if (OD_1006_period > 0U) {
-#if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_PRODUCER) != 0
-            if (SYNC->isProducer) {
-                if (SYNC->timer >= OD_1006_period) {
-                    syncStatus = CO_SYNC_RX_TX;
-                    (void)CO_SYNCsend(SYNC);
-                }
-#if ((CO_CONFIG_SYNC)&CO_CONFIG_FLAG_TIMERNEXT) != 0
-                /* Calculate when next SYNC needs to be sent */
-                if (timerNext_us != NULL) {
-                    uint32_t diff = OD_1006_period - SYNC->timer;
-                    if (*timerNext_us > diff) {
-                        *timerNext_us = diff;
-                    }
-                }
-#endif
-            } else
-#endif /* (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_PRODUCER */
+		/* was SYNC just received */
+		if (CO_FLAG_READ(SYNC->CANrxNew))
+			{
+			 SYNC->timer = 0;
+			 syncStatus = CO_SYNC_RX_TX;
+			 CO_FLAG_CLEAR(SYNC->CANrxNew);
+			}
 
-                /* Verify timeout of SYNC */
-                if (SYNC->timeoutError == 1U) {
-                    /* periodTimeout is 1,5 * OD_1006_period, no overflow */
-                    uint32_t periodTimeout = OD_1006_period + (OD_1006_period >> 1);
-                    if (periodTimeout < OD_1006_period) {
-                        periodTimeout = 0xFFFFFFFFU;
-                    }
+		uint32_t OD_1006_period = (SYNC->OD_1006_period != NULL) ? *SYNC->OD_1006_period : 0U;
 
-                    if (SYNC->timer > periodTimeout) {
-                        CO_errorReport(SYNC->em, CO_EM_SYNC_TIME_OUT, CO_EMC_COMMUNICATION, SYNC->timer);
-                        SYNC->timeoutError = 2;
-                    }
-#if ((CO_CONFIG_SYNC)&CO_CONFIG_FLAG_TIMERNEXT) != 0
-                    else if (timerNext_us != NULL) {
-                        uint32_t diff = periodTimeout - SYNC->timer;
-                        if (*timerNext_us > diff) {
-                            *timerNext_us = diff;
-                        }
-                    } else { /* MISRA C 2004 14.10 */
-                    }
-#endif
-                } else { /* MISRA C 2004 14.10 */
-                }
-        } /* if (OD_1006_period > 0) */
+			if (OD_1006_period > 0U)
+			{
+				if (SYNC->isProducer)
+				{
+					if (SYNC->timer >= OD_1006_period)
+						{
+						 syncStatus = CO_SYNC_RX_TX;
+						 (void)CO_SYNCsend(SYNC);
+						}
 
-        /* Synchronous PDOs are allowed only inside time window */
-        if ((SYNC->OD_1007_window != NULL) && (*SYNC->OD_1007_window > 0U) && (SYNC->timer > *SYNC->OD_1007_window)) {
-            if (!SYNC->syncIsOutsideWindow) {
-                syncStatus = CO_SYNC_PASSED_WINDOW;
-            }
-            SYNC->syncIsOutsideWindow = true;
-        } else {
-            SYNC->syncIsOutsideWindow = false;
-        }
+					/* Calculate when next SYNC needs to be sent */
+					if (timerNext_us != NULL)
+						{
+						 uint32_t diff = OD_1006_period - SYNC->timer;
+						 if (*timerNext_us > diff) { *timerNext_us = diff;	}
+						}
 
-        /* verify error from receive function */
-        if (SYNC->receiveError != 0U) {
-            CO_errorReport(SYNC->em, CO_EM_SYNC_LENGTH, CO_EMC_SYNC_DATA_LENGTH, SYNC->receiveError);
-            SYNC->receiveError = 0;
-        }
-    } /* if (NMTisPreOrOperational) */
-    else {
-        CO_FLAG_CLEAR(SYNC->CANrxNew);
-        SYNC->receiveError = 0;
-        SYNC->counter = 0;
-        SYNC->timer = 0;
-    }
 
-    if (syncStatus == CO_SYNC_RX_TX) {
-        if (SYNC->timeoutError == 2U) {
-            CO_errorReset(SYNC->em, CO_EM_SYNC_TIME_OUT, 0);
-        }
-        SYNC->timeoutError = 1;
-    }
+				}//if (SYNC->isProducer)
+				 else if (SYNC->timeoutError == 1U)/* Verify timeout of SYNC */
+						{
+						   /* periodTimeout is 1,5 * OD_1006_period, no overflow */
+						   uint32_t periodTimeout = OD_1006_period + (OD_1006_period >> 1);
+						   if (periodTimeout < OD_1006_period) {	periodTimeout = 0xFFFFFFFFU;	}
 
-    return syncStatus;
+						   if (SYNC->timer > periodTimeout)
+						   {
+						    CO_errorReport( SYNC->em,
+							  			   CO_EM_SYNC_TIME_OUT,
+										   CO_EMC_COMMUNICATION,
+										   SYNC->timer);
+						    SYNC->timeoutError = 2;
+
+						   }else if (timerNext_us != NULL)
+									{
+									 uint32_t diff = periodTimeout - SYNC->timer;
+									 if (*timerNext_us > diff) { *timerNext_us = diff; }
+
+									} else { }///else if (timerNext_us != NULL)
+
+						}///else if (SYNC->timeoutError == 1U)
+				 	 	 else {}
+
+			} /* if (OD_1006_period > 0) */
+
+			/* Synchronous PDOs are allowed only inside time window */
+			if	(
+				   ( SYNC->OD_1007_window != NULL )
+				&& (*SYNC->OD_1007_window > 0U    )
+				&& ( SYNC->timer > *SYNC->OD_1007_window)
+				)
+					{
+					 if (!SYNC->syncIsOutsideWindow) { syncStatus = CO_SYNC_PASSED_WINDOW;	}
+					 SYNC->syncIsOutsideWindow = true;
+
+					} else { SYNC->syncIsOutsideWindow = false;	}
+
+
+
+			/* verify error from receive function */
+			if (SYNC->receiveError != 0U)
+			{
+			 CO_errorReport( SYNC->em,
+							CO_EM_SYNC_LENGTH,
+							CO_EMC_SYNC_DATA_LENGTH,
+							SYNC->receiveError);
+			 SYNC->receiveError = 0;
+			}
+
+		} /* if (NMTisPreOrOperational) */
+		else {
+			 CO_FLAG_CLEAR(SYNC->CANrxNew);
+			 SYNC->receiveError = 0;
+			 SYNC->counter = 0;
+			 SYNC->timer = 0;
+			}
+
+if (syncStatus == CO_SYNC_RX_TX)
+	{
+		if (SYNC->timeoutError == 2U)
+		{
+		 CO_errorReset(SYNC->em, CO_EM_SYNC_TIME_OUT, 0);
+		}
+		SYNC->timeoutError = 1;
+	}
+
+return syncStatus;
 }
 
 #endif /* (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE */

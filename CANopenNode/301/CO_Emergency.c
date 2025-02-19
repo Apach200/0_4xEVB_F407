@@ -464,7 +464,14 @@ CO_EM_init(
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_CONSUMER) != 0
     em->pFunctSignalRx = NULL;
     /* configure SDO server CAN reception */
-    ret = CO_CANrxBufferInit(CANdevRx, CANdevRxIdx, CO_CAN_ID_EMERGENCY, 0x780, false, (void*)em, CO_EM_receive);
+    ret = CO_CANrxBufferInit(
+    						CANdevRx,
+							CANdevRxIdx,
+							CO_CAN_ID_EMERGENCY,
+							0x780, false,
+							(void*)em,
+							CO_EM_receive
+							);
 #endif /* (CO_CONFIG_EM) & CO_CONFIG_EM_CONSUMER */
 
     return ret;

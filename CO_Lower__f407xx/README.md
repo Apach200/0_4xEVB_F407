@@ -6,8 +6,6 @@ CANOpen at STM32F407
 Проект выполнен в среде STM32CubeIDE
 
 
-Реализовано CAN-устройство на STM32F4X-DISCOVERY from Aliexpress Green color.
-
 CAN1	Activated	CAN1_RX	PD0
 CAN1	Activated	CAN1_TX	PD1
 

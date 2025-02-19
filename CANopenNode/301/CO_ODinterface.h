@@ -278,12 +278,12 @@ typedef struct {
  * extension, configurable by application.
  */
 typedef struct {
-    uint16_t index;            /**< Object Dictionary index */
-    uint8_t subEntriesCount;   /**< Number of all sub-entries, including sub-entry at sub-index 0 */
-    uint8_t odObjectType;      /**< Type of the odObject, indicated by @ref OD_objectTypes_t enumerator. */
-    CO_PROGMEM void* odObject; /**< OD object of type indicated by odObjectType, from which @ref OD_getSub() fetches the
-                                  information */
-    OD_extension_t* extension; /**< Extension to OD, specified by application */
+    uint16_t 	index;				/**< Object Dictionary index */
+    uint8_t 	subEntriesCount;	/**< Number of all sub-entries, including sub-entry at sub-index 0 */
+    uint8_t 	odObjectType;		/**< Type of the odObject, indicated by @ref OD_objectTypes_t enumerator. */
+    CO_PROGMEM void* odObject; 		/**< OD object of type indicated by odObjectType, from which @ref OD_getSub() fetches the
+                                  	  	  information */
+    OD_extension_t* extension; 		/**< Extension to OD, specified by application */
 } OD_entry_t;
 
 /**
@@ -297,18 +297,22 @@ typedef struct {
 /**
  * Read value from original OD location
  *
- * This function can be used inside read / write functions, specified by @ref OD_extension_init(). It reads data
- * directly from memory location specified by Object dictionary. If no IO extension is used on OD entry, then io->read
- * returned by @ref OD_getSub() equals to this function. See also @ref OD_IO_t.
+ * This function can be used inside read / write functions, specified by @ref OD_extension_init().
+ * It reads data directly from memory location specified by Object dictionary.
+ * If no IO extension is used on OD entry,
+ * then io->read returned by @ref OD_getSub() equals to this function.
+ * See also @ref OD_IO_t.
  */
 ODR_t OD_readOriginal(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t* countRead);
 
 /**
  * Write value to original OD location
  *
- * This function can be used inside read / write functions, specified by @ref OD_extension_init(). It writes data
- * directly to memory location specified by Object dictionary. If no IO extension is used on OD entry, then io->write
- * returned by @ref OD_getSub() equals to this function. See also @ref OD_IO_t.
+ * This function can be used inside read / write functions, specified by @ref OD_extension_init().
+ * It writes data directly to memory location specified by Object dictionary.
+ * If no IO extension is used on OD entry,
+ * then io->write returned by @ref OD_getSub() equals to this function.
+ * See also @ref OD_IO_t.
  */
 ODR_t OD_writeOriginal(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten);
 
@@ -535,8 +539,20 @@ OD_get_u16(const OD_entry_t* entry, uint8_t subIndex, uint16_t* val, bool_t odOr
 
 /** Get uint32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
-OD_get_u32(const OD_entry_t* entry, uint8_t subIndex, uint32_t* val, bool_t odOrig) {
-    return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+OD_get_u32(
+			const OD_entry_t* entry,
+			uint8_t subIndex,
+			uint32_t* val,
+			bool_t odOrig
+			)
+{
+ return OD_get_value(
+		 	 	 	 entry,
+					 subIndex,
+					 val,
+					 sizeof(*val),
+					 odOrig
+					 );
 }
 
 /** Get uint64_t variable from Object Dictionary, see @ref OD_get_value */

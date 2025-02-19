@@ -948,11 +948,12 @@ return err;
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
 
 CO_ReturnError_t
-CO_LSSinit(
+CO_LSSinit (
 			CO_t* co,
 			CO_LSS_address_t* lssAddress,
 			uint8_t* pendingNodeID,
-			uint16_t* pendingBitRate)
+			uint16_t* pendingBitRate
+			)
 {
 CO_ReturnError_t err;
 if 	(
@@ -976,6 +977,7 @@ err = CO_LSSslave_init(
 return err;
 }
 #endif /* (CO_CONFIG_LSS) & CO_CONFIG_LSS_SLAVE */
+
 
 CO_ReturnError_t
 CO_CANopenInit(	CO_t* co,
@@ -1282,43 +1284,39 @@ if (co == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT; }
 if ((nodeId < 1U) || (nodeId > 127U) || co->nodeIdUnconfigured)
        { return (co->nodeIdUnconfigured) ? CO_ERROR_NODE_ID_UNCONFIGURED_LSS : CO_ERROR_ILLEGAL_ARGUMENT;}
 
-#if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) != 0
 
 if (CO_GET_CNT(RPDO) > 0U)
 	{
-								OD_entry_t* RPDOcomm = OD_GET(H1400, OD_H1400_RXPDO_1_PARAM);
-								OD_entry_t* RPDOmap = OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
-								for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++)
-								{
-								CO_ReturnError_t err;
-								uint16_t preDefinedCanId = 0;
-								if (i < CO_RPDO_DEFAULT_CANID_COUNT)
-											{
-											preDefinedCanId = (uint16_t)((CO_CAN_ID_RPDO_1 + (i * 0x100U)) + nodeId);
-											}//if (i < CO_RPDO_DEFAULT_CANID_COUNT)
-								err = CO_RPDO_init(
-													&co->RPDO[i],
-													od,
-													em,
-#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-													co->SYNC,
-#endif
-													preDefinedCanId,
-													RPDOcomm,
-													RPDOmap,
-													co->CANmodule,
-													CO_GET_CO(RX_IDX_RPDO) + i,
-													errInfo
-													);
-							   if (err != CO_ERROR_NO) {return err;}
-							   RPDOcomm++;
-							   RPDOmap++;
-							 }//for (uint16_t i
+		OD_entry_t* RPDOcomm = OD_GET(H1400, OD_H1400_RXPDO_1_PARAM  );
+		OD_entry_t* RPDOmap  = OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
+
+		for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++)
+			{
+			CO_ReturnError_t err;
+			uint16_t preDefinedCanId = 0;
+			if (i < CO_RPDO_DEFAULT_CANID_COUNT)
+						{
+						preDefinedCanId = (uint16_t)((CO_CAN_ID_RPDO_1 + (i * 0x100U)) + nodeId);
+						}//if (i < CO_RPDO_DEFAULT_CANID_COUNT)
+			err = CO_RPDO_init(
+								&co->RPDO[i],
+								od,
+								em,
+								co->SYNC,
+								preDefinedCanId,
+								RPDOcomm,
+								RPDOmap,
+								co->CANmodule,
+								CO_GET_CO(RX_IDX_RPDO) + i,
+								errInfo
+								);
+		   if (err != CO_ERROR_NO) {return err;}
+		   RPDOcomm++;
+		   RPDOmap++;
+		   }//for (uint16_t i
 
 	}//if (CO_GET_CNT(RPDO) > 0U)
-#endif
 
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0
 
     if (CO_GET_CNT(TPDO) > 0U)
     	{
@@ -1331,22 +1329,17 @@ if (CO_GET_CNT(RPDO) > 0U)
             uint16_t preDefinedCanId = 0;
             if (i < CO_TPDO_DEFAULT_CANID_COUNT)
             	{
-#if CO_TPDO_DEFAULT_CANID_COUNT <= 4
                 preDefinedCanId = (uint16_t)((CO_CAN_ID_TPDO_1 + (i * 0x100U)) + nodeId);
-#else
                 uint16_t pdoOffset = i % 4;
                 uint16_t nodeIdOffset = i / 4;
                 preDefinedCanId = (CO_CAN_ID_TPDO_1 + pdoOffset * 0x100) + nodeId + nodeIdOffset;
-#endif
             	}//if (i < CO_TPDO_DEFAULT_CANID_COUNT)
 
             err = CO_TPDO_init(
             					&co->TPDO[i],
 								od,
 								em,
-#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
 								co->SYNC,
-#endif
 								preDefinedCanId,
 								TPDOcomm,
 								TPDOmap,
@@ -1360,10 +1353,12 @@ if (CO_GET_CNT(RPDO) > 0U)
             TPDOmap++;
         }//for (uint16_t i
     }
-#endif
 
-    return CO_ERROR_NO;
+
+return CO_ERROR_NO;
 }
+
+
 
 #if (((CO_CONFIG_GFC)&CO_CONFIG_GFC_ENABLE) != 0) || (((CO_CONFIG_SRDO)&CO_CONFIG_SRDO_ENABLE) != 0)
 CO_ReturnError_t
@@ -1449,6 +1444,7 @@ CO_CANmodule_process(co->CANmodule);
     bool_t LSSslave_configuration = false;
 
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
+
     if (CO_GET_CNT(LSS_SLV) == 1U)
     	{
         if (CO_LSSslave_getState(co->LSSslave) == CO_LSS_STATE_CONFIGURATION)
@@ -1481,7 +1477,11 @@ CO_CANmodule_process(co->CANmodule);
 							CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS,
 							timerNext_us
 							);
-		}
+
+
+
+		 }
+
 #endif
 
     /* CANopen Node ID is unconfigured (LSS slave), stop processing here */
@@ -1544,6 +1544,8 @@ return reset;
 
 
 
+
+
 #if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) != 0
 bool_t
 CO_process_SYNC(
@@ -1563,8 +1565,9 @@ bool_t syncWas = false;
 
 		bool_t
 		NMTisPreOrOperational = (
-								   (NMTstate == CO_NMT_PRE_OPERATIONAL)
-								|| (NMTstate == CO_NMT_OPERATIONAL    )
+									NMTstate == CO_NMT_PRE_OPERATIONAL
+								||
+									NMTstate == CO_NMT_OPERATIONAL
 								);
 
 		CO_SYNC_status_t
@@ -1576,10 +1579,10 @@ bool_t syncWas = false;
 
 		switch (sync_process)
 		{
-			case CO_SYNC_NONE: break;
-			case CO_SYNC_RX_TX: syncWas = true; break;
-			case CO_SYNC_PASSED_WINDOW: CO_CANclearPendingSyncPDOs(co->CANmodule); break;
-			default:	break;	/* MISRA C 2004 15.3 */
+			case CO_SYNC_NONE: 														break;
+			case CO_SYNC_RX_TX: syncWas = true; 									break;
+			case CO_SYNC_PASSED_WINDOW: CO_CANclearPendingSyncPDOs(co->CANmodule); 	break;
+			default:																break;
 		}
 
 	}
@@ -1603,6 +1606,7 @@ CO_process_RPDO(
 (void)timerNext_us;
 if (co->nodeIdUnconfigured) { return; }
 
+
 bool_t
 NMTisOperational = CO_NMT_getInternalState(co->NMT) == CO_NMT_OPERATIONAL;
 
@@ -1610,16 +1614,19 @@ for ( uint16_t i = 0;  i < CO_GET_CNT(RPDO);  i++)
 		{
          CO_RPDO_process(
         		 	 	 &co->RPDO[i],
-#if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_TIMERS_ENABLE) != 0
-                        timeDifference_us, timerNext_us,
-#endif
-                        NMTisOperational,
-						syncWas
+                         timeDifference_us,
+						 timerNext_us,
+                         NMTisOperational,
+						 syncWas
 						);
+
 		}////for
 
-}///CO_process_RPDO(
+}///CO_process_RPDO()
 #endif
+
+
+
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0
 void

@@ -531,8 +531,15 @@ void CO_CANmodule_disable(CO_CANmodule_t* CANmodule);
  * Return #CO_ReturnError_t: CO_ERROR_NO CO_ERROR_ILLEGAL_ARGUMENT or CO_ERROR_OUT_OF_MEMORY (not enough masks for
  * configuration).
  */
-CO_ReturnError_t CO_CANrxBufferInit(CO_CANmodule_t* CANmodule, uint16_t index, uint16_t ident, uint16_t mask,
-                                    bool_t rtr, void* object, void (*CANrx_callback)(void* object, void* message));
+CO_ReturnError_t CO_CANrxBufferInit(
+									CO_CANmodule_t* CANmodule,
+									uint16_t index,
+									uint16_t ident,
+									uint16_t mask,
+                                    bool_t rtr,
+									void* object,
+									void (*CANrx_callback)(void* object, void* message)
+									);
 
 /**
  * Configure CAN message transmit buffer.
@@ -551,8 +558,14 @@ CO_ReturnError_t CO_CANrxBufferInit(CO_CANmodule_t* CANmodule, uint16_t index, u
  * @return Pointer to CAN transmit message buffer. 8 bytes data array inside buffer should be written, before
  * CO_CANsend() function is called. Zero is returned in case of wrong arguments.
  */
-CO_CANtx_t* CO_CANtxBufferInit(CO_CANmodule_t* CANmodule, uint16_t index, uint16_t ident, bool_t rtr, uint8_t noOfBytes,
-                               bool_t syncFlag);
+CO_CANtx_t* CO_CANtxBufferInit (
+								CO_CANmodule_t* CANmodule,
+								uint16_t index,
+								uint16_t ident,
+								bool_t rtr,
+								uint8_t noOfBytes,
+								bool_t syncFlag
+								);
 
 /**
  * Send CAN message.

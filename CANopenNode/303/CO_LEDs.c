@@ -50,6 +50,20 @@ CO_LEDs_process(
 				)
 {
 (void)timerNext_us; /* may be unused */
+//// To view how CO_LEDs_process operates
+// NMTstate = CO_NMT_INITIALIZING;
+// NMTstate = CO_NMT_UNKNOWN;
+// NMTstate = CO_NMT_PRE_OPERATIONAL;
+ NMTstate = CO_NMT_OPERATIONAL;
+// NMTstate = CO_NMT_STOPPED;
+ LSSconfig=0;
+ ErrCANbusOff=0;
+ ErrCANbusWarn=0;
+ ErrRpdo=0;
+ ErrSync=0;
+ ErrHbCons=0;
+ ErrOther=0;
+ firmwareDownload=0;
 
     uint8_t rd = 0;
     uint8_t gr = 0;
@@ -70,47 +84,43 @@ if (++LEDs->LEDtmr200ms > 3U)
 			rd = 0;
 			gr = 0;
 
-			if ((LEDs->LEDred & CO_LED_blink) == 0U) {
-				rd |= CO_LED_blink;
-			} else {
-				gr |= CO_LED_blink;
+			if ((LEDs->LEDred & CO_LED_blink) == 0U)
+				{
+				 rd |= CO_LED_blink;
+				} else { gr |= CO_LED_blink; }
+
+
+
+			switch (++LEDs->LEDtmrflash_1)
+			{
+				case 1: rd |= CO_LED_flash_1; 		break;
+				case 2: gr |= CO_LED_flash_1; 		break;
+				case 6: LEDs->LEDtmrflash_1 = 0; 	break;
+				default: /* none */ 				break;
 			}
 
-			switch (++LEDs->LEDtmrflash_1) {
-				case 1: rd |= CO_LED_flash_1; break;
-				case 2: gr |= CO_LED_flash_1; break;
-				case 6: LEDs->LEDtmrflash_1 = 0; break;
-				default: /* none */ break;
+			switch (++LEDs->LEDtmrflash_2)
+			{
+				case 3: rd |= CO_LED_flash_2; 		break;
+				case 4: gr |= CO_LED_flash_2; 		break;
+				case 8: LEDs->LEDtmrflash_2 = 0; 	break;
+				default: /* none */ 				break;
 			}
-			switch (++LEDs->LEDtmrflash_2) {
-				case 1:
-				case 3: rd |= CO_LED_flash_2; break;
-				case 2:
-				case 4: gr |= CO_LED_flash_2; break;
-				case 8: LEDs->LEDtmrflash_2 = 0; break;
-				default: /* none */ break;
+
+			switch (++LEDs->LEDtmrflash_3)
+			{
+				case 5: rd |= CO_LED_flash_3; 		break;
+				case 6: gr |= CO_LED_flash_3; 		break;
+				case 10: LEDs->LEDtmrflash_3 = 0; 	break;
+				default: /* none */ 				break;
 			}
-			switch (++LEDs->LEDtmrflash_3) {
-				case 1:
-				case 3:
-				case 5: rd |= CO_LED_flash_3; break;
-				case 2:
-				case 4:
-				case 6: gr |= CO_LED_flash_3; break;
-				case 10: LEDs->LEDtmrflash_3 = 0; break;
-				default: /* none */ break;
-			}
-			switch (++LEDs->LEDtmrflash_4) {
-				case 1:
-				case 3:
-				case 5:
-				case 7: rd |= CO_LED_flash_4; break;
-				case 2:
-				case 4:
-				case 6:
-				case 8: gr |= CO_LED_flash_4; break;
-				case 12: LEDs->LEDtmrflash_4 = 0; break;
-				default: /* none */ break;
+
+			switch (++LEDs->LEDtmrflash_4)
+			{
+				case 7: rd |= CO_LED_flash_4; 		break;
+				case 8: gr |= CO_LED_flash_4; 		break;
+				case 12: LEDs->LEDtmrflash_4 = 0; 	break;
+				default: /* none */ 				break;
 			}
 
 		} else {
@@ -186,12 +196,11 @@ LEDs->LEDgreen = gr;
 } /* if (tick) */
 
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_FLAG_TIMERNEXT) != 0
-    if (timerNext_us != NULL) {
-        uint32_t diff = 50000 - LEDs->LEDtmr50ms;
-        if (*timerNext_us > diff) {
-            *timerNext_us = diff;
-        }
-    }
+    if (timerNext_us != NULL)
+		{
+		 uint32_t diff = 50000 - LEDs->LEDtmr50ms;
+		 if (*timerNext_us > diff) { *timerNext_us = diff; }
+		}
 #endif
 }
 

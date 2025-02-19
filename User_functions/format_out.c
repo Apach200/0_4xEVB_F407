@@ -174,23 +174,26 @@ uint16_t Size_to_Send;
 	switch (Select_Array)
 	{
 	case 0:	Size_to_Send = sprintf((char*)Array_2_UART_a,pMessage);
-			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%x%x \n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
+			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%04X%04X \n\r\n\r\n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
 			Select_Array=1;
 			while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 			HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)Array_2_UART_a, Size_to_Send + added_length);
 	break;
+
 	case 1:	Size_to_Send = sprintf((char*)Array_2_UART_b,pMessage);
-			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%x%x \n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
+			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%04X%04X \n\r\n\r\n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
 			Select_Array=2;
 			while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 			HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)Array_2_UART_b,  Size_to_Send + added_length);
 	break;
+
 	case 2:	Size_to_Send = sprintf((char*)Array_2_UART_c,pMessage);
-			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%x%x \n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
+			added_length = sprintf((char*)&Array_2_UART_a[Size_to_Send]  ," = 0x%04X%04X \n\r\n\r\n\r\n\r",(uint16_t)(Argument>>16),(uint16_t)(Argument & 0x0FFFF));
 			Select_Array=0;
 			while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
 			HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)Array_2_UART_c,  Size_to_Send + added_length);
 	break;
+
 	default: break;
 	}//switch (Select_Array)
 
@@ -272,7 +275,6 @@ void GPIO_Blink_Test(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t Count_of_Bl
 
 uint16_t  SDO_abortCode_to_String(CO_SDO_abortCode_t Code, char* pString)
 {
-//static	char String_Loc[128];
 	/// SDO abort codes
 const char Message_SDO_AB_NONE[]="CO_SDO_AB_NONE = 0x00000000UL  /* No abort */\n\r\n\r";
 const char Message_SDO_AB_TOGGLE_BIT[]="CO_SDO_AB_TOGGLE_BIT = 0x05030000UL /* Toggle bit not altered */\n\r\n\r";
@@ -522,7 +524,6 @@ void Get_Time(void)
 								sTime.Hours, sTime.Minutes, sTime.Seconds);
 			HAL_UART_Transmit( &TerminalInterface, (uint8_t*)(Array_char_x_64), Length_Msg,5);
 			while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
-
 }
 
 
@@ -579,40 +580,40 @@ uint16_t NMT_State_Info(CO_NMT_internalState_t NMT_State)
 {
 //extern UART_HandleTypeDef htim2;
 //extern char Message_to_Terminal[];
-//uint16_t Lngth;
+uint16_t Lngth;
+
+while (TerminalInterface.gState != HAL_UART_STATE_READY ) {;}
 
 switch ((uint16_t)(NMT_State))
-		{
-		case 0:
-			HAL_UART_Transmit_IT(  &TerminalInterface,
-								(uint8_t*)"0, Device is initializing  \n\r",
-								   sizeof "0, Device is initializing  \n\r");break;
-		case 4:
-			HAL_UART_Transmit_IT(  &TerminalInterface,
-								(uint8_t*)" 4, Device is stopped    \n\r",
-								   sizeof " 4, Device is stopped    \n\r");break;
-		case 5:
-			HAL_UART_Transmit_IT(  &TerminalInterface,
-								(uint8_t*)" 5, Device is in operational state   \n\r",
-								   sizeof " 5, Device is in operational state   \n\r");break;
+{
+case 0:
+	Lngth = sizeof ("0, Device is initializing  \n\r");
+	HAL_UART_Transmit_IT(  &TerminalInterface,
+						(uint8_t*)"0, Device is initializing  \n\r", Lngth );break;
 
-		case 127:
-			HAL_UART_Transmit_IT(  &TerminalInterface,
-								(uint8_t*)" 127, Device is in pre-operational state  \n\r",
-								   sizeof " 127, Device is in pre-operational state  \n\r");break;
-		default:
-			HAL_UART_Transmit_IT(  &TerminalInterface,
-								(uint8_t*)"-1, Device state is unknown (for heartbeat consumer  \n\r)",
-								   sizeof "-1, Device state is unknown (for heartbeat consumer  \n\r)");break;
+case 4:
+	Lngth = sizeof (" 4, Device is stopped    \n\r");
+	HAL_UART_Transmit_IT(  &TerminalInterface,
+						(uint8_t*)" 4, Device is stopped    \n\r", Lngth );break;
 
-		}
-//while(htim2.gState != HAL_UART_STATE_READY){;}
-//HAL_UART_Transmit_DMA(
-//					  &htim2,
-//						(uint8_t*)Message_to_Terminal,
-//						 Lngth);
-//return (Lngth);
-return (0);
+case 5:
+	Lngth = sizeof " 5, Device is in operational state   \n\r";
+	HAL_UART_Transmit_IT(  &TerminalInterface,
+						(uint8_t*)" 5, Device is in operational state   \n\r", Lngth );break;
+
+case 127:
+	Lngth = sizeof (" 127, Device is in pre-operational state  \n\r");
+	HAL_UART_Transmit_IT(  &TerminalInterface,
+						(uint8_t*)" 127, Device is in pre-operational state  \n\r", Lngth );break;
+
+default:
+	Lngth = sizeof (" 127, Device is in pre-operational state  \n\r");
+	HAL_UART_Transmit_IT(  &TerminalInterface,
+						(uint8_t*)"-1, Device state is unknown (for heartbeat consumer  \n\r)", Lngth );break;
+
+}
+
+return (Lngth);
 }
 
 //////////////////////////////////////////////////

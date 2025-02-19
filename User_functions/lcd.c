@@ -14,6 +14,8 @@ __STATIC_INLINE void DelayMicro(__IO uint32_t micros)
 {
 	micros *=(SystemCoreClock / 1000000) / 5;
 	while (micros--);
+//	DWT->CYCCNT = 0; // reset the counter
+//	while( (DWT->CYCCNT / (HAL_RCC_GetSysClockFreq()/1000000) ) < (micros-1) );
 }
 //------------------------------------------------
 void LCD_WriteByteI2CLCD(uint8_t bt)

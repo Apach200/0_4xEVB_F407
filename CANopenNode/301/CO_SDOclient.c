@@ -324,6 +324,7 @@ CO_FLAG_CLEAR(SDO_C->CANrxNew);
 SDO_C->nodeIDOfTheSDOServer = nodeIDOfTheSDOServer;
 
 #if ((CO_CONFIG_SDO_CLI)&CO_CONFIG_FLAG_OD_DYNAMIC) != 0
+
     /* proceed only, if parameters change */
     if ((COB_IDClientToServer == SDO_C->COB_IDClientToServer)
         && (COB_IDServerToClient == SDO_C->COB_IDServerToClient)) {

@@ -156,11 +156,14 @@ Encoder_Status encoderStatus;
 /* USER CODE BEGIN 0 */
 /* Timer interrupt function executes every 1 ms */
 void
-HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-    if (htim == canopenNodeSTM32->timerHandle) {
-        canopen_app_interrupt();
+HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
+{
 
-    }
+    if (htim == canopenNodeSTM32->timerHandle)
+    		{
+    		canopen_app_interrupt();
+    		}
+
 }
 
 
@@ -226,15 +229,16 @@ int main(void)
    GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
   //UART_interface_Test(); //while(1){;}
   //CAN_interface_Test();
-
-  HAL_TIM_Base_Start_IT(&htim8);
+  HAL_TIM_Base_Start(&htim8);
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_UART_Receive_DMA(&huart2, Array_from_Terminal, sizeof Array_from_Terminal );
   //HAL_Delay(1500);
   Board_Name_to_Terminal();
   OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
-
-  Message_2_UART_u16("TEST", 0xfede);
+  Message_2_UART_u32(
+		  	  	  	  "\n\r OD_PERSIST_COMM.x1018_identity.serialNumber",
+					  HAL_GetUIDw0()
+					  );
 
     /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications.
      *             It can be FDCan or CAN and CANOpenSTM32 Driver will take of care of handling that
@@ -263,8 +267,6 @@ int main(void)
 
    	 //SDO_Read_Write_Read();
 
-
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -285,12 +287,12 @@ DWT->CTRL |= 1 ; // Enable_the_Counter_of_Core_circles
 
 //**********************************************************************************************
 Ticks_2=HAL_GetTick();
-while (HAL_GetTick() - Ticks_2<500)
+do
 {
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 canopen_app_process();
-}
+}while (HAL_GetTick() - Ticks_2<500);
 
 #if 1
 uint32_t Delta_T[4]={0};/////Measurement_of_duration_canopen_app_process();
@@ -299,7 +301,7 @@ uint32_t Delta_T[4]={0};/////Measurement_of_duration_canopen_app_process();
 //**********************************************************************************************
 Local_Count=0;
 Ticks_2=HAL_GetTick();
-while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() - Ticks_2<5123)	///
+ while (1)		/// 	while (HAL_GetTick() - Ticks_2<4123) //   	while (HAL_GetTick() - Ticks_2<5123)	///
 	{
 			switch (Local_Count)
 				{
@@ -307,11 +309,11 @@ while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() -
 					OD_PERSIST_COMM.x6000_ALiex_Disco_VAR32_6000++;
 					OD_PERSIST_COMM.x6001_ALiex_Disco_VAR32_6001++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
-					DWT->CYCCNT = 0; // reset the counter
-					canopen_app_process();
-					Delta_T[0]= DWT->CYCCNT;//// 2581circles * 6ns = 15.5ms// Delta_T[0] = 0x00000A15
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[0]= DWT->CYCCNT;//// 2581circles * 6ns = 15.5ms// Delta_T[0] = 0x00000A15
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=1;
 					break;
 
@@ -320,11 +322,11 @@ while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() -
  					OD_PERSIST_COMM.x6003_ALiex_Disco_VAR32_6003++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[1] );
 
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
-					DWT->CYCCNT = 0; // reset the counter
-					canopen_app_process();
-					Delta_T[1]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[1]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=2;
 					break;
 
@@ -333,11 +335,11 @@ while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() -
  					OD_PERSIST_COMM.x6005_ALiex_Disco_VAR32_6005++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[2] );
 
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
-					DWT->CYCCNT = 0; // reset the counter
-					canopen_app_process();
-					Delta_T[2]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B 16295 ns
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
+																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[2]= DWT->CYCCNT;//// 2571 circles * 6ns = 15.5ms ///Delta_T[2] = 0x00000A0B 16295 ns
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=3;
 					break;
 
@@ -346,11 +348,11 @@ while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() -
  					OD_PERSIST_COMM.x6007_ALiex_Disco_VAR32_6007++;
 					CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[3] );
 
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
-					DWT->CYCCNT = 0; // reset the counter
-					canopen_app_process();
-					Delta_T[3]= DWT->CYCCNT;//// 2573circles * 6ns = 15.5ms// Delta_T[3] = 0x00000A0D 16295 ns
-																			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_SET );
+//					DWT->CYCCNT = 0; // reset the counter
+//					canopen_app_process();
+//					Delta_T[3]= DWT->CYCCNT;//// 2573circles * 6ns = 15.5ms// Delta_T[3] = 0x00000A0D 16295 ns
+//																			//HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
 					Local_Count=0;
 					break;
 
@@ -363,19 +365,21 @@ while (HAL_GetTick() - Ticks_2<5123)	/// 	 while (2) //   while (HAL_GetTick() -
 
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
-		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDGreen);
-		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDRed  );//yellow
+		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, canOpenNodeSTM32.outStatusLEDGreen);
+		// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, canOpenNodeSTM32.outStatusLEDRed  );//yellow
 
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET );
-		DWT->CYCCNT = 0; // reset the counter
+//		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13 );
+//		DWT->CYCCNT = 0; // reset the counter
 		canopen_app_process();
-		Duration_of_the_CO_process= DWT->CYCCNT;//// 2575circles * 6.33ns = 18ms
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13,GPIO_PIN_RESET );
-		HAL_Delay(1);
+//		Duration_of_the_CO_process= DWT->CYCCNT;//// 2575circles * 6.33ns = 18ms
+		HAL_Delay(4);
+//		DWT->CYCCNT = 0; // reset the counter
+//		while( (DWT->CYCCNT / 168) < 2999 );
+
 		Encoder_to_LCD();
 		RTC_update_and_Terminal(1999);
 
-	}///while (HAL_GetTick() - Ticks<5123)
+	}///while (HAL_GetTick() - Ticks<4123)
 
 
 
@@ -427,7 +431,7 @@ HAL_UART_Transmit_IT( &TerminalInterface, (uint8_t*)(Message_to_Terminal), LLL);
 
 //**********************************************************************************************
 
-while (1)
+while (2)
 {
 Encoder_to_LCD();
 RTC_update_and_Terminal(1999);
@@ -435,9 +439,9 @@ HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, !canOpenNodeSTM32.outStatusLEDGreen);
 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, !canOpenNodeSTM32.outStatusLEDRed  );
 canopen_app_process();
 
-/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 }
 
   /* USER CODE END 3 */

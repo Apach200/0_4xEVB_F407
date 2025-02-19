@@ -27,8 +27,10 @@
 #include "adc.h"
 #include "can.h"
 #include "dma.h"
+#include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
+#include "sdio.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -158,6 +160,8 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM5_Init();
   MX_TIM1_Init();
+  MX_SDIO_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* CANHandle : Pass in the CAN Handle to this function and it wil be used for all CAN Communications.
@@ -177,27 +181,23 @@ int main(void)
    *
    */
 
-  //  UART_interface_Test(); while(1){;}
-  //  CAN_interface_Test();
+	//  UART_interface_Test(); while(1){;}
+	//  CAN_interface_Test();
+	// GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
+	// GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
+	Board_Name_to_Terminal();
+	OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
+	HAL_TIM_Base_Start_IT(&htim4);
 
-     GPIO_Blink_Test(GPIOA, GPIO_PIN_7|GPIO_PIN_6, 25, 33); //for_STM32F4XX_Ali_pcb
-  // GPIO_Blink_Test(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, 25, 33);// blink_at_Discovery_EVB
-
-
-    Board_Name_to_Terminal();
-    OD_PERSIST_COMM.x1018_identity.serialNumber = HAL_GetUIDw0();
-
-  HAL_TIM_Base_Start_IT(&htim4);
-
-   CANopenNodeSTM32 canOpenNodeSTM32;
-   canOpenNodeSTM32.CANHandle = &hcan1;
-   canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
-   canOpenNodeSTM32.timerHandle = &htim4;
-   canOpenNodeSTM32.desiredNodeID = CO_Upper_F407XX;  //0x3d;
-   //canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
-   canOpenNodeSTM32.baudrate = 125*4;
-   uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
-   CO_Init_Return_State(Ret_value);
+	CANopenNodeSTM32 canOpenNodeSTM32;
+	canOpenNodeSTM32.CANHandle = &hcan1;
+	canOpenNodeSTM32.HWInitFunction = MX_CAN1_Init;
+	canOpenNodeSTM32.timerHandle = &htim4;
+	canOpenNodeSTM32.desiredNodeID = CO_Upper_F407XX;  //0x3d;
+	//canOpenNodeSTM32.desiredNodeID = Node_Unconfigured;
+	canOpenNodeSTM32.baudrate = 125*4;
+	uint16_t Ret_value = canopen_app_init(&canOpenNodeSTM32);
+	CO_Init_Return_State(Ret_value);
 
   /* USER CODE END 2 */
 
@@ -207,16 +207,113 @@ int main(void)
 
 	  OD_PERSIST_COMM.x6000_upper_F4XX_VAR32_6000_TX=0;
 	  Local_Count=0;
+//	  uint8_t Buffsize=2;
+//	  uint16_t Length_of_Ext_Var =2;
+//	  uint32_t Old_u8_Value=0;
+	  Ticks = HAL_GetTick();
+	  uint16_t LLL=0;
+
+//	  CO_SDO_abortCode_t ReturnCode = 0x5040000;/**< 0x05040000, SDO protocol timed out */
+//	  while(TerminalInterface.gState != HAL_UART_STATE_READY)
+//	  {
+////		HAL_Delay(250);
+////		SDO_abortCode_to_String(CO_SDO_AB_TOGGLE_BIT, Message_to_Terminal);
+////		  while(TerminalInterface.gState != HAL_UART_STATE_READY){}
+//	  }
+	  //SDO_abortCode_to_String(ReturnCode, Message_to_Terminal);
+
+//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );
+	  canopen_app_process();
+
+
+//	  while(ReturnCode==0x5040000)
+//	  {
+//	  ReturnCode=
+//	  read_SDO	(
+//			  	  canOpenNodeSTM32.canOpenStack->SDOclient, 	//	CO_SDOclient_t* SDO_C,
+//				  CO_Lower__f407xx,		//	uint8_t nodeId, 	// Remote_NodeID
+//				  0x6003,				//	uint16_t index,		// OD_Index_of_entire_at_Remote_NodeID
+//				  0,					//	uint8_t subIndex, 	// OD_SubIndex_of_entire_at_Remote_NodeID
+//				  Array_8u,				//	uint8_t* buf, 		// Saved_Data_Array
+//				  Buffsize,				//	size_t bufSize, 	// Number_of_Bytes_Read_from_Remote_NodeID
+//		(size_t*)&Length_of_Ext_Var		//	size_t* readSize 	// pointer_at_Number_of_Bytes_to_save
+//				  );
+//	  }
+//		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+//		LLL = sprintf 	( Message_to_Terminal,
+//						  "ReturnCode=0x%02X  \n\r",
+//						  ReturnCode);
+
+		HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)Message_to_Terminal, LLL);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );
+		canopen_app_process();
+
+//	  ReturnCode=
+//	  read_SDO	(
+//			  	  canOpenNodeSTM32.canOpenStack->SDOclient, 	//	CO_SDOclient_t* SDO_C,
+//				  CO_Lower__f407xx,		//	uint8_t nodeId, 	// Remote_NodeID
+//				  0x6003,				//	uint16_t index,		// OD_Index_of_entire_at_Remote_NodeID
+//				  0,					//	uint8_t subIndex, 	// OD_SubIndex_of_entire_at_Remote_NodeID
+//				  Array_8u,				//	uint8_t* buf, 		// Saved_Data_Array
+//				  Buffsize,				//	size_t bufSize, 	// Number_of_Bytes_Read_from_Remote_NodeID
+//		(size_t*)&Length_of_Ext_Var		//	size_t* readSize 	// pointer_at_Number_of_Bytes_to_save
+//				  );
+//		while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+//
+//	SDO_abortCode_to_String(ReturnCode, Message_to_Terminal);
+
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET );
    while (1)
   {
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, canOpenNodeSTM32.outStatusLEDRed  );
+
+//       //********************************************************
+//       		if((HAL_GetTick() & 0x0000080) ==0)
+//       		{
+//       		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7,GPIO_PIN_RESET);
+//       		}else{HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7,GPIO_PIN_SET);}
+//       ///**********************************************************
+
+
+//		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, !canOpenNodeSTM32.outStatusLEDGreen);
+//		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, !canOpenNodeSTM32.outStatusLEDRed  );
 		  canopen_app_process();
+
+//		  ReturnCode=
+//		  read_SDO	(
+//				  	  canOpenNodeSTM32.canOpenStack->SDOclient, 	//	CO_SDOclient_t* SDO_C,
+//					  CO_Lower__f407xx,		//	uint8_t nodeId, 	// Remote_NodeID
+//					  0x6003,				//	uint16_t index,		// OD_Index_of_entire_at_Remote_NodeID
+//					  0,					//	uint8_t subIndex, 	// OD_SubIndex_of_entire_at_Remote_NodeID
+//					  Array_8u,				//	uint8_t* buf, 		// Saved_Data_Array
+//					  Buffsize,				//	size_t bufSize, 	// Number_of_Bytes_Read_from_Remote_NodeID
+//			(size_t*)&Length_of_Ext_Var		//	size_t* readSize 	// pointer_at_Number_of_Bytes_to_save
+//					  );
+//
+//		SDO_abortCode_to_String(ReturnCode, Message_to_Terminal);
+//		  if(Array_8u[0] != Old_u8_Value)
+//			  {
+//				Old_u8_Value = Array_8u[0];
+//				if((HAL_GetTick()-Ticks)>999)
+//				{
+//					Ticks = HAL_GetTick();
+//					while(TerminalInterface.gState != HAL_UART_STATE_READY){;}
+//					LLL = sprintf (	Message_to_Terminal,
+//									"0x%02X, 0x%02X \n\r",
+//									Array_8u[0],
+//									Array_8u[1]
+//								);
+//					HAL_UART_Transmit_IT(&TerminalInterface, (uint8_t*)Message_to_Terminal, LLL);
+//				}
+//			  }
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
+  }///while (1)
   /* USER CODE END 3 */
 }
 

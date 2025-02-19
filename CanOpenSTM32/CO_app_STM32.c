@@ -94,11 +94,10 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 
     } else {
         	//log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
-    		//Message_2_UART_u32((char*)"bytes",heapMemoryUsed);
-    		//Message_2_UART((char*)"Allocated for CANopen objects");
+    		Message_2_UART_u32((char*)"Number_of_bytes_Allocated_for_CANopen_objects",heapMemoryUsed);
     		}
 
-    canopenNodeSTM32->canOpenStack = CO;
+canopenNodeSTM32->canOpenStack = CO;
 
 #if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
     err = CO_storageBlank_init(&storage, CO->CANmodule, OD_ENTRY_H1010_storeParameters,
@@ -153,18 +152,19 @@ err = CO_LSSinit(
 				);
 
 if (err != CO_ERROR_NO)
-{
-	//log_printf("Error: LSS slave initialization failed: %d\n", err);
-	Message_2_UART_u16((char*)"Error: LSS slave initialization failed:",err);
-	return 2;
-}  else	{
-		Message_2_UART_u16((char*)"160 LSS_slv_initOK:",err);
-		}
+	{
+	 //log_printf("Error: LSS slave initialization failed: %d\n", err);
+	 Message_2_UART_u16((char*)"Error: LSS slave initialization failed:",err);
+	 return 2;
+
+	}  else	{ Message_2_UART_u16((char*)"160 LSS_slv_initOK:",err);	}
+
 
 canopenNodeSTM32->activeNodeID = canopenNodeSTM32->desiredNodeID;
 uint32_t errInfo = 0;
 
-err = CO_CANopenInit(CO,                   /* CANopen object */
+err = CO_CANopenInit(
+					 CO,                   /* CANopen object */
 					 NULL,                 /* alternate NMT */
 					 NULL,                 /* alternate em */
 					 OD,                   /* Object dictionary */
@@ -175,7 +175,8 @@ err = CO_CANopenInit(CO,                   /* CANopen object */
 					 SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms */
 					 SDO_CLI_BLOCK,        /* SDOclientBlockTransfer */
 					 canopenNodeSTM32->activeNodeID,
-					 &errInfo);
+					 &errInfo
+					 );
 
 if (   err != CO_ERROR_NO
 	&& err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS
@@ -190,7 +191,10 @@ if (   err != CO_ERROR_NO
 					Message_2_UART_u32((char*)"190_CO_initError:",err);
 					}
 	return 3;
-	}
+	} else { Message_2_UART_u32((char*)"_CO_CANopenInit return CO_ERROR_NO",err); }
+
+
+
 
 err = CO_CANopenInitPDO(
 						CO,
@@ -199,19 +203,20 @@ err = CO_CANopenInitPDO(
 						canopenNodeSTM32->activeNodeID,
 						&errInfo
 						);
-if (err != CO_ERROR_NO)
-	{
-	if (err == CO_ERROR_OD_PARAMETERS)
-		{
-		////log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-		Message_2_UART_u32((char*)"207_OD_entryError:",errInfo);
 
-		} else {
-				//log_printf("Error: PDO initialization failed: %d\n", err);
-				Message_2_UART_u32((char*)"211_PDOInitError:",err);
-				}
-	return 4;
-	}
+if (err != CO_ERROR_NO)
+		{
+		if (err == CO_ERROR_OD_PARAMETERS)
+				{
+				////log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
+				Message_2_UART_u32((char*)"207_OD_entryError:",errInfo);
+
+				} else {
+						//log_printf("Error: PDO initialization failed: %d\n", err);
+						Message_2_UART_u32((char*)"211_PDOInitError:",err);
+						}
+		return 4;
+		} else { Message_2_UART_u32((char*)"_CO_CANopenInitPDO return CO_ERROR_NO",err); }
 
     /* Configure Timer interrupt function for execution every 1 millisecond */
     HAL_TIM_Base_Start_IT(canopenNodeSTM32->timerHandle); //1ms interrupt
@@ -219,27 +224,28 @@ if (err != CO_ERROR_NO)
     /* Configure CAN transmit and receive interrupt */
 
     /* Configure CANopen callbacks, etc */
-    if (!CO->nodeIdUnconfigured) {
+    if (!CO->nodeIdUnconfigured)
+			{
+	#if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
+			if (storageInitError != 0) { CO_errorReport(CO->em, CO_EM_NON_VOLATILE_MEMORY, CO_EMC_HARDWARE, storageInitError); }
+	#endif
+			} else {
+					//log_printf("CANopenNode - Node-id not initialized\n");
+					Message_2_UART((char*)"CANopenNode - Node-id not initialized ");
+				   }
 
-#if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
-        if (storageInitError != 0) {
-            CO_errorReport(CO->em, CO_EM_NON_VOLATILE_MEMORY, CO_EMC_HARDWARE, storageInitError);
-        }
-#endif
-    } else {
-        	//log_printf("CANopenNode - Node-id not initialized\n");
-        	Message_2_UART((char*)"CANopenNode - Node-id not initialized ");
-    		}
+/* start CAN */
+CO_CANsetNormalMode(CO->CANmodule);
 
-    /* start CAN */
-    CO_CANsetNormalMode(CO->CANmodule);
+//log_printf("CANopenNode - Running...\n");
+Message_2_UART((char*)"CANopenNode - Running...");
+fflush(stdout);
+time_old = time_current = HAL_GetTick();
 
-    //log_printf("CANopenNode - Running...\n");
-	Message_2_UART((char*)"CANopenNode - Running...");
-    fflush(stdout);
-    time_old = time_current = HAL_GetTick();
-    return 0;
+return 0;
 }
+
+
 
 void
 canopen_app_process()
@@ -293,17 +299,14 @@ if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal)
         /* get time difference since last function call */
         uint32_t timeDifference_us = 1000; // 1ms second
 
-#if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE
         syncWas = CO_process_SYNC(CO, timeDifference_us, NULL);
-#endif
-#if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE
+
         CO_process_RPDO(CO, syncWas, timeDifference_us, NULL);
-#endif
-#if (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE
+
         CO_process_TPDO(CO, syncWas, timeDifference_us, NULL);
-#endif
 
         /* Further I/O or nonblocking application code may go here. */
     }
-    CO_UNLOCK_OD(CO->CANmodule);
+
+CO_UNLOCK_OD(CO->CANmodule);
 }
