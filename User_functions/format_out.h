@@ -26,7 +26,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "stdio.h"
-#include "CO_NMT_Heartbeat.h"
+#include "301/CO_NMT_Heartbeat.h"
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -50,6 +50,11 @@ uint16_t Process_Rx_Array_UART_DMA(uint8_t *Array,uint16_t Size_of_Array);
 void Message_2_UART(char *pMessage);
 void Message_2_UART_u16(char *pMessage, uint16_t Argument);
 void Message_2_UART_u32(char *pMessage, uint32_t Argument);
+void Datum_Time_from_PC(
+						RTC_DateTypeDef Date_Upd,
+						RTC_TimeTypeDef sTime_Set
+						);
+						
 uint16_t CAN_GetState(CAN_HandleTypeDef *hcan, char* String);
 
 float process_adc_buffer(uint16_t *buffer);

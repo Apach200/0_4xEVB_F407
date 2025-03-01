@@ -17,7 +17,7 @@
 
 
 #include "CO_app_STM32.h"
-#include "CO_SDOclient.h"
+#include "301/CO_SDOclient.h"
 #include "CANopen.h"
 #include "OD.h"
 
